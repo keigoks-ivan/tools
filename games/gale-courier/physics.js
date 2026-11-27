@@ -11,12 +11,26 @@ function createRun(courseIndex = 0) {
     enemies: course.enemies.map(([x, base, min, max], index) => ({
       x, y: base - 27, w: 32, h: 27, min, max, dir: index % 2 ? 1 : -1, alive: true,
     })),
-    lives: 3, count: 0, checkpoint: false, phase: "playing", progress: 0, events: [],
+    lives: 3, count: 0, checkpoint: 0, phase: "playing", progress: 0, events: [],
   };
 }
 
 function overlap(a, b) {
   return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+function respawnAtPost(run) {
+  const p = run.player;
+  p.x = run.checkpoint ? run.course.checkpoints[run.checkpoint - 1] + 34 : PLAYFIELD.spawn;
+  p.y = PLAYFIELD.floor - p.h - 3;
+  p.vx = 0;
+  p.vy = 0;
+  p.facing = 1;
+  p.grounded = false;
+  p.springing = false;
+  p.grace = 0;
+  p.bufferedJump = 0;
+  p.invulnerable = 1.45;
 }
 
 function loseLife(run, fall, direction = -run.player.facing) {
@@ -28,18 +42,15 @@ function loseLife(run, fall, direction = -run.player.facing) {
     run.phase = "lost";
     return;
   }
+  if (fall) {
+    respawnAtPost(run);
+    return;
+  }
   p.invulnerable = 1.45;
   p.grounded = false;
   p.springing = false;
   p.grace = 0;
   p.bufferedJump = 0;
-  if (fall) {
-    p.x = run.checkpoint ? run.course.checkpoint + 34 : PLAYFIELD.spawn;
-    p.y = PLAYFIELD.floor - p.h - 3;
-    p.vx = 0;
-    p.vy = 0;
-    return;
-  }
   p.vx = direction * 250;
   p.vy = -335;
 }
@@ -72,10 +83,14 @@ function advanceRun(run, input, dt = STEP) {
   p.y += p.vy * dt;
   p.grounded = false;
   if (p.vy >= 0) {
-    const landing = run.course.platforms.filter(platform =>
-      p.x + p.w > platform.x && p.x < platform.x + platform.w &&
-      previousBottom <= platform.y + .01 && p.y + p.h >= platform.y
-    ).reduce((nearest, platform) => !nearest || platform.y < nearest.y ? platform : nearest, null);
+    let landing;
+    for (const platform of run.course.platforms) {
+      if (p.x + p.w > platform.x && p.x < platform.x + platform.w &&
+          previousBottom <= platform.y + .01 && p.y + p.h >= platform.y &&
+          (!landing || platform.y < landing.y)) {
+        landing = platform;
+      }
+    }
     if (landing) {
       if (landing.spring || p.vy > 350) {
         run.events.push({ type: landing.spring ? "spring" : "land", x: p.x + p.w / 2, y: landing.y });
@@ -111,22 +126,26 @@ function advanceRun(run, input, dt = STEP) {
   }
 
   for (const [x, w] of run.course.spikes) {
-    if (overlap(p, { x: x + 4, y: PLAYFIELD.floor - 16, w: w - 8, h: 16 })) {
+    if (p.x + p.w > x + 4 && p.x < x + w - 4 &&
+        p.y + p.h > PLAYFIELD.floor - 16 && p.y < PLAYFIELD.floor) {
       loseLife(run, false, p.x + p.w / 2 < x + w / 2 ? -1 : 1);
     }
   }
   if (run.phase !== "playing") return;
 
   for (const seed of run.seeds) {
-    if (!seed.taken && overlap(p, { x: seed.x - 12, y: seed.y - 13, w: 24, h: 26 })) {
+    if (!seed.taken && p.x + p.w > seed.x - 12 && p.x < seed.x + 12 &&
+        p.y + p.h > seed.y - 13 && p.y < seed.y + 13) {
       seed.taken = true;
       run.count += 1;
       run.events.push({ type: "seed", x: seed.x, y: seed.y });
     }
   }
-  if (!run.checkpoint && p.x + p.w / 2 >= run.course.checkpoint) {
-    run.checkpoint = true;
-    run.events.push({ type: "checkpoint", x: run.course.checkpoint, y: PLAYFIELD.floor - 65 });
+  const post = run.course.checkpoints[run.checkpoint];
+  if (p.x + p.w / 2 >= post && p.y + p.h <= PLAYFIELD.floor + 2) {
+    run.checkpoint += 1;
+    run.lives = 3;
+    run.events.push({ type: "checkpoint", x: post, y: PLAYFIELD.floor - 65, number: run.checkpoint });
   }
   run.progress = Math.max(run.progress, clamp((p.x - PLAYFIELD.spawn) / (run.course.goal - PLAYFIELD.spawn), 0, 1));
   if (p.x + p.w / 2 >= run.course.goal && p.y + p.h >= PLAYFIELD.floor - 70) {

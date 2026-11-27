@@ -36,6 +36,8 @@ let messageTimer;
 let displayedHealth;
 let displayedSeeds;
 let displayedProgress;
+let displayedCheckpoint;
+let routePosts = [];
 
 const keyboard = new Set();
 const pointers = new Map();
@@ -48,6 +50,9 @@ let locale = getSetting("lang") === "en" ? 1 : 0;
 const best = readCampaign();
 const tr = (zh, en) => locale ? en : zh;
 const courseNumber = index => String(index + 1).padStart(2, "0");
+const difficulty = [
+  ["入門", "Easy"], ["進階", "Moderate"], ["挑戰", "Challenging"], ["高難", "Expert"],
+];
 
 function getSetting(key) {
   try { return localStorage.getItem(key); } catch { return null; }
@@ -151,12 +156,27 @@ function updateHud() {
     progress.style.setProperty("--progress", `${percent}%`);
     progress.setAttribute("aria-valuenow", percent);
   }
+  if (displayedCheckpoint !== run.checkpoint) {
+    displayedCheckpoint = run.checkpoint;
+    routePosts.forEach((post, index) => post.classList.toggle("reached", index < run.checkpoint));
+  }
 }
 
 function updateCourseLabels() {
   document.querySelector("#route-label").textContent = `${courseNumber(run.courseIndex)} / ${COURSES.length}`;
   document.querySelector("#place").textContent = run.course.name[locale];
   stage.style.setProperty("--course-light", terrain[run.course.background][4]);
+  for (const post of routePosts) post.remove();
+  const length = run.course.goal - PLAYFIELD.spawn;
+  routePosts = run.course.checkpoints.map(x => {
+    const marker = document.createElement("span");
+    marker.className = "route-post";
+    marker.setAttribute("aria-hidden", "true");
+    marker.style.setProperty("--post", `${100 * (x - PLAYFIELD.spawn) / length}%`);
+    return marker;
+  });
+  progress.append(...routePosts);
+  displayedCheckpoint = undefined;
 }
 
 function toast(text) {
@@ -173,6 +193,7 @@ function clearInput() {
 
 function renderOverlay() {
   const paused = state === "paused";
+  const canContinue = state === "lost" && run.checkpoint > 0;
   pauseButton.disabled = state !== "playing" && !paused;
   pauseButton.setAttribute("aria-label", paused ? tr("繼續遊戲", "Resume game") : tr("暫停遊戲", "Pause game"));
   pauseButton.querySelector(".action-label").textContent = paused ? tr("繼續", "Resume") : tr("暫停", "Pause");
@@ -184,7 +205,8 @@ function renderOverlay() {
   const copy = {
     title: [tr("最後一封信", "The last letter"), "", tr("跑過十段郵路，把最後一封信送到風塔。", "Cross ten courses to deliver the last letter to the Windspire."), titleStart],
     paused: [current, tr("遊戲暫停", "Game paused"), run.course.hint[locale], tr("繼續遊戲", "Resume")],
-    lost: [current, tr("郵路中斷", "Delivery interrupted"), collected, tr("再試一次", "Try again")],
+    lost: [current, tr("郵路中斷", "Delivery interrupted"), collected,
+      canContinue ? tr("從郵站繼續", "Continue from checkpoint") : tr("再試一次", "Try again")],
     won: [current, finalCourse ? tr("信已送達", "Letter delivered") : tr("順利抵達", "Course cleared"), collected,
       finalCourse ? tr("查看郵路", "Open route map") : tr("下一關", "Next course")],
   }[state];
@@ -196,7 +218,7 @@ function renderOverlay() {
   lede.textContent = copy[2];
   document.querySelector("#start-label").textContent = copy[3];
   mapButton.hidden = state === "won" && finalCourse;
-  restartButton.hidden = !paused;
+  restartButton.hidden = !paused && !canContinue;
 }
 
 function applyLanguage() {
@@ -237,7 +259,8 @@ function openMap() {
     if (state !== "title" && index === run.courseIndex) button.setAttribute("aria-current", "true");
     const number = document.createElement("span");
     number.className = "course-number";
-    number.textContent = courseNumber(index);
+    const tier = index < 2 ? 0 : index < 4 ? 1 : index < 7 ? 2 : 3;
+    number.textContent = `${courseNumber(index)} · ${difficulty[tier][locale]}`;
     const name = document.createElement("strong");
     name.textContent = course.name[locale];
     const result = document.createElement("span");
@@ -264,6 +287,17 @@ function startRun() {
   }
   if (state === "won" && run.courseIndex === COURSES.length - 1) {
     openMap();
+    return;
+  }
+  if (state === "lost" && run.checkpoint) {
+    unlockAudio();
+    respawnAtPost(run);
+    run.lives = 3;
+    run.phase = "playing";
+    particles = [];
+    camera = courseCamera();
+    setState("playing");
+    updateHud();
     return;
   }
   const index = state === "title" ? suggestedCourse() : run.courseIndex + Number(state === "won");
@@ -375,6 +409,10 @@ function emitParticles(event) {
   }
 }
 
+function courseCamera() {
+  return clamp(run.player.x - width * .32, 0, Math.max(0, run.course.end - width));
+}
+
 function simulateFrame(dt) {
   accumulator += dt;
   const input = { left: inputActive("left"), right: inputActive("right"), jumpHeld: inputActive("jump") };
@@ -387,7 +425,10 @@ function simulateFrame(dt) {
   for (const event of run.events.splice(0)) {
     if (!reducedMotion.matches) emitParticles(event);
     playSound(event.type);
-    if (event.type === "checkpoint") toast(tr("已抵達中途郵站", "Checkpoint reached"));
+    if (event.type === "checkpoint") {
+      toast(tr(`郵站 ${event.number} / ${run.course.checkpoints.length}，生命已補滿`,
+        `Checkpoint ${event.number} / ${run.course.checkpoints.length}. Health restored.`));
+    }
   }
   for (const mote of particles) {
     mote.x += mote.vx * dt;
@@ -396,7 +437,7 @@ function simulateFrame(dt) {
     mote.life -= dt;
   }
   particles = particles.filter(mote => mote.life > 0);
-  const ideal = clamp(run.player.x - width * .32, 0, Math.max(0, run.course.end - width));
+  const ideal = courseCamera();
   camera = Math.abs(camera - ideal) > width * .65 ? ideal : camera + (ideal - camera) * Math.min(1, dt * 8);
   updateHud();
   if (run.phase === "won") {

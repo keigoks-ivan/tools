@@ -296,7 +296,11 @@ function renderScene(ctx, width, run, camera, time, particles, titleScreen) {
       paintLantern(ctx, x, PLAYFIELD.floor);
     }
   }
-  paintSign(ctx, course.checkpoint, run.checkpoint, time);
+  course.checkpoints.forEach((post, index) => {
+    if (post >= camera - 45 && post <= camera + width + 45) {
+      paintSign(ctx, post, index < run.checkpoint, time);
+    }
+  });
   if (course.goal < camera + width + 120) paintMailbox(ctx, course.goal + 10, time);
   for (const [x, w] of course.spikes) {
     if (x + w < camera || x > camera + width) continue;

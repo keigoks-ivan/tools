@@ -6,7 +6,6 @@ const firstCourse = {
   theme: "dusk",
   background: "dusk",
   end: 4460,
-  goal: 4290,
   checkpoint: 1980,
   platforms: [
     [0, 545, 820], [940, 545, 650], [1745, 545, 735],
@@ -27,12 +26,10 @@ const firstCourse = {
     [3766, 362], [3821, 362], [3999, 417], [4128, 508], [4175, 508],
   ],
   enemies: [
-    [658, 545, 575, 775], [1110, 545, 1015, 1260], [1505, 545, 1440, 1560],
-    [1875, 545, 1785, 1925], [2245, 545, 2135, 2380], [2380, 391, 2325, 2445],
-    [2840, 545, 2720, 2980], [3175, 545, 3067, 3248], [3580, 545, 3510, 3650],
-    [3785, 400, 3723, 3863], [4030, 545, 3925, 4140],
+    [1110, 545, 1015, 1260], [1875, 545, 1785, 1925],
+    [2840, 545, 2720, 2980], [3580, 545, 3510, 3650],
   ],
-  spikes: [[1343, 63], [2395, 50], [2996, 66], [3686, 71]],
+  spikes: [[1343, 51], [3686, 54]],
 };
 
 function course(data) {
@@ -46,7 +43,7 @@ function course(data) {
   return { ...details, platforms, seeds, end: banks.at(-1)[0] + banks.at(-1)[1] };
 }
 
-const COURSES = [{ ...firstCourse, enemySpeed: 63 }, ...[
+const openingRoutes = [{ ...firstCourse, enemySpeed: 48 }, ...[
   {
     name: ["曉霧樹海", "Cedar in the Mist"], theme: "morning", background: "morning",
     hint: ["霧裡的木台可以當作踏腳石。", "Use the ledges in the mist as stepping stones."],
@@ -56,7 +53,7 @@ const COURSES = [{ ...firstCourse, enemySpeed: 63 }, ...[
       [2590, 472, 110], [2790, 480, 86], [3100, 444, 154]],
     enemies: [[941, 545, 852, 1036], [1818, 545, 1710, 1940], [2513, 545, 2420, 2650],
       [3175, 545, 3100, 3285]],
-    spikes: [[1075, 54], [2437, 47]], checkpoint: 1550, goal: 3330, enemySpeed: 52,
+    spikes: [[1075, 54], [2437, 47]], checkpoint: 1550, enemySpeed: 52,
   },
   {
     name: ["水車溪谷", "Waterwheel Run"], theme: "morning", background: "millstream",
@@ -68,7 +65,7 @@ const COURSES = [{ ...firstCourse, enemySpeed: 63 }, ...[
       [2720, 406, 138], [2910, 456, 107], [3040, 478, 97], [3290, 459, 130]],
     enemies: [[566, 545, 488, 651], [1145, 545, 1090, 1263], [1720, 545, 1706, 1860],
       [2561, 463, 2520, 2621], [3410, 545, 3305, 3505]],
-    spikes: [[960, 60], [1925, 68], [2650, 53]], checkpoint: 1575, goal: 3500, enemySpeed: 65,
+    spikes: [[960, 60], [1925, 68], [2650, 53]], checkpoint: 1575, enemySpeed: 65,
   },
   {
     name: ["赤葉橋鎮", "Copperleaf Crossing"], theme: "copper", background: "leafbridge",
@@ -82,7 +79,7 @@ const COURSES = [{ ...firstCourse, enemySpeed: 63 }, ...[
       [1943, 545, 1880, 2030], [2638, 545, 2550, 2725], [3410, 418, 3380, 3531],
       [3558, 545, 3497, 3695]],
     spikes: [[825, 64], [996, 106], [1980, 50], [2780, 62], [3305, 65]],
-    checkpoint: 1700, goal: 3740, enemySpeed: 66,
+    checkpoint: 1700, enemySpeed: 66,
   },
   {
     name: ["銅輪工坊", "Clockwork Works"], theme: "copper", background: "copper",
@@ -92,10 +89,10 @@ const COURSES = [{ ...firstCourse, enemySpeed: 63 }, ...[
       [1214, 463, 96], [1390, 467, 95, true], [1560, 354, 103], [1810, 448, 132],
       [1988, 403, 94], [2190, 471, 103, true], [2357, 371, 107], [2580, 452, 141],
       [2800, 404, 115], [2975, 470, 94], [3090, 435, 92], [3350, 454, 150]],
-    enemies: [[522, 545, 440, 565], [1125, 545, 1040, 1260], [1880, 545, 1745, 1950],
+    enemies: [[522, 545, 440, 565], [1125, 545, 1040, 1260], [1880, 545, 1805, 1950],
       [2675, 545, 2560, 2810], [3455, 545, 3340, 3560], [3690, 545, 3625, 3750]],
     spikes: [[962, 67], [2030, 76], [2838, 53], [3574, 52]],
-    checkpoint: 1730, goal: 3765, enemySpeed: 73,
+    checkpoint: 1730, enemySpeed: 73,
   },
   {
     name: ["高風稜線", "Gale Ridge"], theme: "copper", background: "gale-ridge",
@@ -108,7 +105,7 @@ const COURSES = [{ ...firstCourse, enemySpeed: 63 }, ...[
       [3401, 360, 103], [3650, 474, 111]],
     enemies: [[880, 545, 823, 1045], [1475, 444, 1460, 1603], [1528, 545, 1440, 1615],
       [2280, 545, 2210, 2370], [3090, 545, 3020, 3210], [3730, 545, 3600, 3850]],
-    spikes: [[970, 53], [1595, 56], [2414, 74], [3126, 59]], checkpoint: 2045, goal: 3860, enemySpeed: 77,
+    spikes: [[970, 53], [1595, 56], [2414, 74], [3126, 59]], checkpoint: 2045, enemySpeed: 77,
   },
   {
     name: ["月潮河港", "Moonwake Harbor"], theme: "night", background: "night",
@@ -123,7 +120,7 @@ const COURSES = [{ ...firstCourse, enemySpeed: 63 }, ...[
       [2444, 400, 2434, 2571], [2575, 545, 2510, 2630], [3190, 468, 3164, 3290],
       [3396, 545, 3300, 3440], [4080, 545, 3960, 4170]],
     spikes: [[987, 50], [1845, 54], [2500, 51], [3430, 49], [3930, 60]],
-    checkpoint: 2250, goal: 4210, enemySpeed: 73,
+    checkpoint: 2250, enemySpeed: 73,
   },
   {
     name: ["星霧林道", "Starlit Switchbacks"], theme: "night", background: "starwood",
@@ -138,7 +135,7 @@ const COURSES = [{ ...firstCourse, enemySpeed: 63 }, ...[
       [1840, 391, 1804, 1920], [2442, 457, 2410, 2541], [2600, 545, 2525, 2730],
       [3380, 410, 3360, 3482], [3941, 456, 3920, 4041], [4076, 545, 4000, 4155]],
     spikes: [[1058, 87], [1888, 82], [2685, 65], [3321, 79], [4164, 56]],
-    checkpoint: 1535, goal: 4250, enemySpeed: 81,
+    checkpoint: 1535, enemySpeed: 81,
   },
   {
     name: ["夜鐘高架", "Midnight Viaduct"], theme: "night", background: "bellworks",
@@ -150,11 +147,11 @@ const COURSES = [{ ...firstCourse, enemySpeed: 63 }, ...[
       [2320, 448, 128], [2579, 472, 93], [2711, 403, 103], [2825, 458, 88],
       [3030, 452, 118], [3197, 386, 122], [3447, 462, 90, true], [3594, 352, 106],
       [3830, 456, 121], [4015, 415, 108]],
-    enemies: [[1037, 545, 890, 1140], [1700, 463, 1640, 1763], [2298, 545, 2210, 2395],
+    enemies: [[1037, 545, 890, 1140], [1700, 463, 1640, 1763], [2298, 545, 2284, 2395],
       [2370, 448, 2320, 2448], [3055, 545, 2970, 3170], [3210, 386, 3197, 3319],
       [3860, 456, 3830, 3951], [4065, 545, 3990, 4165]],
     spikes: [[1080, 58], [1758, 59], [2410, 77], [3095, 60], [3295, 62], [3955, 74]],
-    checkpoint: 2216, goal: 4220, enemySpeed: 88,
+    checkpoint: 2216, enemySpeed: 88,
   },
   {
     name: ["風塔天階", "The Windspire Ascent"], theme: "dusk", background: "summit",
@@ -171,6 +168,135 @@ const COURSES = [{ ...firstCourse, enemySpeed: 63 }, ...[
       [2848, 545, 2740, 2960], [3517, 458, 3463, 3587], [3620, 545, 3520, 3710],
       [4337, 545, 4250, 4410]],
     spikes: [[932, 55], [1195, 79], [1925, 56], [2128, 65], [2679, 57], [2928, 57],
-      [3420, 66], [3711, 53], [4395, 61]], checkpoint: 1730, goal: 4530, enemySpeed: 93,
+      [3420, 66], [3711, 53], [4395, 61]], checkpoint: 1730, enemySpeed: 93,
   },
 ].map(course)];
+
+// Each crossing lists ledges by center along the gap, height, and width.
+const crossings = {
+  open: [],
+  brook: [[.51, 485, 132]],
+  steppingStones: [[.28, 480, 114], [.72, 455, 112]],
+  stair: [[.22, 477, 108], [.60, 411, 101], [.88, 459, 97]],
+  bridge: [[.21, 471, 103], [.55, 423, 100], [.86, 469, 88]],
+  dock: [[.25, 489, 112], [.68, 472, 101]],
+  ridge: [[.19, 478, 86], [.51, 419, 87], [.79, 372, 83]],
+  highRidge: [[.17, 478, 82], [.47, 414, 82], [.77, 357, 76], [.93, 426, 76]],
+  spring: [[.20, 480, 99, true], [.72, 333, 110]],
+  relay: [[.15, 477, 86, true], [.55, 410, 87, true], [.90, 291, 94]],
+};
+
+// Each section starts at a postal station. Rows describe bank width, gap width,
+// crossing profile, and the obstacle encountered on the bank.
+const courseSections = [
+  [ // Dusk Valley: short jumps, wide landing areas, isolated obstacles.
+    [[555, 114, "open"], [480, 127, "brook", "patrol"], [565, 118, "open", "brambles"], [500, 172, "brook"], [510, 0, "open", "patrol"]],
+    [[575, 139, "brook"], [480, 143, "open", "patrol"], [545, 179, "steppingStones", "brambles"], [575, 123, "open"], [455, 0, "open", "patrol"]],
+    [[620, 157, "open", "patrol"], [535, 193, "steppingStones"], [475, 144, "brook", "brambles"], [530, 164, "open", "patrol"], [475, 0, "open"]],
+  ],
+  [ // Cedar in the Mist: alternating open gaps and low wooden paths.
+    [[545, 145, "open", "patrol"], [485, 184, "brook"], [585, 170, "open", "brambles"], [500, 216, "steppingStones", "patrol"], [525, 0, "open"]],
+    [[620, 192, "brook"], [480, 177, "open", "brambles"], [525, 245, "steppingStones", "patrol"], [550, 168, "open", "brambles"], [500, 0, "open", "patrol"]],
+    [[535, 216, "steppingStones", "patrol"], [570, 185, "open"], [490, 240, "stair", "brambles"], [530, 208, "brook", "patrol"], [505, 0, "open"]],
+  ],
+  [ // Waterwheel Run: lead up to higher landings across wider water.
+    [[575, 225, "dock", "patrol"], [470, 263, "stair"], [540, 190, "open", "brambles"], [520, 300, "bridge", "patrol"], [565, 0, "open"]],
+    [[585, 242, "steppingStones", "brambles"], [510, 286, "stair", "patrol"], [495, 228, "dock", "brambles"], [535, 299, "ridge"], [510, 0, "open", "patrol"]],
+    [[640, 240, "dock", "patrol"], [470, 318, "ridge", "brambles"], [545, 263, "stair", "patrol"], [500, 288, "bridge", "overpass"], [505, 0, "open"]],
+  ],
+  [ // Copperleaf Crossing: branches over ground hazards.
+    [[625, 252, "bridge", "brambles"], [455, 285, "stair", "overpass"], [600, 215, "dock", "patrol"], [510, 312, "bridge", "overpass"], [530, 0, "open"]],
+    [[580, 268, "bridge", "patrol"], [525, 304, "ridge", "overpass"], [450, 237, "steppingStones", "brambles"], [575, 333, "bridge", "overpass"], [490, 0, "open", "patrol"]],
+    [[630, 326, "ridge", "overpass"], [500, 251, "stair", "patrol"], [570, 330, "bridge", "overpass"], [490, 274, "steppingStones", "brambles"], [510, 0, "open"]],
+  ],
+  [ // Clockwork Works: introduce springboards before asking for a longer arc.
+    [[605, 288, "bridge", "overpass"], [485, 315, "spring", "brambles"], [555, 251, "steppingStones", "patrol"], [525, 361, "spring", "overpass"], [550, 0, "open"]],
+    [[595, 339, "spring", "patrol"], [485, 276, "bridge", "overpass"], [560, 390, "spring", "brambles"], [470, 328, "ridge", "overpass"], [545, 0, "open", "patrol"]],
+    [[620, 384, "spring", "overpass"], [530, 312, "stair", "patrol"], [505, 422, "spring", "overpass"], [520, 351, "ridge", "brambles"], [530, 0, "open"]],
+  ],
+  [ // Gale Ridge: several climbs need a deliberate landing and a new jump.
+    [[555, 332, "ridge", "patrol"], [530, 380, "highRidge", "overpass"], [535, 318, "bridge", "brambles"], [595, 402, "spring", "sentries"], [515, 0, "open"]],
+    [[605, 377, "highRidge", "brambles"], [460, 334, "ridge", "overpass"], [560, 426, "spring", "sentries"], [510, 374, "highRidge", "patrol"], [545, 0, "open", "overpass"]],
+    [[624, 390, "highRidge", "overpass"], [490, 351, "ridge", "sentries"], [550, 433, "spring", "overpass"], [500, 400, "highRidge", "brambles"], [575, 0, "open"]],
+  ],
+  [ // Moonwake Harbor: lower docks alternate with exposed pier approaches.
+    [[600, 323, "dock", "sentries"], [510, 374, "bridge", "overpass"], [580, 346, "dock", "patrol"], [525, 396, "ridge", "sentries"], [565, 0, "open", "overpass"]],
+    [[615, 365, "dock", "overpass"], [455, 387, "highRidge", "brambles"], [525, 402, "dock", "sentries"], [565, 416, "spring", "overpass"], [555, 0, "open"]],
+    [[625, 399, "dock", "sentries"], [525, 360, "bridge", "overpass"], [545, 411, "ridge", "sentries"], [480, 394, "dock", "brambles"], [565, 0, "open", "patrol"]],
+  ],
+  [ // Starlit Switchbacks: use both the low path and guarded ledges.
+    [[630, 382, "ridge", "sentries"], [505, 416, "spring", "overpass"], [490, 370, "highRidge", "sentries"], [555, 438, "spring", "overpass"], [580, 0, "open"]],
+    [[605, 402, "highRidge", "sentries"], [525, 440, "spring", "sentries"], [550, 346, "bridge", "overpass"], [500, 435, "highRidge", "sentries"], [550, 0, "open", "overpass"]],
+    [[660, 426, "spring", "sentries"], [510, 388, "ridge", "overpass"], [575, 460, "relay", "sentries"], [495, 401, "highRidge", "sentries"], [590, 0, "open"]],
+  ],
+  [ // Midnight Viaduct: tight landings over long breaks, then spring chains.
+    [[615, 410, "highRidge", "sentries"], [525, 468, "relay", "overpass"], [540, 378, "ridge", "sentries"], [505, 430, "highRidge", "sentries"], [605, 0, "open"]],
+    [[665, 434, "highRidge", "sentries"], [510, 478, "relay", "sentries"], [540, 404, "ridge", "overpass"], [555, 485, "relay", "sentries"], [575, 0, "open"]],
+    [[640, 480, "relay", "sentries"], [520, 428, "highRidge", "sentries"], [550, 449, "highRidge", "overpass"], [500, 493, "relay", "sentries"], [590, 0, "open"]],
+  ],
+  [ // Windspire Ascent: link multiple springboards and narrow ridges.
+    [[650, 453, "highRidge", "sentries"], [555, 488, "relay", "sentries"], [530, 444, "highRidge", "sentries"], [530, 515, "relay", "sentries"], [595, 0, "open"]],
+    [[680, 510, "relay", "sentries"], [555, 470, "highRidge", "sentries"], [590, 528, "relay", "sentries"], [505, 455, "highRidge", "sentries"], [620, 0, "open"]],
+    [[675, 516, "relay", "sentries"], [580, 463, "highRidge", "sentries"], [545, 538, "relay", "sentries"], [550, 550, "relay", "sentries"], [640, 0, "open"]],
+  ],
+];
+
+function extendRoute(opening, sections) {
+  const { checkpoint, ...route } = opening;
+  const platforms = route.platforms.map(platform => ({ ...platform }));
+  const seeds = [...route.seeds];
+  const enemies = [...route.enemies];
+  const spikes = [...route.spikes];
+  const checkpoints = [checkpoint];
+  let end = route.end;
+  let lastBank = platforms.find(platform => platform.ground && platform.x + platform.w === end);
+  const floor = PLAYFIELD.floor;
+
+  function ledge(x, y, w, spring = false) {
+    platforms.push({ x, y, w, spring });
+    seeds.push([x + w * .29, y - (spring ? 66 : 27)], [x + w * .73, y - (spring ? 97 : 27)]);
+  }
+
+  for (const section of sections) {
+    checkpoints.push(end + 120);
+    for (const [width, gap, crossing, obstacle] of section) {
+      const start = end;
+      const edge = start + width;
+      if (lastBank.x + lastBank.w === start) {
+        lastBank.w += width;
+      } else {
+        lastBank = { x: start, y: floor, w: width, ground: true };
+        platforms.push(lastBank);
+      }
+      const center = start + Math.round(width * .51);
+      if (obstacle === "patrol") {
+        enemies.push([center, floor, center - 63, center + 79]);
+        ledge(center - 97, 462, 137);
+      } else if (obstacle === "brambles") {
+        spikes.push([center - 24, 57]);
+        ledge(center - 91, 477, 131);
+      } else if (obstacle === "overpass" || obstacle === "sentries") {
+        const guarded = obstacle === "sentries";
+        const upper = guarded ? 414 : 429;
+        ledge(center - 150, 474, 98);
+        ledge(center - 35, upper, 125);
+        spikes.push([center - 26, guarded ? 145 : 113]);
+        if (guarded) {
+          enemies.push([center + 10, upper, center - 27, center + 85]);
+          const approach = edge - 145;
+          if (approach >= center + 143) spikes.push([approach, 48]);
+        }
+      } else {
+        ledge(center - 51, 468, 105);
+      }
+      seeds.push([edge - 35, floor - 30]);
+      for (const [relative, y, w, spring] of crossings[crossing]) {
+        ledge(edge + Math.round(gap * relative - w / 2), y, w, spring);
+      }
+      end = edge + gap;
+    }
+  }
+  return { ...route, platforms, seeds, enemies, spikes, checkpoints, end, goal: end - 147 };
+}
+
+const COURSES = openingRoutes.map((opening, index) => extendRoute(opening, courseSections[index]));
