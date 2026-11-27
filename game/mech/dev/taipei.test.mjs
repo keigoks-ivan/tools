@@ -57,18 +57,30 @@ test('Taipei 101 stops player movement and fire while remaining outside the stru
   }
   assert.ok(w.boxes.every(b=>b.landmark==='台北101'&&!b.bld));
 });
-test('羽標 requires a clear hit, and a later salvo keeps the designated target after turning away',()=>{
-  const c=Object.create(FalconCombat.prototype);
-  const e={los:true,chest:p=>p.set(0,10,50)},other={};
-  Object.assign(c,{world:{raycast:()=>.45},hero:{designator:new THREE.Object3D()},msl:{cd:1},fx:{tracer(){}},audio:{ui(){}},note(){},cannon:{cd:1},cockpit:{kick(){}},fireTarget:()=>other});
-  c.launchSalvo([e]);assert.equal(c.marked,undefined);assert.equal(c.msl.cd,1);
-  c.world.raycast=()=>-1;c.launchSalvo([e]);assert.equal(c.marked,e);assert.equal(c.markFor,8);assert.equal(c.msl.cd,0);
-  let assignment;
-  c.queueMissiles=(targets,count)=>assignment=[targets[0],count];
-  c.startCannon();
-  assert.deepEqual(assignment,[e,6]);assert.equal(c.cannon.cd,0);
-  assert.equal(FALCON_WEAPONS.rifle.mag,48);
-  assert.deepEqual(FALCON_WEAPONS.msl.offsets,[0,.045,.25,.295,.5,.545]);
-  c.enc={fightT:1};c.boss={ap:400,apMax:1000};
-  assert.equal(c.echoActive,true);c.marked=c.boss;assert.equal(c.echoActive,false);
+test('羽標 fires six missiles on release and marks only an unobstructed target',()=>{
+  const c=Object.create(FalconCombat.prototype),e={los:true,chest:p=>p.set(0,10,50)};
+  const salvos=[];
+  Object.assign(c,{loadout:FALCON_WEAPONS,world:{raycast:()=>.45},hero:{designator:new THREE.Object3D()},msl:{cd:1},
+    fx:{tracer(){}},audio:{ui(){}},note(){},cannon:{cd:1},fireTarget:()=>null,queueMissiles:(targets,n)=>salvos.push([targets,n])});
+  c.launchSalvo([e]);assert.equal(c.marked,undefined);assert.deepEqual(salvos.pop(),[[],6]);
+  c.world.raycast=()=>-1;c.launchSalvo([e]);assert.equal(c.marked,e);assert.equal(c.markFor,8);
+  assert.deepEqual(salvos.pop(),[[e],6]);assert.equal(c.cannon.cd,1);assert.equal(c.msl.cd,0);
+  c.launchSalvo([]);assert.deepEqual(salvos.pop(),[[],6]);
+  c.enc={fightT:1};c.boss={ap:400,apMax:1000};assert.equal(c.echoActive,true);
+  c.marked=c.boss;assert.equal(c.echoActive,false);
+});
+test('白夜羽陣 chains three times, stops at cover, and needs no missile mark',()=>{
+  const c=Object.create(FalconCombat.prototype),damage=[];
+  const target=z=>({z,chest:p=>p.set(0,2,z)}),enemies=[80,120,160,200].map(target);
+  Object.assign(c,{loadout:FALCON_WEAPONS,enemies:[],phase:'fight',cannon:{cd:1},msl:{cd:.55},stats:{shots:0},
+    aimDir:new THREE.Vector3(0,0,1),events:[],hero:{missilePorts:[new THREE.Object3D(),new THREE.Object3D()]},
+    world:{raycast:()=>-1},cockpit:{kick(){}},fx:{wingArc(){}},audio:{ui(){},impact(){}},note(){},
+    damageEnemy:e=>damage.push(e.z)});
+  c.startCannon();assert.equal(c.cannon.cd,1);
+  c.enemies=enemies;c.startCannon();assert.equal(c.cannon.cd,0);assert.equal(c.msl.cd,.55);
+  assert.deepEqual(c.events.map(e=>e.t),[0,.36,.72]);
+  c.events[0].fn();assert.deepEqual(damage,[80,120,160]);
+  c.world.raycast=(a,b)=>b.z>100?.25:-1;
+  c.events[1].fn();assert.deepEqual(damage,[80,120,160,80]);
+  enemies[0].dead=true;c.events[2].fn();assert.equal(damage.length,4);
 });

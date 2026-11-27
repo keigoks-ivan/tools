@@ -497,7 +497,7 @@ async function game() {
     codaFilm.hidden = true; codaFail.hidden = true;
     codaEmergency.hidden = true;
     delete touchUI.dataset.coda;
-    $('tCannon').textContent = taipei ? '展翼' : '光波砲';
+    $('tCannon').textContent = taipei ? '羽陣' : '光波砲';
   }
 
   function codaCombat() {
@@ -767,7 +767,7 @@ async function game() {
     }
     if (inp.view && live) { tpView = !tpView; store.set('view', tpView ? 1 : 0); applyView(); }
     const canMove = live && (state !== 'boot' || boot > 0.85) && !combat.dead;
-    if (!canMove) inp = Object.assign({}, inp, idle, { fire: false, lockHold: false, qb: false, boost: false, jump: false, hover: false, flight:false,descend:false,flightBlocked:true, shield: false, cannon: false, hardLock: false, od: false, reload: false, lookX: state === 'result' ? 0 : inp.lookX, lookY: state === 'result' ? 0 : inp.lookY });
+    if (!canMove) inp = Object.assign({}, inp, idle, { fire: false, lockHold: false, lockRelease:false, qb: false, boost: false, jump: false, hover: false, flight:false,descend:false,flightBlocked:true, shield: false, cannon: false, hardLock: false, od: false, reload: false, lookX: state === 'result' ? 0 : inp.lookX, lookY: state === 'result' ? 0 : inp.lookY });
 
     // 光波砲充能／發射中：機體要撐住後座——轉向變慢、走不快、不能衝刺
     if (combat && combat.cannon.phase) inp = Object.assign({}, inp, { lookX: inp.lookX * 0.45, lookY: inp.lookY * 0.45, mx: inp.mx * 0.35, my: inp.my * 0.35, boost: false });

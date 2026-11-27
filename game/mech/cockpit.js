@@ -1406,7 +1406,7 @@ export class Cockpit {
     // 左肩：飛彈莢艙
     const ms = ui.msl || { ready: 6, max: 6, cd: 1, locks: 0 };
     this.tx(x, 'MSL', L, 158, COL.dim, 18); this.tx(x, this.falcon ? '羽標' : `MISSILE ×${ms.max}`, L + 50, 158, COL.wh, 19);
-    this.tx(x, ms.marked>0 ? `連結 ${Math.ceil(ms.marked)}s` : ms.locks ? `LOCK ${ms.locks}` : ms.cd >= 1 ? 'READY' : 'LOAD', Rr, 158, ms.locks ? COL.rd : ms.cd >= 1 ? COL.gr : COL.am, 22, true, 'right');
+    this.tx(x, ms.locks ? `LOCK ${ms.locks}` : ms.cd >= 1 ? 'READY' : 'LOAD', Rr, 158, ms.locks ? COL.rd : ms.cd >= 1 ? COL.gr : COL.am, 22, true, 'right');
     const pw = (w - 32 + 8) / ms.max;
     for (let i = 0; i < ms.max; i++) {
       const px = L + i * pw, c = i < ms.locks ? COL.rd : ms.cd >= 1 ? COL.cy : COL.grid;
@@ -1419,7 +1419,7 @@ export class Cockpit {
     this.tx(x, shieldText, Rr, 230, shield?.active ? COL.cy : shield?.cooldown > 0 ? COL.am : COL.gr, 20, true, 'right');
     // 光波砲：充能中閃、冷卻中顯示百分比
     const cn = ui.cannon || { cd: 1, phase: null };
-    this.tx(x, 'CAN', L, 260, COL.dim, 18); this.tx(x, this.falcon ? '展翼齊射' : 'BEAM CANNON', L + 50, 260, COL.wh, 19);
+    this.tx(x, 'CAN', L, 260, COL.dim, 18); this.tx(x, this.falcon ? '白夜羽陣' : 'BEAM CANNON', L + 50, 260, COL.wh, 19);
     const cs = cn.phase === 'charge' ? 'CHARGE' : cn.phase === 'fire' ? 'FIRE' : cn.cd >= 1 ? 'READY [E]' : `${Math.round(cn.cd * 100)}%`;
     this.tx(x, cs, Rr, 260, cn.phase ? (Math.sin(t * 20) > 0 ? COL.cy : COL.wh) : cn.cd >= 1 ? COL.gr : COL.am, 20, true, 'right');
     if (cn.cd < 1 && !cn.phase) this.hb(x, L, 274, w - 32, 5, cn.cd, COL.am);

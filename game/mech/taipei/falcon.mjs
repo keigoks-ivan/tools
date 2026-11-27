@@ -6,8 +6,8 @@ import {createFootContactShadows} from '../foot-contact.mjs?v=1';
 
 export const FALCON_WEAPONS = {
   rifle:{mobile:true,mag:48,rof:.155,reload:1.65,dmg:276,stag:18},
-  msl:{...W.msl,n:1,cd:1.3,lockStep:.08,cone:.51,range:850,dmg:680,stag:57,offsets:[0,.045,.25,.295,.50,.545]},
-  cannon:{cd:8},
+  msl:{...W.msl,n:1,tapFire:true,cd:6,lockStep:.08,cone:.51,range:850,dmg:680,stag:57,offsets:[0,.045,.25,.295,.50,.545]},
+  cannon:{cd:24,range:720,chainRange:140,pulses:3,interval:.36,dmg:1450},
 };
 const source=new THREE.Vector3(),contact=new THREE.Vector3();
 export class FalconCombat extends Combat {
@@ -23,20 +23,61 @@ export class FalconCombat extends Combat {
     super.playerWeapons(dt,input);
   }
   launchSalvo(locks){
-    const e=locks[0];
-    if(!e||e.dead||!e.los){this.note('羽標未捕捉目標','am');return;}
-    this.hero.designator.getWorldPosition(source);e.chest(contact);
-    const hit=this.world.raycast(source,contact,null);
-    if(hit>=0&&hit<.98){this.note('羽標被遮住了','am');return;}
-    this.marked=e;this.markFor=8;this.msl.cd=0;
-    this.fx.tracer(source,contact);this.audio.ui('confirm');this.note('羽標已連結　展翼可追擊','cy');
+    const e=locks[0] || this.fireTarget();
+    this.hero.designator.getWorldPosition(source);
+    const guided=e && !e.dead && !e.gone && e.los && !e.dropping &&
+      e.chest(contact).distanceTo(source)<=this.weapons.msl.range && this.clearArc(source,contact);
+    this.msl.cd=0;
+    if(guided){
+      this.marked=e;this.markFor=8;
+      this.fx.tracer(source,contact);this.audio.ui('confirm');
+    }
+    this.queueMissiles(guided?[e]:[],6);
+    this.note(guided?'羽標鎖定・六彈齊射':'羽標齊射・未鎖定','cy');
+  }
+  clearArc(from,to){
+    const hit=this.world.raycast(from,to,null);
+    return hit<0 || hit>=.98;
+  }
+  arcTarget(from,range,visited,forward,preferred){
+    let best=null,lowest=Infinity;
+    const delta=new THREE.Vector3();
+    for(const e of this.enemies){
+      if(e.dead || e.gone || visited.has(e))continue;
+      const p=e.chest(contact),dist=delta.subVectors(p,from).length();
+      if(dist>range || !this.clearArc(from,p))continue;
+      if(e===preferred)return e;
+      const alignment=delta.normalize().dot(this.aimDir);
+      if(forward && alignment<.65)continue;
+      const rank=forward?dist/range+2*(1-alignment):dist;
+      if(rank<lowest){lowest=rank;best=e;}
+    }
+    return best;
   }
   startCannon(){
-    const target=this.marked?.dead?null:this.marked;
-    const aim=target||this.fireTarget();
-    this.cannon.cd=0;this.queueMissiles(aim?[aim]:[],6);
-    this.cockpit.kick('fire',.72);
-    this.note(target?'展翼齊射　追蹤羽標':'展翼齊射','cy');
+    const K=this.weapons.cannon,visited=new Set();
+    const origin=this.hero.missilePorts[0].getWorldPosition(new THREE.Vector3());
+    const primary=this.arcTarget(origin,K.range,visited,true,this.marked);
+    if(!primary){this.note('羽陣・請面向敵機或先用羽標','am');return;}
+    this.cannon.cd=0;
+    this.audio.ui('confirm');this.note('白夜羽陣・三輪放電','cy');
+    for(let pulse=0;pulse<K.pulses;pulse++){
+      this.events.push({t:pulse*K.interval,fn:()=>{
+        if(this.dead || this.phase!=='fight')return;
+        visited.clear();
+        this.hero.missilePorts[pulse%2].getWorldPosition(origin);
+        let e=this.arcTarget(origin,K.range,visited,true,primary);
+        if(e)this.cockpit.kick('fire',.60);
+        for(let hop=0;e && hop<3;hop++){
+          visited.add(e);
+          const hit=e.chest(new THREE.Vector3()),dir=hit.clone().sub(origin).normalize();
+          this.fx.wingArc(origin,hit);this.audio.impact(hit,'beam');this.stats.shots++;
+          this.damageEnemy(e,K.dmg*(1-.2*hop),60,hit,dir);
+          origin.copy(hit);
+          if(hop<2)e=this.arcTarget(origin,K.chainRange,visited,false,null);
+        }
+      }});
+    }
   }
   get echoActive(){
     return !!this.boss&&!this.boss.dead&&this.boss.ap<this.boss.apMax*.52&&this.enc.fightT%10<6&&this.marked!==this.boss;

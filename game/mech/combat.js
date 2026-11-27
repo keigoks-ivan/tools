@@ -423,7 +423,7 @@ export class Combat {
     if (inp.fire && CN.phase === null) this.fireRifle();
     // 飛彈：按住右鍵掃過敵人上鎖，放開發射
     if (M.cd < 1) M.cd = Math.min(1, M.cd + dt / this.weapons.msl.cd);
-    if (inp.lockHold && M.cd >= 1) {
+    if ((inp.lockHold || this.weapons.msl.tapFire && inp.lockRelease) && M.cd >= 1) {
       if (!M.locking) { M.locking = true; M.locks = []; M.lockT = 0.05; }
       M.lockT -= dt;
       if (M.lockT <= 0 && M.locks.length < this.weapons.msl.n) {

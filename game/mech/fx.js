@@ -720,6 +720,14 @@ export class FX {
     if (j >= 0) this._beamFlare(from.x, from.y, from.z, P.dx[j], P.dy[j], P.dz[j], en);
   }
 
+  // Three short-lived segments share the existing projectile pool.
+  wingArc(from,to) {
+    const bend=Math.min(9,from.distanceTo(to)*.045);
+    const a=from.clone().lerp(to,.37),b=from.clone().lerp(to,.68);
+    a.y+=bend; b.x+=rr(-bend,bend); b.y-=bend*.4;
+    this._pa(from,a,3,2000,12);this._pa(a,b,3,2000,12);this._pa(b,to,3,2000,12);
+  }
+
   tracer(from, to) { this._pa(from, to, 2, 900, 7); }
 
   // 戰車砲彈：慢速粗曳光，回傳槽位（可用 projEnd 提前結束）
@@ -1876,6 +1884,12 @@ export class FX {
       P.trav[j] += P.speed[j] * dt;
       const len = P.len[j], trav = P.trav[j], bl = P.blen[j], kind = P.kind[j];
       const fx = P.fx[j], fy = P.fy[j], fz = P.fz[j], dx = P.dx[j], dy = P.dy[j], dz = P.dz[j];
+      if(kind===3){
+        const intensity=1-P.age[j]/.18;
+        if(intensity<=0){P.alive[j]=0;continue;}
+        this._imm(fx,fy,fz,fx+dx*len,fy+dy*len,fz+dz*len,.65*intensity,K_BEAM,3*intensity,12*intensity,14*intensity,0);
+        continue;
+      }
       const flight = len / P.speed[j];
       const boltOn = trav - bl < len;
       if (!boltOn && (kind === 2 || P.age[j] > flight + 0.32)) { P.alive[j] = 0; continue; }

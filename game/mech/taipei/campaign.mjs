@@ -20,7 +20,7 @@ export const TAIPEI_STAGES = [
   },
   {
     name:'逆流的回聲',en:'UPSTREAM',fieldLabel:'關渡・雙河匯流',battlefield:'taipei',music:3,score:'supply',tier:3,
-    tip:'羽標按住瞄準、放開標記。展翼齊射優先追蹤被標記的敵機。',
+    tip:'按住羽標瞄準，放開就發射。敵機聚集時，用白夜羽陣連鎖放電。',
     brief:['從大稻埕沿淡水河抵達關渡，基隆河在這裡匯入。兩艘領航艇正以相同呼號請求放行。','有人準備讓兩艘船一起離岸。阿澄只有兩部河岸接收器，可以分辨哪一艘載著她哥哥。'],
     start:[['阿澄','關渡大橋，三個紅色鋼拱。船都還在橋的上游。先去聽第一部接收器。']],
     end:[['領航員','這次真的是我。你小時候把我的船漆成紅色，你還記得嗎？'],['阿澄','……另一艘沒有人。它最後一筆訊號，在信義。']],
@@ -28,7 +28,7 @@ export const TAIPEI_STAGES = [
       {at:1,amb:'tank@out grunt@side',amb2:'heli@rise',tip:'沿堤內前往上游接收站'},
       {at:2,amb:'heli@far tank@out',pickup:{x:-246,z:14,name:'上游接收器'},tip:'接上第一部接收器，記下訊號背景',clear:[['阿澄','兩艘都在說話。只有一道訊號底下有機械運轉的低鳴。']]},
       {at:4,amb:'grunt@out heli@far',amb2:'heavy@out grunt@side',tip:'從倉庫街轉入堤外，自行車道通往浮碼頭'},
-      {at:5,amb:'heli@rise*2 tank@out',amb2:'ace@drop',tip:'沿堤岸追上干擾機，用羽標引導展翼齊射'},
+      {at:5,amb:'heli@rise*2 tank@out',amb2:'ace@drop',tip:'沿堤岸追上干擾機，鎖定干擾機後放開羽標齊射'},
       {at:6,amb:'heli@far*2 grunt@drop',pickup:{x:222,z:57,name:'下游接收器'},tip:'比對第二次收訊，辨認要放行的船',clear:[['阿澄','紅頂的船上有引擎聲。接近它那座放行台，我就鬆纜。']]},
       {at:7,amb:'heavy@out heli@far',pickup:{name:'領航艇放行台',x:287,z:89,decoyX:354,decoyZ:89,releaseFerry:true,verb:'已放行'},tip:'從兩座放行台中選擇紅頂領航艇',clear:[['領航員','我離岸了。橋那邊有東西從水面升起，當心！']]},
       {at:11,amb:'heavy@out heli@rise',amb2:'ace@drop grunt@side',tip:'穿過引道內側，截住追船的敵機'},

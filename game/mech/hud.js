@@ -318,11 +318,11 @@ export class HUD {
       this.bar(x, wy + 8 * s, w, 2 * s, v, col);
     };
     chip(0, C.weapons.rifle.mobile ? '掠翼' : 'RIFLE', R.reload >= 0 ? 'RELOAD' : `${R.ammo}/${R.mag}`, R.reload >= 0 ? R.reload : R.ammo / R.mag, R.reload >= 0 || R.ammo <= 3 ? 'am' : 'cy', true);
-    chip(1, C.weapons.rifle.mobile ? '羽標' : 'MSL', C.markFor > 0 ? `${Math.ceil(C.markFor)}s` : M.cd >= 1 ? 'READY' : `${Math.ceil((1 - M.cd) * M.cooldownSeconds)}s`, M.cd, M.cd >= 1 ? 'gr' : 'dim', M.cd >= 1);
+    chip(1, C.weapons.rifle.mobile ? '羽標' : 'MSL', M.cd >= 1 ? 'READY' : `${Math.ceil((1 - M.cd) * M.cooldownSeconds)}s`, M.cd, M.cd >= 1 ? 'gr' : 'dim', M.cd >= 1);
     const shieldReady = SH.cooldown <= 0 && !SH.active;
     const shieldText = SH.active ? `ON ${Math.ceil(SH.level * 100)}%` : shieldReady ? 'READY' : `${Math.ceil(SH.cooldown)}s`;
     chip(2, 'SHIELD F', shieldText, SH.level, SH.active ? (SH.level < 0.3 ? 'am' : 'cy') : shieldReady ? 'gr' : 'dim', shieldReady || SH.active);
-    chip(3, C.weapons.rifle.mobile ? '展翼 E' : 'CANNON E', CN.phase ? (CN.phase === 'charge' ? 'CHARGE' : 'FIRE') : CN.cd >= 1 ? 'READY' : `${Math.ceil((1 - CN.cd) * C.weapons.cannon.cd)}s`, CN.phase ? 1 : CN.cd, CN.phase || CN.cd >= 1 ? 'cy' : 'dim', CN.cd >= 1 || !!CN.phase);
+    chip(3, C.weapons.rifle.mobile ? '羽陣 E' : 'CANNON E', CN.phase ? (CN.phase === 'charge' ? 'CHARGE' : 'FIRE') : CN.cd >= 1 ? 'READY' : `${Math.ceil((1 - CN.cd) * C.weapons.cannon.cd)}s`, CN.phase ? 1 : CN.cd, CN.phase || CN.cd >= 1 ? 'cy' : 'dim', CN.cd >= 1 || !!CN.phase);
     chip(4, 'OD Q', OD.active ? 'ACTIVE' : OD.gauge >= 1 ? 'READY' : `${Math.floor(OD.gauge * 100)}%`, OD.gauge, 'pk', OD.gauge >= 1 || OD.active);
 
     // ---- 頭目：畫面最上方名字＋血條
