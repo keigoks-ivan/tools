@@ -39,7 +39,7 @@ function rng(seed) {
 const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
 // ---------------------------------------------------------------- 資源載入
-export async function loadAssets(renderer, onProgress = () => {}, compact = true) {
+export async function loadAssets(renderer, onProgress = () => {}, compact = true, kobe = true) {
   const tl = new THREE.TextureLoader();
   let done = 0; const total = 13 + FACADES.length * 3 + 4;
   const step = (x) => { done++; onProgress(done / total); return x; };
@@ -57,9 +57,9 @@ export async function loadAssets(renderer, onProgress = () => {}, compact = true
     T('asphalt_diff.jpg', true), T('asphalt_nor.jpg'), T('asphalt_arm.jpg'),
     T('rubble_diff.jpg', true), T('rubble_nor.jpg'),
     T('rock_diff.jpg', true), T('rock_nor.jpg'), T('rock_arm.jpg'),
-    fetch(new URL('./assets/kobe-relief-v1.bin',import.meta.url)).then(r=>{if(!r.ok)throw new Error('Kobe relief unavailable');return r.arrayBuffer();}).then(decodeKobeRelief).catch(()=>null),
+    kobe ? fetch(new URL('./assets/kobe-relief-v1.bin',import.meta.url)).then(r=>{if(!r.ok)throw new Error('Kobe relief unavailable');return r.arrayBuffer();}).then(decodeKobeRelief).catch(()=>null) : null,
   ]);
-  const fac = FACADES.map((f,i) => japaneseFacade(i).map(step));
+  const fac = kobe ? FACADES.map((f,i) => japaneseFacade(i).map(step)) : [];
   const [wearM, wearN, frameM, frameN] = await Promise.all([T('wear_mask.jpg'), T('wear_nor.jpg'), T('frame_mask.jpg'), T('frame_nor.jpg')]);
   return { hdr, sky, grassD, grassN, grassA, asphD, asphN, asphA, rubD, rubN, rockD, rockN, rockA, fac, wearM, wearN, frameM, frameN, relief };
 }
@@ -1059,7 +1059,7 @@ function pylonGeometry() {
 
 // ---------------------------------------------------------------- 世界
 export class World {
-  constructor(renderer, scene, A, { terrainSegments = 160, city = true, kitano = true, sceneryReserve = null } = {}) {
+  constructor(renderer, scene, A, { terrainSegments = 160, city = true, kitano = true, sceneryReserve = null, heightSource = null, terrainSurface = terrainMaterial } = {}) {
     this.cityEnabled = city;
     this.kitanoEnabled = city && kitano;
     this.sceneryReserve = sceneryReserve;
@@ -1122,8 +1122,8 @@ export class World {
     scene.add(hemi); this.hemi=hemi;
 
     // 地形
-    this.terrain = new Terrain(10000, terrainSegments, A.relief ? (x,z)=>kobeCityHeight(A.relief,x,z) : rawHeight);
-    const tmesh = new THREE.Mesh(this.terrain.geometry(), terrainMaterial(A));
+    this.terrain = new Terrain(10000, terrainSegments, heightSource ? (x,z)=>heightSource(x,z,this.fieldRoute?.district) : A.relief ? (x,z)=>kobeCityHeight(A.relief,x,z) : rawHeight);
+    const tmesh = new THREE.Mesh(this.terrain.geometry(), terrainSurface(A));
     tmesh.receiveShadow = true;
     scene.add(tmesh);
     this.terrainMesh = tmesh;
@@ -1231,7 +1231,7 @@ export class World {
     this.hillsideSite?.dispose(); this.hillsideSite=null;
     this.landingSite?.dispose(); this.landingSite=null;
     if (this.fieldGroup) {
-      this.fieldGroup.traverse(o => { if (o.userData.fieldGeometry) o.geometry.dispose(); if (o.isInstancedMesh) o.dispose(); });
+      this.fieldGroup.traverse(o => { if (o.userData.fieldGeometry) o.geometry.dispose(); if (o.userData.fieldMaterial) o.material.dispose(); if (o.isInstancedMesh) o.dispose(); });
       this.fieldGroup.removeFromParent(); this.fieldGroup = null;
     }
     this.battlefield = profile; this.fieldRoute = route;
@@ -1245,8 +1245,15 @@ export class World {
       p.setXYZ(i, x, T.h[i], z); uv.setXY(i, x / 15, z / 15);
     }
     p.needsUpdate = uv.needsUpdate = true; this.terrainMesh.geometry.computeVertexNormals(); this.terrainMesh.geometry.computeBoundingSphere();
-    this.terrainMesh.material.userData.battlefield.value = F.mode;
-    this.terrainMesh.material.userData.hillside.value = profile==='hillside' ? 1 : 0;
+    if (profile==='taipei') {
+      this.mountainMesh.geometry.dispose();
+      this.mountainMesh.geometry=T.backdropGeometry();
+    }
+    const terrainUniforms=this.terrainMesh.material.userData;
+    if(terrainUniforms.battlefield){
+      terrainUniforms.battlefield.value=F.mode;
+      terrainUniforms.hillside.value=profile==='hillside' ? 1 : 0;
+    }
     this.scene.fog.density = F.mode ? profile === 'landing' ? .00024 : profile === 'forest' ? .00018 : profile === 'hillside' ? .00069 : .00012 : .00024;
     this.scene.environmentIntensity=profile==='landing'?.57:F.mode?.43:.7;
     if(profile==='landing')this.lightDir.set(.45,.43,-.78).normalize();
@@ -1301,6 +1308,10 @@ export class World {
       if (!geo) return;
       const m = new THREE.Mesh(geo, mat); m.castShadow = shadow; m.receiveShadow = true; m.userData.fieldGeometry = true; group.add(m);
     };
+    if(profile==='taipei'){
+      this._registerBlds(this.buildTaipei(this,group,{bucket:()=>new GeoBucket(),box:addBox,put}));
+      return;
+    }
     if(profile==='hillside')this._registerBlds(buildAlleyBuildings(this,{bucket:()=>new GeoBucket(),box:addBox,put,facades:FACADES}));
     for (const S of layout.structures) {
       const width = S.width || (S.target ? 30 : profile === 'airfield' || profile === 'depot' ? 48 : 28);
@@ -1497,7 +1508,7 @@ export class World {
     const kb = this.kitano?.bounds;
     let hit = kb && this.battlefield === 'city' && pos.x >= kb.x0-r && pos.x <= kb.x1+r && pos.z >= kb.z0-r && pos.z <= kb.z1+r ? this.kitanoSolid.pushOut(pos, r, feetY, feetY + 18, 1.5) : false;
     for (const b of this.nearBoxes(pos.x, pos.z, r + 2, this._tmpB || (this._tmpB = []))) {
-      if (b.top <= feetY + 1.5) continue;
+      if (b.top <= feetY + 1.5 || b.bottom !== undefined && feetY+18 < b.bottom) continue;
       const cx = Math.max(b.x0, Math.min(pos.x, b.x1)), cz = Math.max(b.z0, Math.min(pos.z, b.z1));
       let dx = pos.x - cx, dz = pos.z - cz;
       const d2 = dx * dx + dz * dz;
@@ -1538,7 +1549,7 @@ export class World {
         if (bx.top < 0) continue;   // 停用中的瓦礫台階
         // slab
         let t0 = 0, t1 = 1, nAxis = -1, nSign = 0;
-        const L = [[a.x, dx, bx.x0, bx.x1], [a.y, dy, -50, bx.top], [a.z, dz, bx.z0, bx.z1]];
+        const L = [[a.x, dx, bx.x0, bx.x1], [a.y, dy, bx.bottom ?? -50, bx.top], [a.z, dz, bx.z0, bx.z1]];
         let ok = true;
         for (let k = 0; k < 3; k++) {
           const [o, d, mn, mx] = L[k];

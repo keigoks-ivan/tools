@@ -98,6 +98,13 @@ export class HUD {
       X.fillStyle = gr; X.fillRect(0, 0, W, H);
     }
 
+    if (C.world.scenicPoints && !C.lockTarget && !C.soft) {
+      for (const landmark of C.world.scenicPoints) {
+        const p=this.proj(landmark.p,{});
+        if (p.front && Math.abs(p.x-W/2)<W*.17 && p.y>H*.13 && p.y<H*.52)
+          this.text(landmark.name,p.x,p.y-12*s,12,'ink2',.86,'center',600,SANS);
+      }
+    }
     // ---- 準心位置＝瞄準方向投影
     const aimP = this.proj(_a.copy(C.eye).addScaledVector(C.aimDir, 400), {});
     const ax = aimP.x, ay = aimP.y;
@@ -161,6 +168,7 @@ export class HUD {
       if (e.stagT <= 0 && e.stag > 0) { X.fillStyle = rgba('am', 0.85); X.fillRect(p.x - bw / 2, yb + 4 * s, bw * clamp(e.stag / e.K.stag, 0, 1), 1.5 * s); }
       // 距離、代號；鎖定目標多一行接近率（VC＋＝越來越近）
       const tx = p.x + bx + (locked ? 11 : 5) * s, ty = p.y - by + 5 * s;
+      if (e===C.marked || e===C.boss && C.echoActive) this.text(e===C.marked ? `羽標 ${Math.ceil(C.markFor)}s` : '回音干擾・可用羽標',p.x,p.y-by-28*s,13,'cy',1,'center',700,SANS);
       this.text(`${Math.round(dist)}m`, tx, ty, locked ? 12 : 11, col, 0.95, 'left', 700);
       this.text(e.label || (e.kind === 'ace' ? 'ACE' : e.kind === 'heavy' ? 'HVY' : 'GNT'), tx, ty + 13 * s, 10, col, 0.75);
       if (locked) this.text(`VC ${this.vc >= 0 ? '+' : '-'}${pad(Math.abs(this.vc))}`, tx, ty + 26 * s, 10, 'am', 0.9);
@@ -308,12 +316,12 @@ export class HUD {
       this.text(val, x + w, wy, 11, col, hot ? 1 : 0.75, 'right', 700);
       this.bar(x, wy + 8 * s, w, 2 * s, v, col);
     };
-    chip(0, 'RIFLE', R.reload >= 0 ? 'RELOAD' : `${R.ammo}/${R.mag}`, R.reload >= 0 ? R.reload : R.ammo / R.mag, R.reload >= 0 || R.ammo <= 3 ? 'am' : 'cy', true);
-    chip(1, 'MSL', M.cd >= 1 ? 'READY' : `${Math.ceil((1 - M.cd) * M.cooldownSeconds)}s`, M.cd, M.cd >= 1 ? 'gr' : 'dim', M.cd >= 1);
+    chip(0, C.weapons.rifle.mobile ? '掠翼' : 'RIFLE', R.reload >= 0 ? 'RELOAD' : `${R.ammo}/${R.mag}`, R.reload >= 0 ? R.reload : R.ammo / R.mag, R.reload >= 0 || R.ammo <= 3 ? 'am' : 'cy', true);
+    chip(1, C.weapons.rifle.mobile ? '羽標' : 'MSL', C.markFor > 0 ? `${Math.ceil(C.markFor)}s` : M.cd >= 1 ? 'READY' : `${Math.ceil((1 - M.cd) * M.cooldownSeconds)}s`, M.cd, M.cd >= 1 ? 'gr' : 'dim', M.cd >= 1);
     const shieldReady = SH.cooldown <= 0 && !SH.active;
     const shieldText = SH.active ? `ON ${Math.ceil(SH.level * 100)}%` : shieldReady ? 'READY' : `${Math.ceil(SH.cooldown)}s`;
     chip(2, 'SHIELD F', shieldText, SH.level, SH.active ? (SH.level < 0.3 ? 'am' : 'cy') : shieldReady ? 'gr' : 'dim', shieldReady || SH.active);
-    chip(3, 'CANNON E', CN.phase ? (CN.phase === 'charge' ? 'CHARGE' : 'FIRE') : CN.cd >= 1 ? 'READY' : `${Math.ceil((1 - CN.cd) * 20)}s`, CN.phase ? 1 : CN.cd, CN.phase || CN.cd >= 1 ? 'cy' : 'dim', CN.cd >= 1 || !!CN.phase);
+    chip(3, C.weapons.rifle.mobile ? '展翼 E' : 'CANNON E', CN.phase ? (CN.phase === 'charge' ? 'CHARGE' : 'FIRE') : CN.cd >= 1 ? 'READY' : `${Math.ceil((1 - CN.cd) * C.weapons.cannon.cd)}s`, CN.phase ? 1 : CN.cd, CN.phase || CN.cd >= 1 ? 'cy' : 'dim', CN.cd >= 1 || !!CN.phase);
     chip(4, 'OD Q', OD.active ? 'ACTIVE' : OD.gauge >= 1 ? 'READY' : `${Math.floor(OD.gauge * 100)}%`, OD.gauge, 'pk', OD.gauge >= 1 || OD.active);
 
     // ---- 頭目：畫面最上方名字＋血條
@@ -530,7 +538,7 @@ export class HUD {
       this.text('!', p.x, p.y + 2 * s, 13, 'rd', a, 'center', 700);
     }
     if (!EN.wp) return;
-    if (!front && hl == null && !(EN.tg && EN.tg.length && EN.state === 'fight')) this.text(`前進 ▶ ${Math.round(EN.dist)}m`, W / 2, y, 15, 'cy', 0.8 + 0.2 * Math.sin(this.t * 4), 'center', 700, SANS);
+    if (!front && hl == null && !(EN.tg && EN.tg.length && EN.state === 'fight')) this.text(`${EN.deviceHint || '前進 ▶'} ${Math.round(EN.dist)}m`, W / 2, y, 15, 'cy', 0.8 + 0.2 * Math.sin(this.t * 4), 'center', 700, SANS);
     const p = this.proj(_o.set(EN.wp.x, EN.wp.y, EN.wp.z), {});
     if (!(p.front && p.x > 30 && p.x < W - 30 && p.y > 30 && p.y < H - 30)) { this.edgeMark(p, 'cy', `${Math.round(EN.dist)}m`, W, H, 0.9); return; }
     const r = 11 * s, b = 1 + 0.12 * Math.sin(this.t * 5);
@@ -557,7 +565,7 @@ export class HUD {
   // 開機自我檢測（BIT）：逐行跑出來，狀態字綠色；下方進度條
   drawBoot(g) {
     const X = this.x, W = this.w, H = this.h, b = g.boot, s = this.s;
-    const lines = ['M-07 AZURE FLAME', 'OS  IRON DUSK  COMBAT SYSTEM  v7.2', 'REACTOR ........ ONLINE', 'FRAME ........... OK', 'FCS ............. OK', 'THRUSTERS ....... OK', 'ALL-VIEW ........ ON'];
+    const lines = [g.combat.weapons.rifle.mobile ? '白隼 WHITE FALCON' : 'M-07 AZURE FLAME', 'OS  IRON DUSK  COMBAT SYSTEM  v7.2', 'REACTOR ........ ONLINE', 'FRAME ........... OK', 'FCS ............. OK', 'THRUSTERS ....... OK', 'ALL-VIEW ........ ON'];
     const n = Math.floor(clamp(b / 0.7, 0, 1) * lines.length), x0 = W * 0.5 - 170 * s, y0 = H * 0.35;
     for (let i = 0; i < n; i++) {
       const Ln = lines[i], y = y0 + i * 22 * s;

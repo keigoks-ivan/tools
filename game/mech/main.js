@@ -14,6 +14,7 @@ import { HarborCinematic } from './harbor-cinematic.mjs?v=1';
 import { LESSONS } from './tutorial.mjs?v=1';
 
 const q = new URLSearchParams(location.search);
+const taipei = q.get('campaign') === 'taipei';
 // 大檔案（貼圖、HDR、模型）改從 jsDelivr 下載，網站主機給大檔很慢；不能用時照舊從本站（見 cdn.js）
 try { const f = await (await import('./cdn.js')).useCDN(); if (f) THREE.DefaultLoadingManager.setURLModifier(f); } catch (e) {}
 if (q.has('show') || q.has('free')) await import('./preview.js');
@@ -26,13 +27,16 @@ async function game() {
   const { Cockpit } = await import('./cockpit.js');
   const { Input } = await import('./input.js');
   const { Player, WEIGHT } = await import('./player.js');
-  const { Combat, STAGES, stageWeight } = await import('./combat.js');
+  const { Combat: KobeCombat, STAGES: kobeStages, prepareStages, stageWeight } = await import('./combat.js');
   const { setRoute } = await import('./encounter.js');
   const { HUD } = await import('./hud.js');
   const { Audio: Sound } = await import('./audio.js');
   const clamp = THREE.MathUtils.clamp;
   const $ = (id) => document.getElementById(id);
 
+  const falcon = taipei ? await import('./taipei/falcon.mjs') : null;
+  const Combat = falcon?.FalconCombat || KobeCombat;
+  const STAGES = taipei ? prepareStages((await import('./taipei/campaign.mjs')).TAIPEI_STAGES) : kobeStages;
   // ---------------------------------------------------------------- 畫面
   const canvas = $('gl');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
@@ -47,12 +51,14 @@ async function game() {
   const cockCam = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.05, 20);
 
   const bar = document.querySelector('#bar i'), status = $('status');
-  const [A] = await Promise.all([loadAssets(renderer, (p) => { bar.style.width = (p * 90).toFixed(0) + '%'; }), loadHeroMech()]);
+  const basin = taipei ? await import('./taipei/basin.mjs') : null;
+  const [A, heightSource] = await Promise.all([loadAssets(renderer, (p) => { bar.style.width = (p * 90).toFixed(0) + '%'; }, true, !taipei), basin ? basin.loadBasin() : loadHeroMech()]);
   status.textContent = '建立城市';
   initMechMaterials(A);
-  const world = new World(renderer, scene, A);
+  const world = new World(renderer, scene, A, taipei ? {city:false, terrainSegments:180, heightSource, terrainSurface:basin.basinSurface} : undefined);
+  if (taipei) world.buildTaipei = await (await import('./taipei/district.mjs')).prepareDistrict(A,heightSource);
   const post = new Post(renderer, scene, camera, cockScene, cockCam);
-  const cockpit = new Cockpit(world, camera, cockScene, cockCam);
+  const cockpit = new Cockpit(world, camera, cockScene, cockCam, taipei);
   // 扶手台擋住的畫面，城市那層直接跳過不畫（?nomask 可關掉比對）
   const cockMask = cockpit.depthMask();
   cockMask.visible = false;
@@ -73,10 +79,11 @@ async function game() {
 
   // ---------------------------------------------------------------- 自機
   const SPAWN = new THREE.Vector3(0, 0, -70);
-  const hero = new Mech('hero', 'hero');
+  const hero = taipei ? new Mech('grunt', 'ally') : new Mech('hero', 'hero');
+  if (taipei) falcon.fitFalcon(hero, A);
   hero.heavy = true;   // 重量模式（anim.js HEAVY）：機身轉向限速、落腳更沉；前傳、續作不開
   scene.add(hero.root);
-  const titleVisual = createTitleHarbor(renderer, new Mech('hero', 'hero'), world, post);
+  const titleVisual = taipei ? falcon.falconTitle(renderer,hero,world) : createTitleHarbor(renderer, new Mech('hero', 'hero'), world, post);
   const player = new Player(hero, world, {
     land: (s) => {
       audio.land(s); cockpit.kick('land', s);
@@ -100,9 +107,9 @@ async function game() {
   player.apMax = 9000;
   // n＝關卡（遭遇戰從路線起點、面向第一段出發）；cp＝檢查點
   function resetPlayer(n = 0, cp = null) {
-    const D = n ? STAGES[n - 1] : null;
+    const D = n ? STAGES[n - 1] : taipei ? STAGES[0] : null;
     world.setBattlefield(D?.battlefield, D?.route);
-    const E = n ? STAGES[n - 1].enc : null;
+    const E = D?.enc;
     let x = SPAWN.x, z = SPAWN.z, yaw = 0;
     if (cp) { x = cp.x; z = cp.z; yaw = cp.yaw; }
     else if (E) { const [a, b] = E.pts; x = a.x; z = a.z; yaw = Math.atan2(b.x - a.x, b.z - a.z); }
@@ -192,18 +199,19 @@ async function game() {
     if (!keepBuildings) world.resetBuildings();   // 尾聲接續同一個戰場，保留決戰破壞
     fx.clear();
     stageNo = n;
-    combat = new Combat({ scene, world, camera, player, hero, fx, audio, cockpit, post, onEnd: finish, stage: n, cp });
+    combat = new Combat({ scene, world, camera, player, hero, fx, audio, cockpit, post, onEnd: finish, stage: n, stageDef: taipei ? STAGES[n-1] : undefined, campaignLength:STAGES.length, cp });
     window.__combat = combat;
   }
   newCombat();
 
   // ---------------------------------------------------------------- 設定
   // 視角：false＝駕駛艙（第一人稱）、true＝機體後方（看得到整台機體）；記住上次的選擇
-  const store0 = (k, d) => { try { const v = localStorage.getItem('mech.' + k); const n = v === null ? d : +v; return Number.isFinite(n) ? n : d; } catch (e) { return d; } };
+  const saveKey = k => (taipei && /^(cleared|best\d+|view)$/.test(k) ? 'mech.taipei.' : 'mech.') + k;
+  const store0 = (k, d) => { try { const v = localStorage.getItem(saveKey(k)); const n = v === null ? d : +v; return Number.isFinite(n) ? n : d; } catch (e) { return d; } };
   let tpView = store0('view', 0) === 1;
   let chaseD = store0('camd2', 9);
   chaseD = Number.isFinite(chaseD) ? clamp(chaseD, 6, 40) : 9;   // 近背視角距離（公尺），滑鼠滾輪調整；舊版遠鏡頭設定不套用
-  const store = { get: (k, d) => { try { const v = localStorage.getItem('mech.' + k); const n = v === null ? d : +v; return Number.isFinite(n) ? n : d; } catch (e) { return d; } }, set: (k, v) => { try { localStorage.setItem('mech.' + k, v); } catch (e) {} } };
+  const store = { get: (k, d) => { try { const v = localStorage.getItem(saveKey(k)); const n = v === null ? d : +v; return Number.isFinite(n) ? n : d; } catch (e) { return d; } }, set: (k, v) => { try { localStorage.setItem(saveKey(k), v); } catch (e) {} } };
   let quality = store.get('q', 1);
   function setQuality(qv) {
     qv = qualityLevel(qv); quality = qv; store.set('q', qv);
@@ -281,7 +289,7 @@ async function game() {
         + `${D.enc ? `<em>${D.fieldLabel || '遭遇戰'}</em>` : ''}<b>${n}</b><span>${lock ? 'LOCKED' : D.name}</span>${best ? `<i>${RANKS[best]}</i>` : ''}</button>`;
     }).join('');
     const codaButton = $('replayCoda');
-    codaButton.hidden = store.get('cleared', 0) < STAGES.length;
+    codaButton.hidden = taipei || store.get('cleared', 0) < STAGES.length;
     codaButton.textContent = store.get('harborCoda', 0) ? '重玩第 11 章　港口未停火' : '第 11 章　港口未停火';
     const relay = RELAY_OUTCOMES[store.get('harborRelay', 0)], sequel = $('titleLastLine');
     sequel.href = lastLineURL(relay);
@@ -297,7 +305,7 @@ async function game() {
   const codaEmergency = $('codaEmergency'), codaInterrupt = $('codaInterrupt');
   const codaFilm = $('codaFilm'), codaFail = $('codaFail'), cinematic = new HarborCinematic(camera, world);
   const history = new HistoryReader({onOpen:()=>{pause();input.unlock();},onClose:()=>{input.reset();resume();},onRead:()=>{try{localStorage.setItem('mech.history',JSON.stringify(history.snapshot()));}catch{}}});
-  const historyPlaques=createHistoryPlaques(scene,world.kitano);
+  const historyPlaques=taipei ? {meshes:[],items:[]} : createHistoryPlaques(scene,world.kitano);
   world.cityObjects.push(...historyPlaques.meshes);
   try{history.restore(JSON.parse(localStorage.getItem('mech.history')));}catch{}
   window.__history=history;
@@ -393,7 +401,7 @@ async function game() {
     audio.setPaused(false); audio.setDanger(false); audio.setLockAlert(0); audio.boost(0);
     input.unlock(); input.enabled = false;
     touchUI.style.display = 'none';
-    resetPlayer(); newCombat(stageNo);
+    resetPlayer(); newCombat(taipei ? 1 : stageNo);
     cockpitView(false); cockpit.root.visible = false; seeOff();
     for (const k of ['damage', 'overdrive', 'speed', 'danger', 'flash']) post.u[k].value = 0;
     odV = speedV = flashV = dangerV = 0;
@@ -413,7 +421,7 @@ async function game() {
     }
   }
   function startBoot(len) {
-    historyButton.hidden=false;
+    historyButton.hidden=taipei;
     combat.prep();   // 遭遇戰：擺路障、第一區的遠處目標
     state = 'boot'; boot = 0; bootLen = len;
     input.enabled = true;
@@ -464,12 +472,12 @@ async function game() {
       if (RANKS.indexOf(rank) > store.get('best' + n, 0)) store.set('best' + n, RANKS.indexOf(rank));
     }
     audio.music(win ? (last ? 'allclear' : D.frontline==='landing' ? 'landingHome' : 'clear') : 'fail');
-    $('resTitle').textContent = win ? (last ? '神戶市區停火' : `第 ${n} 關完成`) : `第 ${n} 關失敗`;
-    $('resSub').textContent = win ? (last ? 'CEASEFIRE' : 'STAGE CLEAR') : 'MISSION FAILED';
+    $('resTitle').textContent = win ? (last ? (taipei ? '台北雨線・任務完成' : '神戶市區停火') : `第 ${n} 關完成`) : `第 ${n} 關失敗`;
+    $('resSub').textContent = win ? (last ? (taipei ? 'SIGNAL RESTORED' : 'CEASEFIRE') : 'STAGE CLEAR') : 'MISSION FAILED';
     $('resRank').textContent = rank;
     $('resRank').style.display = win ? '' : 'none';
     $('next').style.display = win && !last ? '' : 'none';
-    $('playCoda').hidden = !(win && last);
+    $('playCoda').hidden = taipei || !(win && last);
     $('again').textContent = win ? '再打一次 RETRY' : '再試一次 RETRY';
     $('cont').style.display = !win && combat.cp ? '' : 'none';
     const mm = Math.floor(S.time / 60), ss = String(Math.floor(S.time % 60)).padStart(2, '0');
@@ -489,7 +497,7 @@ async function game() {
     codaFilm.hidden = true; codaFail.hidden = true;
     codaEmergency.hidden = true;
     delete touchUI.dataset.coda;
-    $('tCannon').textContent = '光波砲';
+    $('tCannon').textContent = taipei ? '展翼' : '光波砲';
   }
 
   function codaCombat() {
@@ -516,6 +524,7 @@ async function game() {
   }
 
   function startCoda(fromTitle = false) {
+    if (taipei) return;
     const n = STAGES.length;
     if (fromTitle ? state !== 'title' || store.get('cleared', 0) < n : state !== 'result' || $('playCoda').hidden || stageNo !== n) return;
     $('title').classList.add('hide');
@@ -738,7 +747,7 @@ async function game() {
       if (boot >= 1) { state = 'play'; combat.start(); }
     }
     const inCoda = state === 'coda', live = state === 'play' || state === 'boot' || inCoda;
-    if(state==='play'&&input.pressed('KeyJ')){history.open(historyAt());input.endFrame();return;}
+    if(!taipei&&state==='play'&&input.pressed('KeyJ')){history.open(historyAt());input.endFrame();return;}
     let inp = input.state(rdt);
     if (window.__game.fake) Object.assign(inp, window.__game.fake);
     if (inp.pause && live) { input.unlock(); pause(); input.endFrame(); return; }
@@ -794,7 +803,7 @@ async function game() {
       move: { x: inp.mx, y: inp.my }, turn: { x: inp.lookX * 25, y: inp.lookY * 25 },
       boost: player.boosting, hover: player.hovering, speed: player.speed, alt: agl, vs: player.vel.y,
       ap: player.ap, apMax: player.apMax, en: player.en / 100, parts: C.parts,
-      rifle: C.rifle, msl: { ready: C.msl.cd >= 1 ? 6 : 0, max: 6, cd: C.msl.cd, locks: C.msl.locks.length },
+      rifle: C.rifle, msl: { ready: C.msl.cd >= 1 ? C.msl.max : 0, max: C.msl.max, marked:C.markFor, cd: C.msl.cd, locks: C.msl.locks.length },
       shield: C.shield, cannon: C.cannon, od: C.od, lockAlert: C.lockAlert, danger: player.ap / player.apMax < 0.3 ? 1 : 0,
       radar, px: player.pos.x, pz: player.pos.z, route: C.enc && C.enc.ahead, wp: C.enc && C.enc.wp,
     });
@@ -845,7 +854,7 @@ async function game() {
     post.u.flash.value = flashV;
     // 瞄準鏡頭：鎖定時另拍一張小的放大畫面，貼在側邊面板
     // 第十一章低畫質保留主 HUD 鎖定，省去莢艙的第二次場景渲染。後視鏡頭看不到莢艙，也不必重畫。
-    cockpit.targetView(renderer, scene, landingOpening || coda && (quality === 0 || tpView) ? null : C.lockTarget);
+    cockpit.targetView(renderer, scene, landingOpening || (taipei || coda) && (quality === 0 || tpView) ? null : C.lockTarget);
     if (landingOpening) seeOff();
     else seeThrough(C);
     post.render(t);
@@ -858,7 +867,7 @@ async function game() {
   requestAnimationFrame(frame);
 
   // 從前傳《鋼鐵黃昏 零》接過來（?zero）：跳過標題，黑畫面待命；瀏覽器要先有一次操作才能鎖滑鼠、出聲，按一下就直接第 1 關開機
-  if (q.has('zero')) {
+  if (!taipei && q.has('zero')) {
     const tl = $('title'), kids = [...tl.children];
     tl.style.background = '#000';
     for (const el of kids) el.style.display = 'none';

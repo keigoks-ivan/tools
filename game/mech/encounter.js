@@ -22,7 +22,7 @@ export const edgeKey = (i, j, i2, j2) => (i + i2 + 20) * 100 + (j + j2 + 20);
 
 // 牆的種類：bld 城市大樓／bunker 戰場要塞建物／cover 路障貨櫃（或城市裡沒標記的盒）／rock 戰場裡沒標記的碰撞盒（岩壁、土坡）
 export function wallKind(world, box) {
-  if (box.bld) return world.battlefield === 'city' ? 'bld' : 'bunker';
+  if (box.bld) return ['city','taipei'].includes(world.battlefield) ? 'bld' : 'bunker';
   if (box.on !== undefined) return 'cover';
   return world.battlefield && world.battlefield !== 'city' ? 'rock' : 'cover';
 }
@@ -43,7 +43,7 @@ export function parse(R, n) {
   const secs = R.secs.map((c, i) => {
     const a = P[c.at - 1], b = P[c.at], d = P[c.at + 1];
     const turn = !!d && Math.abs((b.x - a.x) * (d.z - b.z) - (b.z - a.z) * (d.x - b.x)) > 1;
-    return { i, at: c.at, s: b.s, turn, tip: c.tip, last: i === N - 1, trig: i === N - 1 ? R.fin : 58, pre: L(c.pre), waves: [c.amb, c.amb2, c.amb3].filter(Boolean).map(L),
+    return { i, at: c.at, s: b.s, turn, tip: c.tip, pickup:c.pickup, breakContact:c.breakContact, last: i === N - 1, trig: i === N - 1 ? R.fin : 58, pre: L(c.pre), waves: [c.amb, c.amb2, c.amb3].filter(Boolean).map(L),
       go: c.go, lines: c.lines, talkClear: c.clear, hold: c.hold, gap: c.gap, waveGap: c.waveGap,
       boss: c.boss ? { ...c.boss, halfWave: L(c.boss.halfWave), lowWave: L(c.boss.lowWave) } : null,
       beats: (c.beats || []).map(b => ({ ...b, spawn: L(b.spawn) })), targets: c.targets };
@@ -67,6 +67,7 @@ export function parse(R, n) {
     const k = edgeKey(gi, gj, gi + di, gj + dj);
     if (!edges.has(k) && !bars.some((b) => b.k === k)) bars.push({ k, gi, gj, di, dj });
   }
+  if (R.district) bars.length = 0;
   return { n, pts: P, len: end.s, secs, cp: R.cp, par: R.par, over: R.over || 1, edges, bars, blocked: new Set(bars.map((b) => b.k)) };
 }
 // 給 stageWeight 用的「敵機清單」（每區一批）
@@ -315,8 +316,12 @@ export class Encounter {
   get wantsTutorial() { return !!this.C.def.tutorial && !this.C.cp && this.sec === 0; }
   // 開機時：擺路障、先擺好第一區的遠處戰車，光柱／警示光先畫一次（編好 shader，第一次出現不卡）
   prep() {
-    if (!this.front) this.R = setRoute(this.C.world, this.E);
+    if (!this.front && this.C.def.battlefield !== 'taipei') this.R = setRoute(this.C.world, this.E);
     this.front?.prepare?.();
+    for (const sector of this.E.secs) {
+      const prop = this.C.world.pickupVisuals?.get(sector.pickup?.name);
+      if (prop) sector.i < this.sec ? prop.complete() : prop.reset();
+    }
     this.B = markers(this.C.scene);
     this.B.root.visible = true; this.B.a = 0;
     this.B.flares[0].s.visible = true;
@@ -375,6 +380,24 @@ export class Encounter {
       if (this.prog >= c.s - c.trig || Math.hypot(p.x - V.x, p.z - V.z) < c.trig * 0.8) this.ambush(1);
     } else if (this.state === 'fight') {
       this.fightT += dt;
+      const pickup = c.pickup;
+      if (pickup && !this.collected) {
+        const height = C.world.height(pickup.x,pickup.z) + (pickup.alt || 0);
+        if (Math.hypot(p.x-pickup.x,p.z-pickup.z)<13 && Math.abs(p.y-height)<(pickup.alt ? 9 : 17)) {
+          this.collected = true;
+          C.world.pickupVisuals?.get(pickup.name)?.complete();
+          C.audio.ui('confirm');
+          C.note(pickup.name + (pickup.verb || (pickup.portable ? '已取回' : '已連線')), 'gr');
+          if (c.breakContact) {
+            this.queue.length=0;
+            return this.clear(c);
+          }
+        } else if (pickup.decoyX!==undefined && !this.wrongSignal && Math.hypot(p.x-pickup.decoyX,p.z-pickup.decoyZ)<13 && Math.abs(p.y-height)<17) {
+          this.wrongSignal=true;
+          C.lines([['阿澄','這艘沒有引擎聲，別放行。去紅頂船旁的控制台！']],true);
+          this.reinforce([{kind:'heli',where:'far'}]);
+        }
+      }
       for (let i = 0; i < c.beats.length; i++) {
         const b = c.beats[i];
         if (this.beatSeen.has(i) || this.fightT < b.t) continue;
@@ -387,7 +410,7 @@ export class Encounter {
       if (c.hold) { const was = this.holdT < c.hold; this.holdT += dt; if (was && this.holdT >= c.hold) C.note('守住了　清掉剩下的', 'gr'); }
       if (holding) { if (!this.queue.length && (mine <= E.over || this.beatT > (c.gap || 18))) this.ambush(this.beat % c.waves.length + 1, true); }
       else if (!c.hold && this.beat < c.waves.length) { if (!this.queue.length && this.beatT >= (c.waveGap || 0) && (mine <= E.over || this.beatT > 28)) this.ambush(this.beat + 1); }
-      else if (!this.queue.length && this.cleared(c) && this.tgDone()) { this.clrT += dt; if (this.clrT > 0.7) return this.clear(c); }
+      else if (!this.queue.length && this.cleared(c) && this.tgDone() && (!c.pickup || this.collected)) { this.clrT += dt; if (this.clrT > 0.7) return this.clear(c); }
       else this.clrT = 0;
     }
     // 頭目：剩一半、剩兩成半各講一次；倒下（或撤退）時講 down，還沒出來的護衛不再來
@@ -506,7 +529,7 @@ export class Encounter {
     for (const k in C.parts) C.parts[k] = Math.min(1, C.parts[k] + 0.25);
     C.rifle.ammo = C.rifle.mag; C.rifle.reload = -1;
     C.note(add > 0 ? `補給　AP +${add}` : '補給完成', 'gr');
-    this.sec++; this.state = 'move'; this.beat = 0;
+    this.collected=false;this.sec++; this.state = 'move'; this.beat = 0;
     if ([].concat(E.cp).includes(this.sec)) {
       const q = pointAt(E, c.s + 5);
       C.cp = { sec: this.sec, x: q.x, z: q.z, yaw: Math.atan2(q.dx, q.dz), stats: JSON.parse(JSON.stringify(C.stats)), used: 0 };
@@ -526,7 +549,7 @@ export class Encounter {
     if (late && (wh === 'side' || wh === 'far')) wh = 'out';
     const base = late ? this.prog + 120 : c.s;
     const F = { far: this.pFar, out: this.pOut, side: this.pSide, breach: this.pBreach, drop: this.pDrop, roof: this.pRoof, rise: this.pRise, ring: this.pRing }[wh] || this.pDrop;
-    let at = F.call(this, q, base, V);
+    let at = wh === 'side' && this.C.def.battlefield === 'taipei' ? this.pCharge(q) : F.call(this, q, base, V);
     if (!at && wh === 'breach') at = this.pCharge(q) || this.pSide(q, base, V);
     if (!at && q.kind === 'tank') at = this.pRing(q, base, V) || this.pOut(q, Math.min(base, this.E.len - 120), V, true);
     if (!at && q.kind === 'heli') at = this.pRise(q, base, V, true);
@@ -735,7 +758,9 @@ export class Encounter {
       wp = wp || E.pts[c.at];
     }
     const move = this.state === 'move' || this.state === 'idle';
-    const target = this.training?.marker || this.front?.marker;
+    const device=c?.pickup&&!this.collected&&this.state==='fight'?w.pickupVisuals?.get(c.pickup.name):null;
+    this.deviceHint = device ? (c.pickup.decoyX!==undefined ? '辨認紅頂船的放行台' : c.pickup.alt ? '升至天線高度' : '靠近'+c.pickup.name) : '';
+    const target = this.training?.marker || this.front?.marker || (device?.searchArea ?? device?.marker);
     this.wp = target || (move && wp && !this.front ? { x: wp.x, y: w.height(wp.x, wp.z) + 38, z: wp.z } : null);
     this.dist = target ? C.player.pos.distanceTo(target) : c ? Math.max(0, c.s - this.prog) : 0;
     const A = this.ahead; A.length = 0;

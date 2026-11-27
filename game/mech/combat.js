@@ -25,10 +25,11 @@ const KIND = {
   brawler: { style: 'grunt', scheme: 'brawler', ap: 3200, walk: 17, boost: 52, pref: [20, 60], stag: 120, range: 220, score: 180 },
 };
 // 關卡：資料在 stages.js（劇情、路線、任務）；有 route 的關解析成遭遇戰（enc），groups 只拿來算評價份量
-export const STAGES = STAGE_DATA.map((D, i) => {
+export function prepareStages(data) { return data.map((D, i) => {
   const enc = D.route ? parse(D.route, i + 1) : null;
   return { ...D, enc, groups: enc ? encGroups(enc) : D.groups };
-});
+}); }
+export const STAGES = prepareStages(STAGE_DATA);
 // 評價用的「關卡份量」：雜兵機＝1、重裝 1.5、王牌 2；載具是砲灰，只算零頭
 const WEIGHT = { grunt: 1, heavy: 1.5, ace: 2, brawler: 1.3 };
 // 光劍突擊的突進計畫：回傳 {t 突進秒數, v 速度}；揮下前固定再 0.45 s（e.lunge 從 0.45+t 倒數）
@@ -142,8 +143,8 @@ export class Combat {
     this.stage = clamp(o.stage || 1, 1, STAGES.length);   // 第幾關
     this.group = 0; this.phase = 'idle'; this.phaseT = 0; this.nextId = 1;   // group＝已出動幾批敵機
     this.stats = { shots: 0, hits: 0, kills: 0, dmgTaken: 0, time: 0, chain: 0, maxChain: 0, lastKill: -99, score: 0 };
-    this.rifle = { ammo: W.rifle.mag, mag: W.rifle.mag, reload: -1, cd: 0 };
-    this.msl = { cd: 1, cooldownSeconds: W.msl.cd, locks: [], lockT: 0, locking: false, max: W.msl.n };
+    this.rifle = { ammo: this.weapons.rifle.mag, mag: this.weapons.rifle.mag, reload: -1, cd: 0 };
+    this.msl = { cd: 1, cooldownSeconds: this.weapons.msl.cd, locks: [], lockT: 0, locking: false, max: this.weapons.msl.n };
     this.shield = {
       remaining: 0, hp: 0, cooldown: 0, feedback: 0,
       get active() { return this.remaining > 0; },
@@ -197,6 +198,7 @@ export class Combat {
   get alive() { return this.enemies.filter((e) => !e.dead); }
 
   start() { this.phase = 'intro'; this.phaseT = 1.2; this.group = 0; if (!this.enc?.wantsTutorial) this.lines(this.def.start); }
+  get weapons() { return this.loadout || W; }
   get def() { return STAGES[this.stage - 1]; }
   get tier() { return TIER[clamp((this.def.tier ?? this.stage) - 1, 0, TIER.length - 1)]; }
   // 無線電對白：一句一句排隊播；now＝戰鬥喊話，插隊馬上播，被打斷的劇情句還沒看完七成就放回最前面重播
@@ -322,7 +324,7 @@ export class Combat {
     else if (this.phase === 'fight' && (this.enc ? this.enc.update(dt) : this.enemies.length === 0 && this.events.length === 0 && (!this.canAdvance || this.canAdvance()))) {
       if (!this.enc && this.group < this.def.groups.length) this.spawnGroup();
       else {
-        const last = this.stage === STAGES.length;
+        const last = this.stage === (this.campaignLength ?? STAGES.length);
         this.phase = 'done'; this.slowmo = 1.4;
         this.say(last ? 'ALL CLEAR' : 'STAGE CLEAR', last ? '全部過關' : `第 ${this.stage} 關完成`, 4, 'am');
         this.audio.ui('clear');
@@ -415,30 +417,30 @@ export class Combat {
     // 步槍
     R.cd -= dt;
     if (R.reload >= 0) {
-      R.reload += dt / W.rifle.reload;
+      R.reload += dt / this.weapons.rifle.reload;
       if (R.reload >= 1) { R.reload = -1; R.ammo = R.mag; }
     } else if (inp.reload && R.ammo < R.mag) this.startReload();
     if (inp.fire && CN.phase === null) this.fireRifle();
     // 飛彈：按住右鍵掃過敵人上鎖，放開發射
-    if (M.cd < 1) M.cd = Math.min(1, M.cd + dt / W.msl.cd);
+    if (M.cd < 1) M.cd = Math.min(1, M.cd + dt / this.weapons.msl.cd);
     if (inp.lockHold && M.cd >= 1) {
       if (!M.locking) { M.locking = true; M.locks = []; M.lockT = 0.05; }
       M.lockT -= dt;
-      if (M.lockT <= 0 && M.locks.length < W.msl.n) {
+      if (M.lockT <= 0 && M.locks.length < this.weapons.msl.n) {
         let best = null, bs = 1e9;
         for (const e of this.enemies) {
           if (e.dead || !e.los || e.dropping) continue;
           const c = e.chest(_a).sub(this.eye), d = c.length();
-          if (d > W.msl.range) continue;
+          if (d > this.weapons.msl.range) continue;
           const ang = Math.acos(clamp(c.dot(this.aimDir) / d, -1, 1));
-          if (ang > W.msl.cone) continue;
+          if (ang > this.weapons.msl.cone) continue;
           const s = e.locks * 10 + ang - (e === this.lockTarget ? 0.3 : 0);
           if (s < bs) { bs = s; best = e; }
         }
         if (best) {
-          M.locks.push(best); best.locks++; M.lockT = W.msl.lockStep;
+          M.locks.push(best); best.locks++; M.lockT = this.weapons.msl.lockStep;
           this.audio.lockTick();
-          if (M.locks.length === W.msl.n) this.audio.lockMulti(M.locks.length);
+          if (M.locks.length === this.weapons.msl.n) this.audio.lockMulti(M.locks.length);
         } else M.lockT = 0.05;
       }
     }
@@ -449,7 +451,7 @@ export class Combat {
       M.locks = [];
     }
     // 光波砲（覺醒中冷卻快一倍）
-    if (CN.cd < 1 && CN.phase === null) CN.cd = Math.min(1, CN.cd + dt / W.cannon.cd * (OD.active ? 2 : 1));
+    if (CN.cd < 1 && CN.phase === null) CN.cd = Math.min(1, CN.cd + dt / this.weapons.cannon.cd * (OD.active ? 2 : 1));
     if (inp.cannon && CN.cd >= 1 && CN.phase === null) this.startCannon();
     this.updateCannon(dt);
     // 覺醒
@@ -510,9 +512,10 @@ export class Combat {
 
   fireRifle() {
     const R = this.rifle, pl = this.player, hero = this.hero, w = this.world;
-    if (R.reload >= 0 || R.cd > 0) return;
+    if (R.reload >= 0 || R.cd > 0 || this.dead) return;
     if (R.ammo <= 0) { this.startReload(); return; }
-    R.ammo--; R.cd = this.od.active ? W.rifle.rof * 0.5 : W.rifle.rof;
+    R.ammo--;
+    R.cd = this.weapons.rifle.rof * (this.od.active ? .5 : 1);
     this.stats.shots++;
     hero.muzzle.updateWorldMatrix(true, false);
     const from = hero.muzzle.getWorldPosition(V3());
@@ -551,15 +554,17 @@ export class Combat {
       const hitP = V3().lerpVectors(from, ext, tw);
       if (!hitE || hitP.distanceTo(from) < len - 4) { hitE = null; to.copy(hitP); kind = _n.y > 0.7 ? 'ground' : 'building'; }
     } else if (!hitE) to.copy(ext);
-    this.fx.beam(from, to, 'player');
-    this.fx.muzzle(from, dir, 'beam');
-    this.audio.beam();
+    if(this.weapons.rifle.mobile){
+      this.fx.tracer(from,to);this.fx.muzzle(from,dir,'mg');this.audio.mg(from);
+    }else{
+      this.fx.beam(from,to,'player');this.fx.muzzle(from,dir,'beam');this.audio.beam();
+    }
     hero.recoil = 1;
     this.cockpit.kick('fire', 1);
-    this.cockpit.flashAt(PINK, 5, 0.45, -0.25, -1.1);
+    this.cockpit.flashAt(this.weapons.rifle.mobile ? ORANGE : PINK, 5, 0.45, -0.25, -1.1);
     if (hitE) {
       const d = from.distanceTo(to), fall = d > 600 ? clamp(1 - (d - 600) / 800, 0.5, 1) : 1;
-      this.damageEnemy(hitE, W.rifle.dmg * fall * (this.od.active ? 1.25 : 1), W.rifle.stag, to, dir);
+      this.damageEnemy(hitE, this.weapons.rifle.dmg * fall * (this.od.active ? 1.25 : 1), this.weapons.rifle.stag * (this.weapons.rifle.mobile && pl.speed >= 12 ? 1.65 : 1), to, dir);
       this.fx.impact(to, _n.copy(dir).negate(), 'beam');
       this.audio.impact(to, 'beam');
       if (this.pursuit?.ready && !hitE.dead && !hitE.gone) {
@@ -577,18 +582,19 @@ export class Combat {
 
   launchSalvo(locks) {
     this.msl.cd = 0;
-    this.queueMissiles(locks, W.msl.n);
+    this.queueMissiles(locks, this.weapons.msl.n);
   }
 
   queueMissiles(locks, count, direct = false) {
-    const hero = this.hero, missile = W.msl;
+    const hero = this.hero, missile = this.weapons.msl;
     hero.bones.torso.updateWorldMatrix(true, false);
     for (let i = 0; i < count; i++) {
       const target = locks.length ? locks[i % locks.length] : null;
       this.events.push({
-        t: i * 0.07, fn: () => {
+        t: missile.offsets?.[i] ?? i * 0.07, fn: () => {
           const side = i % 2 ? 1 : -1, row = Math.floor(i / 2);
-          const p = hero.bones.torso.localToWorld(V3(side * 2.4, 5.2 + row * 0.5, -1.6));
+          const port=hero.missilePorts?.[i % hero.missilePorts.length];
+          const p = port ? port.getWorldPosition(V3()) : hero.bones.torso.localToWorld(V3(side * 2.4, 5.2 + row * 0.5, -1.6));
           const f = _a.copy(this.aimDir).setY(0).normalize();
           const r = _b.set(-f.z, 0, f.x);
           const v = V3();
@@ -637,11 +643,11 @@ export class Combat {
     const CN = this.cannon;
     CN.phase = 'charge'; CN.t = 0; CN.cd = 0; CN.I = 0; CN.hit.clear();
     CN.dir.copy(this.aimDir);
-    this.audio.cannonCharge(W.cannon.charge);
+    this.audio.cannonCharge(this.weapons.cannon.charge);
     this.note('BEAM CANNON', 'cy');
   }
   updateCannon(dt) {
-    const CN = this.cannon, K = W.cannon, hero = this.hero, ck = this.cockpit;
+    const CN = this.cannon, K = this.weapons.cannon, hero = this.hero, ck = this.cockpit;
     if (CN.phase === null) return;
     CN.t += dt;
     hero.muzzle.updateWorldMatrix(true, false);
@@ -685,7 +691,7 @@ export class Combat {
   }
   // 光束路徑：穿過最多 pierce 棟樓（記下來結算傷害），碰到地面或下一棟樓就停
   cannonPath(from, dir) {
-    const w = this.world, K = W.cannon, CN = this.cannon;
+    const w = this.world, K = this.weapons.cannon, CN = this.cannon;
     const o = _b.copy(from);
     let left = K.range;
     CN.nb = 0; CN.stop = 'air';
@@ -707,7 +713,7 @@ export class Combat {
   }
   // 一次結算：光束附近的敵人全部挨打，穿過的樓重擊
   cannonHit(from, to) {
-    const CN = this.cannon, K = W.cannon, w = this.world, S = this.stats, OD = this.od;
+    const CN = this.cannon, K = this.weapons.cannon, w = this.world, S = this.stats, OD = this.od;
     const mult = OD.active ? 1.25 : 1, hits0 = S.hits, g0 = OD.gauge;
     let any = false, fresh = 0;
     this.quiet = true;
@@ -1516,7 +1522,7 @@ export class Combat {
         this.audio.explosion(hit, M.shell ? 1.5 : 1);
         w.blast(hit, M.shell ? 9 : 8, M.own === 'player' ? 1 : M.shell ? 1 : 0.6);   // 爆炸波及建築
         if (M.own === 'player') {
-          if (hitE) this.damageEnemy(hitE, M.dmg * (this.od.active ? 1.25 : 1), W.msl.stag, hit, M.vel.clone().normalize());
+          if (hitE) this.damageEnemy(hitE, M.dmg * (this.od.active ? 1.25 : 1), this.weapons.msl.stag, hit, M.vel.clone().normalize());
           const splash = _d.copy(hit);
           if (tw >= 0 && !hitE) splash.addScaledVector(dir, -.15);
           for (const e of this.enemies) {

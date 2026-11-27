@@ -1,0 +1,56 @@
+// Visual proportions of the eight flared sections follow Taipei 101's published design.
+// The tower, podium and spire are static scenery in the fictional mission district.
+export const TAIPEI_101 = Object.freeze({x:-66,z:500,height:508});
+
+export function buildTaipei101(world,{quad,glass,trim,piece,paint,glassUV,uv}) {
+  const {x,z}=TAIPEI_101;
+  const silver=paint(0xa9b7ae), dark=paint(0x375d62), jade=paint(0x80a79b);
+  const panes=[.61,.85,.80],corners=(r)=>[[-r*.87,r],[r*.87,r],[r,r*.87],[r,-r*.87],[r*.87,-r],[-r*.87,-r],[-r,-r*.87],[-r,r*.87]];
+  const point=(p,y)=>[x+p[0],y,z+p[1]];
+  const mix=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];
+  function segment(y,r,h,rt,glazed,color=dark){
+    const lo=corners(r),hi=corners(rt);
+    for(let i=0;i<8;i++){
+      const k=(i+1)%8,n=glazed&&!(i%2)?6:1;
+      for(let j=0;j<n;j++){
+        const a=j/n,b=(j+1)/n;
+        quad(glazed?glass:trim,[point(mix(lo[i],lo[k],a),y),point(mix(lo[i],lo[k],b),y),
+          point(mix(hi[i],hi[k],b),y+h),point(mix(hi[i],hi[k],a),y+h)],glazed?glassUV:uv,glazed?panes:color);
+      }
+      quad(trim,[[x,y+h,z],point(hi[i],y+h),point(hi[k],y+h),[x,y+h,z]],uv,color);
+    }
+  }
+  function solid(y,r,h){world.addCollider({x0:x-r,x1:x+r,z0:z-r,z1:z+r,bottom:y,top:y+h,landmark:'台北101'});}
+  function shaft(y,lo,h,hi,floors){
+    for(let j=0;j<floors;j++){
+      const bottom=y+h*j/floors,step=h/floors,r=lo+(hi-lo)*j/floors,t=lo+(hi-lo)*(j+1)/floors;
+      segment(bottom,r,step-.27,t,true);segment(bottom+step-.27,t+.06,.27,t+.06,false,silver);
+      solid(bottom,(r+t)/2,step);
+    }
+  }
+  // Low mall podium on the far side leaves the approach to the tower visible.
+  const mallX=x-61;
+  piece(mallX,0,z+4,67,1.2,84,jade);
+  for(let j=0;j<7;j++){
+    const w=64-j*.9,d=82-j*.7;
+    piece(mallX,1.2+j*3.6,z+4,w,3.6,d,dark);
+    piece(mallX,4.55+j*3.6,z+4,w+.8,.45,d+.8,silver);
+  }
+  world.addCollider({x0:mallX-33.5,x1:mallX+33.5,z0:z-38,z1:z+46,top:27,landmark:'台北101'});
+  shaft(0,39.5,112,29.5,23);
+  segment(112,29.5,3,30,true);solid(112,30,3);
+  for(let i=0;i<8;i++){
+    const y=115+i*34,bottom=27.3-i*.25,top=bottom+4.7;
+    shaft(y,bottom,31.6,top,8);
+    segment(y+31.6,top+.65,1.0,top+.65,false,silver);
+    segment(y+32.6,top+.65,1.4,bottom-1,false,dark);solid(y+31.6,top,2.4);
+    for(const sx of [-1,1])for(const sz of [-1,1]){
+      const xx=x+sx*top*.94,zz=z+sz*top*.94;
+      piece(xx,y+27.8,zz,1.7,5.4,1.7,jade);
+      piece(xx+sx*.52,y+31.4,zz+sz*.52,2.15,2.7,2.15,silver);
+    }
+  }
+  shaft(387,21,26,17,6);shaft(413,13.6,27,9.5,6);
+  shaft(440,7.5,9,5.1,2);segment(449,4.4,18,2.45,false,silver);solid(449,3.6,18);
+  segment(467,2.45,41,.13,false,silver);solid(467,1.25,41);
+}

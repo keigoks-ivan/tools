@@ -1,0 +1,74 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import * as THREE from 'three';
+import {readFile} from 'node:fs/promises';
+import {World} from '../env.js';
+import {buildTaipei101,TAIPEI_101} from '../taipei/landmark.mjs';
+import {channelsAt,riverDepth} from '../taipei/rivers.mjs';
+import {loadBasin} from '../taipei/basin.mjs';
+import {FalconCombat,FALCON_WEAPONS} from '../taipei/falcon.mjs';
+import {TAIPEI_STAGES} from '../taipei/campaign.mjs';
+import {prepareStages} from '../combat.js';
+
+test('each Taipei chapter has seven reachable sectors, recovery checkpoints and its own ending',()=>{
+  for(const stage of prepareStages(TAIPEI_STAGES)){
+    assert.equal(stage.enc.secs.length,7);
+    assert.ok(stage.enc.len>=1000);
+    assert.deepEqual(stage.enc.cp,[2,4,6]);
+    assert.ok(stage.enc.secs.every((s,i,arr)=>s.waves.length && (!i || s.s>arr[i-1].s)));
+    assert.ok(stage.enc.secs.at(-1).last);
+    assert.equal(stage.enc.bars.length,0);
+  }
+  assert.ok(TAIPEI_STAGES[0].route.secs.find(s=>s.pickup?.portable).breakContact);
+  assert.equal(TAIPEI_STAGES[1].route.secs.filter(s=>s.pickup?.releaseFerry).length,1);
+  assert.ok(TAIPEI_STAGES[2].route.secs.filter(s=>s.pickup?.alt).every(s=>s.pickup.alt<100));
+});
+test('surface water follows both upstream channels and leaves an exposed spit before the confluence',()=>{
+  const [near,far]=channelsAt(-670);
+  assert.ok(riverDepth(-670,(near[0]+near[1])/2)>3);
+  assert.ok(riverDepth(-670,(far[0]+far[1])/2)>3);
+  assert.equal(riverDepth(-670,(near[1]+far[0])/2),0);
+  assert.ok(riverDepth(481,300)>3);
+  assert.equal(riverDepth(481,8),0);
+});
+test('real terrain grid preserves a low Taipei basin and the northern mountain group',async t=>{
+  const data=await readFile(new URL('../taipei/basin.bin',import.meta.url));
+  t.mock.method(globalThis,'fetch',async()=>new Response(data));
+  const sample=await loadBasin();
+  assert.ok(sample(0,0,'arcade')<45);
+  let highest=0;
+  for(let z=2400;z<4000;z+=70)for(let x=-1500;x<380;x+=65)highest=Math.max(highest,sample(x,z,'arcade'));
+  assert.ok(highest>600);
+});
+test('Taipei 101 stops player movement and fire while remaining outside the structural damage system',()=>{
+  const w=Object.create(World.prototype);
+  Object.assign(w,{boxes:[],grid:new Map(),cellSize:60,height:()=>0,blds:[],_nv:new THREE.Vector3(),_cv:new THREE.Vector3()});
+  buildTaipei101(w,{quad(){},piece(){},glass:null,trim:null,paint:c=>c,glassUV:[],uv:[]});
+  const {x,z,height}=TAIPEI_101;
+  assert.equal(Math.max(...w.boxes.map(b=>b.top)),height);
+  for(const y of [12,121,256,390,471]){
+    const a=new THREE.Vector3(x,y,z-88),b=new THREE.Vector3(x,y,z),t=w.raycast(a,b,null);
+    assert.ok(t>0&&t<1);
+    const p=a.clone().lerp(b,t);
+    assert.equal(w.hitBuilding(p,500),null);
+    w.blast(p,48,500);
+    assert.equal(w.raycast(a,b,null),t);
+    assert.ok(w.collide(b.clone(),2,y));
+  }
+  assert.ok(w.boxes.every(b=>b.landmark==='台北101'&&!b.bld));
+});
+test('羽標 requires a clear hit, and a later salvo keeps the designated target after turning away',()=>{
+  const c=Object.create(FalconCombat.prototype);
+  const e={los:true,chest:p=>p.set(0,10,50)},other={};
+  Object.assign(c,{world:{raycast:()=>.45},hero:{designator:new THREE.Object3D()},msl:{cd:1},fx:{tracer(){}},audio:{ui(){}},note(){},cannon:{cd:1},cockpit:{kick(){}},fireTarget:()=>other});
+  c.launchSalvo([e]);assert.equal(c.marked,undefined);assert.equal(c.msl.cd,1);
+  c.world.raycast=()=>-1;c.launchSalvo([e]);assert.equal(c.marked,e);assert.equal(c.markFor,8);assert.equal(c.msl.cd,0);
+  let assignment;
+  c.queueMissiles=(targets,count)=>assignment=[targets[0],count];
+  c.startCannon();
+  assert.deepEqual(assignment,[e,6]);assert.equal(c.cannon.cd,0);
+  assert.equal(FALCON_WEAPONS.rifle.mag,48);
+  assert.deepEqual(FALCON_WEAPONS.msl.offsets,[0,.045,.25,.295,.5,.545]);
+  c.enc={fightT:1};c.boss={ap:400,apMax:1000};
+  assert.equal(c.echoActive,true);c.marked=c.boss;assert.equal(c.echoActive,false);
+});

@@ -170,7 +170,7 @@ function stripeTex() {
 // 噴漆標示字（印在面板上；原創字樣，帶一點噴漆顆粒）
 const LABELS = ['RADAR', 'RNG 600', 'STATUS', 'ARMS', 'FCS', 'SPD', 'ALT', 'EN CELL', 'BALANCER', 'CAUTION', 'M-07', 'MSL ARM', 'SYS 1', 'SYS 2', 'IFF', 'COMM', 'HOT', 'VENT', 'GEN', 'LINK',
   'EJECT', 'PULL', 'MASTER ARM', 'OVRD', 'BRT', 'NO STEP', 'SAFE', 'ARM', 'HYD', 'ELEC', 'DANGER'];
-function labelTex() {
+function labelTex(falcon) {
   const W = 1024, H = 512, [c, x] = canvas(W, H), r = rng(3);
   const rect = {};
   x.font = '700 30px Rajdhani, "Arial Narrow", sans-serif';
@@ -182,7 +182,7 @@ function labelTex() {
     const warn = s === 'CAUTION' || s === 'HOT' || s === 'DANGER';
     if (warn) { x.fillStyle = '#d9a21a'; x.fillRect(px, py, w, 36); x.fillStyle = '#111'; }
     else x.fillStyle = s === 'M-07' || s === 'EJECT' ? '#e8ecef' : '#b9c3c8';
-    x.fillText(s, px + 7, py + 19);
+    x.fillText(falcon && s === 'M-07' ? '白隼' : s, px + 7, py + 19);
     rect[s] = [px, py, w, 36];
     px += w + 8;
   }
@@ -343,7 +343,8 @@ const DOME_FRAG = `
 
 // ---------------------------------------------------------------- 駕駛艙
 export class Cockpit {
-  constructor(world, camera, scene, cam) {
+  constructor(world, camera, scene, cam, falcon = false) {
+    this.falcon = falcon;
     this.world = world; this.camera = camera; this.scene = scene; this.cam = cam;
     this.root = new THREE.Group();
     scene.add(this.root);
@@ -356,7 +357,7 @@ export class Cockpit {
     scene.environmentIntensity = 0.15;
     this.t = 0;
     this.baseFov = camera.fov;
-    this.eyeLocal = new THREE.Vector3(0, 2.75, 1.25);   // 胸口（軀幹骨頭座標）
+    this.eyeLocal = new THREE.Vector3(0, falcon ? 3.45 : 2.75, falcon ? 1.55 : 1.25);   // 胸口（軀幹骨頭座標）
     this.off = new THREE.Vector3(); this.offV = new THREE.Vector3();
     this.prevEye = new THREE.Vector3(); this.prevVel = new THREE.Vector3(); this.acc = new THREE.Vector3();
     this.inited = false;
@@ -397,7 +398,8 @@ export class Cockpit {
       sleeve: std(0x303b34, 0.0, 0.84, { bumpMap: fab, bumpScale: 0.0007 }),
       glow: new THREE.MeshBasicMaterial({ color: 0x000000 }),   // 扶手燈條（顏色每幀依狀態變）
     };
-    const L = labelTex();
+    if (this.falcon) { this.M.shell.color.setHex(0x769a94); this.M.orange.color.setHex(0xccab64); }
+    const L = labelTex(this.falcon);
     this.labels = L;
     this.M.label = new THREE.MeshStandardMaterial({ map: L.tex, transparent: true, alphaTest: 0.2, roughness: 0.6, metalness: 0, polygonOffset: true, polygonOffsetFactor: -2 });
     // 背光按鍵：沒亮＝灰字；背光＝字發淡青白光（亮度每幀依儀表電源與外面亮度調）
@@ -531,6 +533,16 @@ export class Cockpit {
       P.base = S.base = GL.base = null;
     }
 
+    if (this.falcon) {
+      for (const side of [-1,1]) {
+        const foot=new THREE.Vector3(side*1.13,-.84,-.85), joint=new THREE.Vector3(side*.62,.23,-1.0), peak=new THREE.Vector3(side*.33,.49,-.94);
+        P.seg(M.frame,foot,joint,.034,.027); P.seg(M.shell,joint,peak,.031,.025);
+        P.seg(M.rubber,new THREE.Vector3(side*.605,.23,-1.0),new THREE.Vector3(side*.316,.49,-.94),.012,.012);
+        P.add(M.orange,rb(.075,.018,.032,.004),joint.toArray(),[0,0,side*.63]);
+      }
+      P.seg(M.frame,new THREE.Vector3(-.33,.49,-.94),new THREE.Vector3(.33,.49,-.94),.025,.025);
+      label(null,'M-07',[-.21,.475,-.912],.023,[0,0,0]);
+    }
     P.build(this.root); S.build(this.root); GL.build(this.root); Lb.build(this.root); KY.build(this.root);
 
     // ---- 指示燈（同一個 InstancedMesh，每盞顏色各自變）
@@ -540,7 +552,9 @@ export class Cockpit {
     this.root.add(this.lamps);
 
     // ---- 全像視窗：飄在周圍，面向飛行員；每片自己一個材質（才能各自閃、各自跳出來）；掛在 holoRoot（固定在眼前）
-    this.holos = HOLO.map((o) => {
+    this.holos = HOLO.map((definition) => {
+      const o = this.falcon && ['radar','arms'].includes(definition.k)
+        ? {...definition, a:definition.k==='radar' ? -27 : 32, e:definition.k==='radar' ? -14 : -8} : definition;
       const mat = new THREE.MeshBasicMaterial({ map: this.screenTex, color: new THREE.Color(1.5, 1.5, 1.5), transparent: true, depthWrite: false, side: THREE.DoubleSide });
       const mesh = new THREE.Mesh(atlasPlane(o.w, o.h, SCR[o.k], 1024, 1024), mat);
       const g = new THREE.Group();
@@ -1353,7 +1367,7 @@ export class Cockpit {
     part(pc.armL, [[50, 28], [88, 34], [92, 128], [66, 132], [56, 60]]);
     part(pc.legR, [[-24, 124], [-4, 124], [-8, 226], [-40, 232], [-36, 180]]);
     part(pc.legL, [[24, 124], [4, 124], [8, 226], [40, 232], [36, 180]]);
-    this.tx(x, 'M-07', 20, 56, COL.wh, 20, true);
+    this.tx(x, this.falcon ? '白隼' : 'M-07', 20, 56, COL.wh, 20, true);
     // 右半：裝甲、能量、各部位、狀態
     const ap = ui.ap ?? 1, apMax = ui.apMax ?? 1, en = ui.en ?? 1, f = clamp(ap / apMax, 0, 1), X0 = 236, WW = 258;
     this.tx(x, 'ARMOR', X0, 58, COL.dim, 19);
@@ -1382,7 +1396,7 @@ export class Cockpit {
     this.tx(x, 'MSTR ARM', L, 56, COL.dim, 17); this.tx(x, 'ARM', L + 104, 56, COL.gr, 18, true);
     // 右手：光束步槍
     const rf = ui.rifle || { ammo: 40, mag: 40, reload: -1 };
-    this.tx(x, 'GUN', L, 88, COL.dim, 18); this.tx(x, 'BEAM RIFLE', L + 50, 88, COL.wh, 19);
+    this.tx(x, 'GUN', L, 88, COL.dim, 18); this.tx(x, this.falcon ? (ui.speed>=12?'掠翼・機動':'掠翼') : 'BEAM RIFLE', L + 50, 88, COL.wh, 19);
     this.tx(x, pad(rf.ammo, 2), Rr - 46, 82, rf.ammo > 0 ? COL.wh : COL.rd, 42, true, 'right');
     this.tx(x, `/${rf.mag}`, Rr, 88, COL.dim, 18, false, 'right');
     const gap = Math.min(6, (w - 32) / rf.mag * 0.35), cw = (w - 32 + gap) / rf.mag;
@@ -1390,8 +1404,8 @@ export class Cockpit {
     if (rf.reload >= 0) { this.hb(x, L, 130, w - 32 - 60, 6, rf.reload, COL.am); this.tx(x, 'RLD', Rr, 133, COL.am, 16, true, 'right'); }
     // 左肩：飛彈莢艙
     const ms = ui.msl || { ready: 6, max: 6, cd: 1, locks: 0 };
-    this.tx(x, 'MSL', L, 158, COL.dim, 18); this.tx(x, `MISSILE ×${ms.max}`, L + 50, 158, COL.wh, 19);
-    this.tx(x, ms.locks ? `LOCK ${ms.locks}` : ms.cd >= 1 ? 'READY' : 'LOAD', Rr, 158, ms.locks ? COL.rd : ms.cd >= 1 ? COL.gr : COL.am, 22, true, 'right');
+    this.tx(x, 'MSL', L, 158, COL.dim, 18); this.tx(x, this.falcon ? '羽標' : `MISSILE ×${ms.max}`, L + 50, 158, COL.wh, 19);
+    this.tx(x, ms.marked>0 ? `連結 ${Math.ceil(ms.marked)}s` : ms.locks ? `LOCK ${ms.locks}` : ms.cd >= 1 ? 'READY' : 'LOAD', Rr, 158, ms.locks ? COL.rd : ms.cd >= 1 ? COL.gr : COL.am, 22, true, 'right');
     const pw = (w - 32 + 8) / ms.max;
     for (let i = 0; i < ms.max; i++) {
       const px = L + i * pw, c = i < ms.locks ? COL.rd : ms.cd >= 1 ? COL.cy : COL.grid;
@@ -1404,7 +1418,7 @@ export class Cockpit {
     this.tx(x, shieldText, Rr, 230, shield?.active ? COL.cy : shield?.cooldown > 0 ? COL.am : COL.gr, 20, true, 'right');
     // 光波砲：充能中閃、冷卻中顯示百分比
     const cn = ui.cannon || { cd: 1, phase: null };
-    this.tx(x, 'CAN', L, 260, COL.dim, 18); this.tx(x, 'BEAM CANNON', L + 50, 260, COL.wh, 19);
+    this.tx(x, 'CAN', L, 260, COL.dim, 18); this.tx(x, this.falcon ? '展翼齊射' : 'BEAM CANNON', L + 50, 260, COL.wh, 19);
     const cs = cn.phase === 'charge' ? 'CHARGE' : cn.phase === 'fire' ? 'FIRE' : cn.cd >= 1 ? 'READY [E]' : `${Math.round(cn.cd * 100)}%`;
     this.tx(x, cs, Rr, 260, cn.phase ? (Math.sin(t * 20) > 0 ? COL.cy : COL.wh) : cn.cd >= 1 ? COL.gr : COL.am, 20, true, 'right');
     if (cn.cd < 1 && !cn.phase) this.hb(x, L, 274, w - 32, 5, cn.cd, COL.am);
