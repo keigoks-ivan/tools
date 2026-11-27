@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-const atlasURL = new URL('./fuji-skyline.webp', import.meta.url).href;
+const atlasURL = new URL('./fuji-skyline.webp?v=2', import.meta.url).href;
 const radians = THREE.MathUtils.degToRad;
 
 // The centre of the atlas has more pixels per degree for the snowy eastern face.
