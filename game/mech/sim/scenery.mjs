@@ -11,7 +11,15 @@ const gate=new THREE.TorusGeometry(17,.7,6,64);
 const arc=new THREE.TorusGeometry(1, .065, 6, 8, Math.PI/3.4);
 const glassTube=new THREE.CylinderGeometry(.5,.5,1,24,1,true);
 const dome=new THREE.SphereGeometry(.5,12,8,0,Math.PI*2,0,Math.PI/2);
+const face=new THREE.PlaneGeometry(1,1);
 const surfaces={
+  shop:{roughness:.44,metalness:.13},
+  conservatory:{roughness:.31,metalness:.28},
+  optics:{roughness:.35,metalness:.46},
+  radiator:{roughness:.4,metalness:.44},
+  caisson:{roughness:.58,metalness:.41},
+  shutter:{roughness:.39,metalness:.42},
+  asphalt:{span:[16,16],url:'../zero/assets/env/asphalt_diff.webp',roughness:.87,metalness:.04},
   quayside:{span:[19,23],roughness:.81,metalness:.05},
   curtain:{span:[16,25],roughness:.34,metalness:.37},
   paving:{span:[19,19],roughness:.79,metalness:.07},
@@ -22,17 +30,30 @@ const surfaces={
 const maps=new Map();
 // Course art is released with the course, independently of the shared mech asset CDN.
 const mapLoader=new THREE.TextureLoader(new THREE.LoadingManager());
-function surfaceMaterial(key){
-  const spec=surfaces[key],mat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:spec.roughness,metalness:spec.metalness});
-  if(typeof document==='undefined')return mat;
-  if(!maps.has(key)){
-    const ready=mapLoader.loadAsync(new URL('./'+key+'.webp',import.meta.url).href).then(texture=>{
-      texture.colorSpace=THREE.SRGBColorSpace;texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
-      texture.anisotropy=4;return texture;
-    }).catch(()=>{maps.delete(key);return null;});
-    maps.set(key,ready);
+// Share textures within the selected course. Dropping the last material also
+// releases the GPU texture when a slow request finishes after a level switch.
+function bindTexture(mat,url,repeat,apply){
+  if(typeof document==='undefined')return;
+  let entry=maps.get(url);
+  if(!entry){
+    entry={refs:0,ready:mapLoader.loadAsync(new URL(url,import.meta.url).href).then(t=>{
+      t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;
+      if(repeat)t.wrapS=t.wrapT=THREE.RepeatWrapping;
+      return t;
+    }).catch(()=>null)};
+    maps.set(url,entry);
   }
-  maps.get(key).then(texture=>{if(texture){mat.map=texture;mat.needsUpdate=true;}});
+  let active=true;entry.refs++;
+  mat.addEventListener('dispose',function release(){
+    active=false;mat.removeEventListener('dispose',release);
+    if(--entry.refs===0){maps.delete(url);entry.ready.then(t=>t?.dispose());}
+  });
+  entry.ready.then(t=>{if(active&&t)apply(t);});
+}
+function surfaceMaterial(key,assets){
+  const spec=surfaces[key],mat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:spec.roughness,metalness:spec.metalness});
+  if(key==='asphalt'&&assets?.asphD)mat.map=assets.asphD;
+  else bindTexture(mat,spec.url||('./'+key+'.webp'),!!spec.span,t=>{mat.map=t;mat.needsUpdate=true;});
   return mat;
 }
 // Local planar coordinates keep the material at the same scale on pavement, windows and moving cars.
@@ -46,15 +67,20 @@ function projectUV(g,span){
   }
 }
 // Each assembly shares a draw per surface, including its architectural detail and strip lighting.
-function batch(root,name){
+function batch(root,name,assets,castWalls=false){
   const parts=new Map(),pose=new THREE.Object3D(),color=new THREE.Color();
   function add(g,x,y,z,w,h,d,tint,lit=false,rx=0,ry=0,rz=0){
     pose.position.set(x,y,z);pose.rotation.set(rx,ry,rz);pose.scale.set(w,h,d);pose.updateMatrix();
     const copy=g.clone().applyMatrix4(pose.matrix);
     const attr=new Float32Array(copy.attributes.position.count*3);color.setHex(tint);
-    for(let i=0;i<attr.length;i+=3)color.toArray(attr,i);
+    const pos=copy.attributes.position;
+    for(let i=0;i<pos.count;i++){
+      // Bake a small amount of ground bounce/occlusion into the bottom of opaque assemblies.
+      const shade=lit===true||lit==='glass'?1:1-.18*Math.max(0,1-Math.max(0,pos.getY(i))/6);
+      attr[i*3]=color.r*shade;attr[i*3+1]=color.g*shade;attr[i*3+2]=color.b*shade;
+    }
     copy.setAttribute('color',new THREE.BufferAttribute(attr,3));
-    if(surfaces[lit])projectUV(copy,surfaces[lit].span);
+    if(surfaces[lit]?.span)projectUV(copy,surfaces[lit].span);
     if(!parts.has(lit))parts.set(lit,[]);parts.get(lit).push(copy);
   }
   function strut(a,b,width,depth,tint,lit=false){
@@ -63,14 +89,19 @@ function batch(root,name){
     const e=new THREE.Euler().setFromQuaternion(q);
     add(cube,(a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2,width,length,depth,tint,lit,e.x,e.y,e.z);
   }
-  return {add,strut,box:(...args)=>add(cube,...args),finish(){
+  // A single-sided face carries a whole photographed panel, with its original UVs.
+  function panel(x,y,z,w,h,key,rx=0,ry=0){
+    add(face,x,y,z,w,h,1,0xffffff,key,rx,ry);
+  }
+  return {add,strut,panel,box:(...args)=>add(cube,...args),finish(){
     for(const [key,items] of parts){
       const geo=mergeGeometries(items);for(const p of items)p.dispose();
-      const mat=key==='glass'?new THREE.MeshStandardMaterial({vertexColors:true,roughness:.18,metalness:.38,transparent:true,opacity:.27,depthWrite:false,side:THREE.DoubleSide}):surfaces[key]?surfaceMaterial(key):key?new THREE.MeshBasicMaterial({vertexColors:true}):new THREE.MeshStandardMaterial({vertexColors:true,roughness:.55,metalness:.27});
+      const mat=key==='glass'?new THREE.MeshStandardMaterial({vertexColors:true,roughness:.18,metalness:.38,transparent:true,opacity:.27,depthWrite:false,side:THREE.DoubleSide}):surfaces[key]?surfaceMaterial(key,assets):key?new THREE.MeshBasicMaterial({vertexColors:true}):new THREE.MeshStandardMaterial({vertexColors:true,roughness:.55,metalness:.27});
       const m=new THREE.Mesh(geo,mat);
       m.name=name;m.receiveShadow=key!==true;
-      // The continuous streets sit above each other. Only buildings cast down into that space.
-      m.castShadow=key!==true&&key!=='paving'&&key!=='ceramic'&&key!=='glass';
+      // Keep streets and thin architectural decals out of the shadow map.
+      m.castShadow=key!==true&&key!=='glass'&&key!=='paving'&&key!=='asphalt'&&
+        (key!=='ceramic'||castWalls)&&(!surfaces[key]||!!surfaces[key].span||key==='shutter');
       m.userData.fieldGeometry=m.userData.fieldMaterial=true;root.add(m);
     }
   }};
@@ -92,9 +123,10 @@ function sky(root,world,district){
     }
   }
   const material=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,uniforms:{
+    vista:{value:null},withVista:{value:0},summit:{value:district==='summit'?1:0},sunDir:{value:world.lightDir||new THREE.Vector3(-.66,.19,.72).normalize()},
     squall:{value:district==='rail'?1:0},cloudMap:{value:world.A?.sky||null},topColor:{value:new THREE.Color(colors.zenith)},horizon:{value:new THREE.Color(colors.horizon)},sun:{value:new THREE.Color(colors.sun)}},
     vertexShader:'varying vec3 p;void main(){p=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
-    fragmentShader:`varying vec3 p;uniform sampler2D cloudMap;uniform float squall;uniform vec3 topColor,horizon,sun;
+    fragmentShader:`varying vec3 p;uniform sampler2D cloudMap,vista;uniform float withVista,squall,summit;uniform vec3 sunDir;uniform vec3 topColor,horizon,sun;
     void main(){
       vec3 n=normalize(p);float elevation=asin(clamp(n.y,-1.,1.));
       vec2 uv=vec2(fract(atan(n.z,n.x)/6.2831853+.53),clamp((elevation+.17453)/1.74533,.006,.994));
@@ -105,23 +137,40 @@ function sky(root,world,district){
       float shaft=smoothstep(.16,.84,.48+.32*sin(uv.x*55.+n.y*3.)+.2*sin(uv.x*87.-n.y*7.));
       vec3 rainSky=sky*(.46+.69*smoothstep(.12,.65,density));
       sky=mix(sky,mix(rainSky,vec3(.31,.38,.43),shaft*.47*(1.-smoothstep(.0,.47,n.y))),squall);
-      float key=max(dot(n,normalize(vec3(-.66,.19,.72))),0.);
+      // The seamless panorama closes the distant horizon at every bearing. Only a narrow
+      // elevation band is painted; the original cloud dome remains above the ridges.
+      float v=(elevation+mix(.104,.115,summit))/mix(.305,.416,summit);
+      float band=withVista*(1.-smoothstep(.70,.99,v));
+      if(band>.001){
+        float u=fract(uv.x*2.+.24);
+        vec3 landscape=texture2D(vista,vec2(u,clamp(v,.012,.985))).rgb;
+        float haze=.24+.12*squall+.16*(1.-smoothstep(.12,.47,v));
+        sky=mix(sky,mix(landscape*(.98-.12*squall),sky,haze),band);
+      }
+      float key=max(dot(n,sunDir),0.);
       gl_FragColor=vec4(sky+sun*(.23*pow(key,17.)+.65*pow(key,320.)),1.);
 #include <tonemapping_fragment>
 #include <colorspace_fragment>
 }`});
+  bindTexture(material,'./vista-'+district+'.webp',false,t=>{
+    material.uniforms.vista.value=t;material.uniforms.withVista.value=1;
+  });
   const m=new THREE.Mesh(new THREE.SphereGeometry(2200,24,12),material);m.renderOrder=-2;
   m.userData.fieldGeometry=m.userData.fieldMaterial=true;root.add(m);
 }
 const block=(x,z,w,d,top,bottom=0)=>({x0:x-w/2,x1:x+w/2,z0:z-d/2,z1:z+d/2,top,bottom});
-function fold(root,site){
+function fold(root,site,world){
   const pair=new THREE.Group(),solids=foldedSolids(site);root.add(pair);site.city=pair;
   for(const ceiling of [false,true]){
     const layer=new THREE.Group();pair.add(layer);
     if(ceiling){layer.rotation.z=Math.PI;layer.position.y=HEIGHT;}
-    const p=batch(layer,ceiling?'琥珀上城':'青色下城'),accent=ceiling?amber:teal;
+    const p=batch(layer,ceiling?'琥珀上城':'青色下城',world.A),accent=ceiling?amber:teal;
     const limestone=ceiling?0xf0d2b5:0xd3e0dc,trim=ceiling?0xab7957:0x567b86;
     p.box(0,-1,0,1240,2,1330,ceiling?0xffe2c5:0xd3e7eb,'paving');
+    p.box(0,-.045,0,97,.15,1260,ceiling?0xd7d2bf:0xbccdd4,'asphalt');
+    for(let z=-580;z<=580;z+=17){
+      for(const side of [-1,1])p.box(side*19,.09,z,.36,.06,8,ceiling?0xe1ce98:0xe2e6dd);
+    }
     for(let i=-4;i<=4;i++)for(let j=-5;j<=5;j++){
       const x=i*116,z=j*104;
       if(i===0){
@@ -129,6 +178,27 @@ function fold(root,site){
         p.box(0,.13,z,1.05,.1,54,accent,true);
         for(const side of [-1,1]){
           const sx=side*52;
+          // Raised platforms carry a bronze-and-glass arcade below and a solar canopy above.
+          if(ceiling){
+            // Frosted walk-on skylights read as a lit ceiling when viewed from the lower city.
+            const sx=side*31;
+            p.box(sx,.135,z-8,6.6,.24,47,trim);
+            p.box(sx,.283,z-8,5.8,.07,45,0xcad8cc,true);
+            p.box(sx,.36,z-8,.23,.12,46,trim);
+            for(let k=-3;k<=3;k++)p.box(sx,.37,z-8+k*6.25,6,.13,.36,trim);
+          }
+          const stopZ=z+13;
+          if(j%2===0){
+            p.box(sx+side*3,1,stopZ,8,2,24,limestone,'paving');
+            for(const off of [-9,9]){
+              p.strut([sx+side*5,1.6,stopZ+off],[sx+side*4,9,stopZ+off],.8,.85,trim);
+              p.strut([sx+side*4,7.4,stopZ+off],[sx-side*3,9.5,stopZ+off],.6,.6,trim);
+            }
+            p.box(sx,9.5,stopZ,10,.65,25,ceiling?0x576d7d:0x6b9991,false,0,0,side*.09);
+            p.box(sx,9.24,stopZ,8,.15,22,0xabc7bd,'glass',0,0,side*.09);
+            p.box(sx+side*1.4,2.18,stopZ,1.6,.48,12,0x9f7958);
+            solids.register([block(sx+side*3,stopZ,8,24,2),block(sx,stopZ,10,25,10,9)],ceiling);
+          }
           p.box(sx,.10,z,1.1,.16,101,limestone);
           p.box(sx+side*5,.22,z,5,.44,95,trim);
           // Prismatic underlights break up the long shadowed soffit when this street is overhead.
@@ -182,6 +252,19 @@ function echo(root,site){
       p.strut([x,y+4,z+4],[xx,yy+4,z+4],1.25,2.4,frame);
       p.strut([x,y,z],[xx,yy+4,z+4],.62,.81,frame);
       if(i>0&&i<11)site.boxes.push(block((x+xx)/2,z,Math.abs(x-xx)+1.4,4.5,Math.max(y,yy)+1,Math.min(y,yy)-1));
+      // Long folded roof leaves frame the two recording wings, with an open central oculus.
+      if(z<318&&(i===2||i===3||i===8||i===9)){
+        const dx=xx-x,dy=yy-y,span=Math.hypot(dx,dy),angle=Math.atan2(dy,dx);
+        for(const end of [-1,1]){
+          p.box((x+xx)/2,(y+yy)/2+1.35,z+35+end*16.4,span,1.55,29.8,0xbac8c9,'ceramic',0,0,angle);
+          p.box((x+xx)/2,(y+yy)/2+.22,z+35+end*16.4,span*.72,.62,26.8,0x536b7b,false,0,0,angle);
+        }
+        p.box((x+xx)/2,(y+yy)/2+1,z+35,span,.55,3.3,0xb6d3cc,'glass',0,0,angle);
+        for(let k=0;k<4;k++){
+          const t=(k+.5)/4,mid=y+dy*t;
+          site.boxes.push(block(x+dx*t,z+35,Math.abs(dx)*.25,62,mid+2+Math.abs(dy)/8,mid-.6-Math.abs(dy)/8));
+        }
+      }
       if(i===2||i===9||i===5||i===6){
         p.strut([x,y+1,z],[x,y+1,z+69],1.1,1,frame);
         p.strut([x,y-.65,z+6],[x,y-.65,z+62],.65,.7,i<6?violet:teal,true);
@@ -210,9 +293,34 @@ function echo(root,site){
   p.add(dome,0,16,-106,10,3.8,10,0x759baa,false,-Math.PI/2);
   p.add(gate,0,16,-106,.46,.46,.74,teal,true);
   for(let k=0;k<6;k++)p.add(arc,0,16,-105.7,10.4,10.4,9,porcelain,false,0,0,k*Math.PI/3);
-  site.boxes.push(block(0,-102,19,9.8,23));
+  // Nested objective lens with a flared housing, an iris and a two-sided gimbal.
+  for(const [scale,depth,tint] of [[.79,1.2,0x49515c],[.66,.82,porcelain],[.55,.55,0x5e858e]]){
+    p.add(gate,0,16,-104.8-depth,scale,scale,depth,tint);
+  }
+  p.add(dome,0,16,-107,8,3.2,8,0x193746,false,-Math.PI/2);
+  p.add(gate,0,16,-108,.21,.21,.54,teal,true);
+  for(let k=0;k<8;k++){
+    const a=k*Math.PI/4,dx=Math.cos(a),dy=Math.sin(a);
+    p.box(dx*10.6,16+dy*10.6,-105.8,3.8,1.1,1.5,frame,false,0,0,a);
+  }
+  for(const side of [-1,1]){
+    p.strut([side*8.5,2,-102],[side*12.6,16,-102],2.5,4.3,frame);
+    p.add(round,side*12,16,-102,5.2,3.3,5.2,0x939f9c,false,0,0,Math.PI/2);
+    p.panel(side*5,4.2,-106.1,7.2,5.6,'optics',0,Math.PI);
+  }
+  site.boxes.push(block(0,-102,26,13,30));
   for(const side of [-1,1]){
     const branch=side<0?teal:violet,x=side*44;
+    // Dichroic mirror banks lean toward the recording head, outside the two approach lanes.
+    for(let j=0;j<5;j++){
+      const px=side*(139+j%2*6),pz=-179+92*j;
+      p.box(px,2.4,pz,19,4.8,14,frame,'ceramic');
+      for(const dz of [-4,4])p.strut([px,3,pz+dz],[px-side*1.8,18,pz+dz],2.2,2,porcelain);
+      p.add(round,px,19,pz,8,16,8,frame,false,Math.PI/2);
+      p.box(px-side*1.1,23,pz,22,24,1.6,frame,false,-.29,side*.39);
+      p.panel(px-side*1.5,22.7,pz-.95,20.6,22,'optics',.29,Math.PI+side*.39);
+      site.boxes.push(block(px,pz,19,13,31));
+    }
     p.box(x,.5,-166,12,1,19,frame);p.box(x,3.3,-166,8,5.6,15,porcelain);
     p.strut([x,5,-166],[x+side*6,26,-163],4.8,10,porcelain);
     p.strut([x+side*6,26,-163],[x+side*25,33,-158],4.3,9.5,frame);
@@ -235,8 +343,10 @@ function echo(root,site){
   for(const z of [-76,-24,28,80]){
     p.box(0,9,z,17,18,49,shell);site.boxes.push(block(0,z,17,49,18));
     p.box(0,18.8,z,19,1.6,49,steel);
+    p.panel(0,9,z-24.57,15.3,16.8,'optics',0,Math.PI);
     for(const side of [-1,1]){
       p.box(side*8.55,10,z,.2,8,42,0x151f30);
+      for(const off of [-13,13])p.panel(side*8.73,9.1,z+off,18,10.2,'optics',0,side*Math.PI/2);
       for(let k=-18;k<=18;k+=6)p.box(side*8.75,12,z+k,.4,2.7,.7,side<0?teal:violet,true);
     }
   }
@@ -324,27 +434,36 @@ function estuary(root){
   const mesh=new THREE.Mesh(g,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.DoubleSide}));
   mesh.userData.fieldGeometry=mesh.userData.fieldMaterial=true;root.add(mesh);
 }
-function water(root){
-  const material=new THREE.ShaderMaterial({uniforms:{},vertexShader:`
+function water(root,world){
+  const material=new THREE.ShaderMaterial({uniforms:{vista:{value:null},ready:{value:0},lightDir:{value:world.lightDir||new THREE.Vector3(-.66,.19,.72).normalize()}},vertexShader:`
     varying vec3 point;void main(){point=(modelMatrix*vec4(position,1.)).xyz;gl_Position=projectionMatrix*viewMatrix*vec4(point,1.);}`,
-    fragmentShader:`varying vec3 point;void main(){
+    fragmentShader:`varying vec3 point;uniform sampler2D vista;uniform float ready;uniform vec3 lightDir;void main(){
       vec3 view=normalize(cameraPosition-point);float distanceFade=1.-smoothstep(120.,780.,length(cameraPosition-point));
       float wave=point.x*1.42+point.z*.34+1.4*sin(point.z*.18)+.9*sin(point.x*.09-point.z*.14);
       float ripples=.5+.5*sin(wave)*clamp(1.-fwidth(wave)*.38,0.,1.);
       float spread=.5+.5*sin(point.z*.91-point.x*.58);
-      float glint=pow(ripples,6.)*spread*(.12+.55*pow(max(dot(view,normalize(vec3(.64,.14,-.75))),0.),4.));
-      vec3 c=mix(vec3(.092,.175,.20),vec3(.29,.40,.44),pow(1.-max(view.y,0.),5.));
-      gl_FragColor=vec4(c+vec3(.28,.26,.20)*glint*distanceFade,1.);
+      vec2 ripple=vec2(sin(wave),cos(point.z*.39+point.x*.27))*(.014+.025*distanceFade);
+      vec3 normal=normalize(vec3(ripple.x,1.,ripple.y)),reflection=reflect(-view,normal);
+      float bearing=atan(reflection.z,reflection.x)/6.2831853+.53;
+      float u=fract(bearing*2.+.24),v=clamp((asin(clamp(reflection.y,-1.,1.))+.104)/.305,.02,.96);
+      vec3 env=mix(vec3(.46,.57,.60),texture2D(vista,vec2(u,v)).rgb,ready*.65);
+      float fresnel=pow(1.-clamp(dot(view,normal),0.,1.),3.);
+      float glint=pow(max(0.,dot(reflection,lightDir)),90.)*(.4+.6*ripples);
+      vec3 c=mix(vec3(.052,.135,.145),env,.15+.70*fresnel);
+      gl_FragColor=vec4(c+vec3(.86,.73,.52)*glint+vec3(.025)*spread*ripples*distanceFade,1.);
 #include <tonemapping_fragment>
 #include <colorspace_fragment>
 }`});
+  bindTexture(material,'./vista-'+world.fieldRoute.district+'.webp',false,t=>{
+    material.uniforms.vista.value=t;material.uniforms.ready.value=1;
+  });
   const mesh=new THREE.Mesh(new THREE.PlaneGeometry(2350,2350),material);
   mesh.rotation.x=-Math.PI/2;mesh.position.y=-2;
   mesh.userData.fieldGeometry=mesh.userData.fieldMaterial=true;root.add(mesh);
 }
-function rail(root,site){
+function rail(root,site,world){
   const bed=batch(root,'河口重工碼頭'),warm=0xcea379,beam=0x6d838a;
-  water(root);
+  water(root,world);
   // A distant shipyard closes the view at either end of the bridge.
   for(const end of [-1,1]){
     for(let k=0;k<16;k++){
@@ -414,6 +533,15 @@ function rail(root,site){
       tunnel.box(tip,108,z,4,1,8,amber,true);
     }
     tunnel.box(0,102,z,64,3.4,6,0xbcc5c2);
+    // A lower signal gallery passes overhead; the upper truss remains the bridge silhouette.
+    for(const side of [-1,1]){
+      tunnel.strut([side*72,38,z],[side*45,53,z],2.3,3.8,beam);
+      tunnel.box(side*54,40,z,35,1.6,3.8,beam);
+      for(const dx of [-12,-5,2,10])tunnel.box(side*(54+dx),41.9,z-1.6,.4,2.6,.4,0xb3b8ad);
+      tunnel.box(side*55,43,z-1.6,34,.45,.44,0xb9b4a6);
+      tunnel.box(side*44,37,z-1.55,7,6,2.1,0x31404a);
+      for(const k of [-1,1])tunnel.add(round,side*44+k*1.7,37,z-2.7,1.8,.5,1.8,k<0?0x81e7cf:0xbd715c,true,Math.PI/2);
+    }
   }
   tunnel.finish();
   const rainPos=[];let seed=173;
@@ -446,6 +574,15 @@ function rail(root,site){
           p.box(side*9.6,DECK-9.4,z+off,.25,.56,4.7,steel);
         }
       }
+      // Recessed paired radiator cassettes leave the landing plane clear.
+      for(const end of [-1,1]){
+        const hz=z+end*12.5;
+        p.box(0,DECK+.07,hz,8,.14,11.8,0x42565e);
+        p.panel(0,DECK+.16,hz,7.4,11.2,'radiator',-Math.PI/2);
+        for(const dx of [-4.1,4.1])p.box(dx,DECK+.13,hz,.35,.24,12.1,0x8b9999);
+      }
+      // The concertina can be seen through the gap during a transfer.
+      for(let k=0;k<3;k++)p.box(0,DECK-5.3,z+26.6+k*.93,13.2-k%2,7.4-k%2,1,dark);
       p.box(0,DECK-6.4,z+27,12.2,5.7,1.5,dark);
       if(z===carCenters[0]||z===carCenters.at(-1)){
         const dir=z<0?-1:1;
@@ -472,9 +609,9 @@ export function buildExercise(world,root){
   const id=world.fieldRoute.district;
   const site={boxes:[],create:(combat,enc)=>createExercise(id,site,combat,enc)};
   sky(root,world,id);
-  if(id==='dock'){water(root);estuary(root);dock(root,site,batch);}
+  if(id==='dock'){water(root,world);estuary(root);dock(root,site,batch);}
   else if(id==='summit')summit(root,site,batch,world.A);
-  else ({fold,echo,rail})[id](root,site);
+  else ({fold,echo,rail})[id](root,site,world);
   if(id!=='rail'){
     for(const box of site.boxes)world.addCollider(box);
     site.boxes=site.gates?.map(g=>g.box)||[];

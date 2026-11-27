@@ -39,6 +39,16 @@ function freighter(p,site,x,z){
     p.box(x,21+j*6,z+79,33-j*3,6,30-j*3,cream,'ceramic');
     p.box(x,23+j*6,z+63.9+j*1.5,29-j*3,2.2,.5,0x354f5c);
   }
+  // Deck furniture follows the taper of the foredeck and shows the ship's scale from above.
+  for(const side of [-1,1]){
+    for(let j=0;j<8;j++){
+      const dz=-78+j*24,rail=x+side*18.7;
+      p.box(rail,19.6,z+dz,.36,2.8,.36,cream);
+      if(j<7)p.box(rail,20.85,z+dz+12,.26,.28,24,cream);
+    }
+    p.strut([x+side*4,23,z-111],[x+side*15,18,z-76],.40,.40,steel);
+  }
+  p.add(drum,x,27,z-88,1.8,19,1.8,cream);p.box(x,32,z-88,16,.9,1.2,cream);
   p.add(drum,x,32,z+104,7,22,9,iron);p.add(drum,x,43,z+104,7.2,2.4,9.2,steel);
 }
 function crane(p,x,z,side){
@@ -59,12 +69,24 @@ function crane(p,x,z,side){
     p.strut([tip,68,z+dz],[tip,32,z+dz],.32,.32,steel);
   }
   p.box(tip,31,z,3,2.5,7,safety);
+  // A-frame, counterweight and dual stays connect the jib to the crane chassis.
+  p.strut([x+side*7,52,z],[x+side*9,74,z],2.4,2.9,iron);
+  p.strut([x-side*5,54,z],[x+side*9,74,z],1.8,2.2,iron);
+  for(const dz of [-2.5,2.5])p.strut([x+side*9,74,z],[tip+side*8,68,z+dz],.38,.38,steel);
+  p.box(x+side*13,55,z,10,6.6,17,0x7e827b,'ceramic');
+  for(const dx of [-5,5])p.box(tip+dx,29.2,z,1.8,2.1,7.4,safety);
+  p.box(tip,29.7,z,13,1.8,5.4,iron);
 }
 export function dock(root,site,batch){
-  const p=batch(root,'潮汐乾塢'),wall=0xb3a899;
+  const p=batch(root,'潮汐乾塢',null,true),wall=0xb3a899;
   p.box(0,-2,36,184,4,820,0xb8b0a0,'paving');
   for(const side of [-1,1]){
     for(let i=0;i<4;i++)p.box(side*(92+i*3),-1+i,36,4,5+i,820,wall,'ceramic');
+    // Crane rails are embedded in the apron, their dark recesses visible in the cockpit.
+    for(const rx of [54,73]){
+      p.box(side*rx,.052,36,1.5,.10,810,0x444d50);
+      p.box(side*rx,.14,36,.46,.14,810,0xa8aaa2);
+    }
     for(let z=-315;z<415;z+=22){
       p.box(side*79,.1,z,1.2,.15,13,safety);
       p.add(drum,side*89,1.4,z,2.4,2.8,2.4,steel);
@@ -79,12 +101,23 @@ export function dock(root,site,batch){
       p.box(side*228,6,z,98,15,130,wall,'ceramic');
       p.box(side*235,24,z,75,21,83,0x879ba0,'glazing');
       p.box(side*235,35,z,78,2,86,cream,'car-deck');
+      for(let k=-1;k<=1;k++){
+        const cz=z+k*27;
+        p.box(side*235,39.4,cz,75,1.5,25,0x899b99,'car-deck',-.25);
+        p.box(side*235,38,cz+12,74,5.6,1.8,0x526a70,'glazing');
+        p.box(side*197,17.1,cz,1.2,7,19,0x556164);
+      }
     }
   }
   freighter(p,site,152,20);freighter(p,site,-151,209);
   for(const [x,z,w] of [[-57,-82,66],[57,-82,66],[-78,100,24],[0,100,44],[78,100,24]]){
     bulkhead(site,p,x,z,w,24,9,wall);
     p.box(x,24.5,z,w+1.4,1,10,safety,'car-deck');
+    for(let dx=-w/2+3;dx<w/2;dx+=9){
+      p.box(x+dx,25.8,z-3.8,.43,2.6,.43,steel);
+      p.box(x+dx,12,z-4.7,.85,23,.75,0x9c9d92);
+    }
+    p.box(x,27.1,z-3.8,w,.39,.4,steel);
   }
   for(const [x,z] of [[-45,-129],[52,20],[-58,181]]){
     bulkhead(site,p,x,z,20,9,19,0xa99d8e);p.box(x,9.3,z,21,.6,20,steel);
@@ -93,6 +126,8 @@ export function dock(root,site,batch){
     const group=new THREE.Group();root.add(group);group.position.set(x,0,z);
     const leaf=batch(group,'塢門扇');
     leaf.box(0,12,0,44,24,4.2,0x59757a,'car-deck');
+    for(const sign of [-1,1])for(const side of [-1,1])
+      leaf.panel(side*10.8,12,sign*2.14,21.4,23.4,'caisson',0,sign<0?Math.PI:0);
     for(let j=-20;j<=20;j+=5)leaf.box(j,12,-2.35,.86,23,.9,0x334750);
     for(const y of [2,12,22])leaf.box(0,y,-2.6,44,1,1,cream);
     for(let j=-20;j<=20;j+=4)leaf.box(j,2,-3.2,2.6,1.1,.3,safety);
@@ -110,26 +145,24 @@ export function dock(root,site,batch){
   p.finish();
 }
 
-function mountainBowl(root){
-  const v=[],colors=[],ix=[],c=new THREE.Color(),count=144;
-  for(let band=0;band<2;band++){
-    const start=v.length/3;
-    for(let j=0;j<=count;j++){
-      const a=2*Math.PI*(j%count)/count;
-      const saw=Math.abs(Math.sin(a*7+band+.51*Math.sin(11*a)));
-      const crest=128+74*Math.sin(3*a+band)+104*saw+35*Math.cos(19*a+band)+19*Math.sin(46*a);
-      for(let k=0;k<5;k++){
-        const t=k/4,r=(band?480:910)+(band?290:380)*t+22*Math.sin(17*a+k*.53);
-        v.push(Math.sin(a)*r,crest*t**1.3*(band?.7:1.15)-34+Math.sin(23*a)*10*t,Math.cos(a)*r);
-        const snowy=(crest*t>130+26*Math.sin(a*21+k)&&k>1);
-        c.setHex(snowy?(band?0xd7dde0:0xe2e8e5):band?[0x596b63,0x64776a,0x7a847d,0x89918f,0x939da2][k]:0x939fae);
-        c.multiplyScalar(.95+.08*Math.cos(23*a+k));colors.push(c.r,c.g,c.b);
-        if(j<count&&k<4){const b=start+j*5+k;ix.push(b,b+1,b+6,b,b+6,b+5);}
-      }
+// Intermediate foothills provide parallax in front of the photographic high peaks.
+function mountainBowl(root,assets){
+  const positions=[],uv=[],colors=[],indices=[],tint=new THREE.Color(),count=192,rows=7;
+  for(let j=0;j<=count;j++){
+    const a=2*Math.PI*(j%count)/count;
+    const ridge=42+19*Math.sin(3*a)+24*Math.cos(7*a+.8*Math.sin(13*a))+12*Math.cos(17*a);
+    for(let k=0;k<rows;k++){
+      const t=k/(rows-1),r=448+270*t+15*Math.cos(13*a+3*t);
+      const x=Math.sin(a)*r,z=Math.cos(a)*r,y=-12+t*ridge+9*Math.sin(a*23+2*t)*t;
+      positions.push(x,y,z);uv.push(x/38,z/38);
+      const cold=THREE.MathUtils.smoothstep(y+7*Math.sin(24*a),33,68);
+      tint.setRGB(.33+cold*.48,.39+cold*.47,.34+cold*.56);
+      colors.push(tint.r,tint.g,tint.b);
+      if(j<count&&k<rows-1){const i=j*rows+k;indices.push(i,i+1,i+rows+1,i,i+rows+1,i+rows);}
     }
   }
-  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));g.setIndex(ix);g.computeVertexNormals();
-  const mesh=new THREE.Mesh(g,new THREE.MeshStandardMaterial({vertexColors:true,side:THREE.DoubleSide,flatShading:true,roughness:.95}));
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(indices);g.computeVertexNormals();
+  const mesh=new THREE.Mesh(g,new THREE.MeshStandardMaterial({vertexColors:true,map:assets?.rockD||null,roughness:.95}));
   mesh.userData.fieldMaterial=mesh.userData.fieldGeometry=true;root.add(mesh);
 }
 function observatory(p,x,z,r,h){
@@ -140,12 +173,29 @@ function observatory(p,x,z,r,h){
   const gap=.24;
   for(const start of [gap,Math.PI+gap]){
     const shell=new THREE.SphereGeometry(.5,20,9,start,Math.PI-2*gap,0,Math.PI/2);
-    p.add(shell,x,h,z,2*r,2*r,2*r,0xe4e5e0,false,0,1.08);shell.dispose();
+    // Each shutter is a curved metal skin with a track on each side of the opening.
+    p.add(shell,x,h,z,2*r,2*r,2*r,0xf6f6f1,'shutter',0,1.08);shell.dispose();
   }
-  p.add(cap,x,h,z,1.85*r,1.85*r,1.85*r,0x394954);
+  // A pitched telescope barrel and segmented shutter tracks remain visible through the slit.
+  const axis=1.08,cs=Math.cos(axis),sn=Math.sin(axis);
+  for(const sign of [-1,1]){
+    for(let k=0;k<9;k++){
+      const a=k*Math.PI/18,b=(k+1)*Math.PI/18;
+      const vx=Math.cos(.24)*cs+sign*Math.sin(.24)*sn,vz=-Math.cos(.24)*sn+sign*Math.sin(.24)*cs;
+      p.strut([x+vx*r*Math.cos(a),h+r*Math.sin(a),z+vz*r*Math.cos(a)],
+        [x+vx*r*Math.cos(b),h+r*Math.sin(b),z+vz*r*Math.cos(b)],.65,.72,0x8d9695);
+    }
+  }
+  p.add(cap,x,h,z,1.45*r,1.45*r,1.45*r,0x35434c);
+  const dir=new THREE.Vector3(cs*.66,.75,-sn*.66).normalize();
+  const rotation=new THREE.Euler().setFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),dir));
+  for(const [offset,bore,length,tint] of [[.80,.32,.47,0x404f58],[1.01,.36,.10,0xb8bfc1],[1.067,.29,.012,0x204454]]){
+    p.add(drum,x+r*offset*dir.x,h+r*offset*dir.y,z+r*offset*dir.z,r*bore,r*length,r*bore,tint,false,rotation.x,rotation.y,rotation.z);
+  }
   p.add(drum,x,h*.19,z,r*2.03,.9,r*2.03,0x848d91);
   for(let j=0;j<12;j++){
     const a=j*Math.PI/6;
+    if(j%2===0)p.panel(x+(r+.08)*Math.sin(a),h*.60,z+(r+.08)*Math.cos(a),r*.47,h*.57,'shutter',0,a);
     p.box(x+(r+.2)*Math.sin(a),h*.47,z+(r+.2)*Math.cos(a),r*.23,3,.55,steel,false,0,a);
   }
   const dx=x+r*.66,dz=z-r*.68;
@@ -153,14 +203,30 @@ function observatory(p,x,z,r,h){
   p.box(dx,8.8,dz,8,.7,6.8,cream,false,0,-.72);
 }
 export function summit(root,site,batch,assets){
-  mountainBowl(root);
-  const gravel=new THREE.PlaneGeometry(1570,1570);
+  mountainBowl(root,assets);
+  const gravel=new THREE.PlaneGeometry(1570,1570,38,38);
   gravel.rotateX(-Math.PI/2);
-  const uv=gravel.attributes.uv;
-  for(let i=0;i<uv.count;i++)uv.setXY(i,uv.getX(i)*76,uv.getY(i)*76);
-  const apron=new THREE.Mesh(gravel,new THREE.MeshStandardMaterial({map:assets?.rockD||null,normalMap:assets?.rockN||null,normalScale:new THREE.Vector2(.45,.45),color:0xc6c5bb,roughness:.95}));
+  const {uv,position}=gravel.attributes,drift=[];
+  for(let i=0;i<uv.count;i++){
+    const x=position.getX(i),z=position.getZ(i);
+    const wind=.46*Math.sin(x*.018+z*.009)+.31*Math.cos(z*.036-x*.007)+.18*Math.sin(x*.071+z*.044);
+    const verge=THREE.MathUtils.smoothstep(Math.abs(x),24,56);
+    drift.push(THREE.MathUtils.clamp(.46+.82*wind+.19*verge,0,1));
+    uv.setXY(i,uv.getX(i)*76,uv.getY(i)*76);
+  }
+  gravel.setAttribute('drift',new THREE.Float32BufferAttribute(drift,1));
+  const gravelMat=new THREE.MeshStandardMaterial({map:assets?.rockD||null,normalMap:assets?.rockN||null,normalScale:new THREE.Vector2(.36,.36),roughness:.95});
+  gravelMat.onBeforeCompile=shader=>{
+    shader.vertexShader='attribute float drift;varying float vDrift;\n'+shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvDrift=drift;');
+    shader.fragmentShader='varying float vDrift;\n'+shader.fragmentShader.replace('#include <map_fragment>',`#include <map_fragment>
+      float fissure=dot(diffuseColor.rgb,vec3(.21,.72,.07));
+      float snow=smoothstep(.39,.70,vDrift+min(fissure,.62)*.49);
+      vec3 moraine=diffuseColor.rgb*vec3(.76,.80,.83);
+      diffuseColor.rgb=mix(moraine,vec3(.73,.82,.87)*(.92+.16*fissure),snow);`);
+  };
+  const apron=new THREE.Mesh(gravel,gravelMat);
   apron.position.y=-.08;apron.receiveShadow=true;apron.userData.fieldGeometry=apron.userData.fieldMaterial=true;root.add(apron);
-  const p=batch(root,'高山光學觀測站');
+  const p=batch(root,'高山光學觀測站',assets,true);
   // Glacial erratics break up the forecourt without blocking the marked flight approaches.
   const stone=new THREE.IcosahedronGeometry(1,0);
   stone.setIndex(Array.from({length:stone.attributes.position.count},(_,i)=>i));
@@ -179,6 +245,12 @@ export function summit(root,site,batch,assets){
     const ax=side*90,az=156;
     bulkhead(site,p,ax,az,54,35,62,0xa8ada7);
     p.box(ax,35,az,54,.24,62,0xc8c7b9,'paving');
+    // A service gallery and braced apron turn the recharge deck into a mountain-side station.
+    p.box(ax,27,az-31.2,52,7,.75,0x516370,'glazing');
+    for(const dx of [-23,-14,-5,5,14,23]){
+      p.strut([ax+dx,1,az-31],[ax+dx,23,az-32.6],1.1,1.4,steel);
+      p.box(ax+dx,27,az-31.8,.66,7.7,1.1,cream);
+    }
     for(const dx of [-21,21])p.box(ax+dx,35.3,az,1,.4,44,safety);
   }
   for(const [cx,cz,r,h] of [[x,z,31,56],[-111,-77,20,18],[127,-31,25,24],[-142,270,19,20],[104,310,16,17]]){

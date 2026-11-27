@@ -272,6 +272,26 @@ export function building(p,solids,i,j,ceiling){
     }
   }
 
+  // The old street has deep shopfront bays; above, glazed winter gardens hang from the podiums.
+  if(near){
+    const bx=-w*.54-2.8,depth=d*.72,height=ceiling?8.8:7.4,glass=ceiling?'conservatory':'shop';
+    box(bx+1.3,height*.5,0,5,height,depth+1.2,trim);
+    solid(bx+1.3,0,5,depth+1.2,0,height);
+    for(let n=0;n<3;n++){
+      const bz=(n-1)*depth/3;
+      p.panel(X(bx-1.23),height*.50,z+bz,depth/3-.30,height-.60,glass,0,-side*Math.PI/2);
+      box(bx-1.4,height*.50,bz-depth/6,.42,height,.45,trim);
+    }
+    box(bx-.2,height+.34,0,6.9,.68,depth+2,ceiling?0x9bb3ae:0x587f75);
+    if(!ceiling){
+      for(const k of [-1,1]){
+        const bz=k*d*.25;
+        box(bx-2.1,height-1.3,bz,.42,2.1,.45,0x584f43);
+        box(bx-2.1,height-.35,bz,.82,.94,.88,0xffe1ab,true);
+      }
+    }
+  }
+
   // Shallow infill and split shopfronts close gaps along the principal street.
   // Leave a cross street every third plot, wide enough to see and fly between blocks.
   if(near&&j%3!==0){
