@@ -15,12 +15,17 @@ import { LESSONS } from './tutorial.mjs?v=1';
 
 const q = new URLSearchParams(location.search);
 const taipei = q.get('campaign') === 'taipei';
-const ikaruga = q.get('campaign') === 'ikaruga';
-const sideStory = taipei || ikaruga;
+const kl = q.get('campaign') === 'kl';
+const klUnit = kl ? q.get('unit') : null;
+const falconPilot = taipei || klUnit === 'falcon';
+const ikaruga = q.get('campaign') === 'ikaruga' || klUnit === 'ikaruga';
+const sideStory = taipei || ikaruga || kl;
 // 大檔案（貼圖、HDR、模型）改從 jsDelivr 下載，網站主機給大檔很慢；不能用時照舊從本站（見 cdn.js）
-try { const f = await (await import('./cdn.js?v=2')).useCDN(); if (f) THREE.DefaultLoadingManager.setURLModifier(f); } catch (e) {}
-if (q.has('show') || q.has('free')) await import('./preview.js');
-else await game();
+if (!kl || ['cangyan','falcon','ikaruga'].includes(klUnit)) {
+  try { const f = await (await import('./cdn.js?v=2')).useCDN(); if (f) THREE.DefaultLoadingManager.setURLModifier(f); } catch (e) {}
+  if (q.has('show') || q.has('free')) await import('./preview.js');
+  else await game();
+}
 
 async function game() {
   const { loadAssets, World } = await import('./env.js');
@@ -36,10 +41,11 @@ async function game() {
   const clamp = THREE.MathUtils.clamp;
   const $ = (id) => document.getElementById(id);
 
-  const falcon = taipei ? await import('./taipei/falcon.mjs') : null;
+  const falcon = falconPilot ? await import('./taipei/falcon.mjs') : null;
   const leftWing = ikaruga ? await import('./ikaruga/loadout.mjs') : null;
   const Combat = leftWing?.IkarugaCombat || falcon?.FalconCombat || KobeCombat;
-  const STAGES = taipei ? prepareStages((await import('./taipei/campaign.mjs')).TAIPEI_STAGES)
+  const STAGES = kl ? prepareStages((await import('./kl/campaign.mjs')).KL_STAGES.map(stage => ({...stage,pilot:ikaruga ? '斑鳩' : falconPilot ? '白隼' : '蒼焰'})))
+    : taipei ? prepareStages((await import('./taipei/campaign.mjs')).TAIPEI_STAGES)
     : ikaruga ? prepareStages((await import('./ikaruga/campaign.mjs')).IKARUGA_STAGES) : kobeStages;
   // ---------------------------------------------------------------- 畫面
   const canvas = $('gl');
@@ -56,18 +62,24 @@ async function game() {
 
   const bar = document.querySelector('#bar i'), status = $('status');
   const basin = taipei ? await import('./taipei/basin.mjs') : null;
-  const [A, heightSource] = await Promise.all([loadAssets(renderer, (p) => { bar.style.width = (p * 90).toFixed(0) + '%'; }, true, !sideStory), basin ? basin.loadBasin() : ikaruga ? null : loadHeroMech()]);
+  const valley = kl ? await import('./kl/valley.mjs') : null;
+  const [A, heightSource] = await Promise.all([
+    loadAssets(renderer, p => { bar.style.width = (p * 90).toFixed(0) + '%'; }, true, !sideStory),
+    basin ? basin.loadBasin() : valley ? valley.loadValley().catch(()=>()=>0) : null,
+    (!sideStory || klUnit==='cangyan') ? loadHeroMech() : null,
+  ]);
   status.textContent = '建立城市';
   initMechMaterials(A);
-  const world = new World(renderer, scene, A, taipei ? {city:false, terrainSegments:180, heightSource, terrainSurface:basin.basinSurface} : ikaruga ? {city:false,terrainSegments:180,heightSource:()=>0} : undefined);
+  const world = new World(renderer, scene, A, taipei ? {city:false, terrainSegments:180, heightSource, terrainSurface:basin.basinSurface} : valley ? {city:false,terrainSegments:180,heightSource,terrainSurface:valley.valleySurface} : ikaruga ? {city:false,terrainSegments:180,heightSource:()=>0} : undefined);
   if (taipei) world.buildTaipei = await (await import('./taipei/district.mjs')).prepareDistrict(A,heightSource);
-  if (ikaruga) {
+  if (kl) world.buildKL = (await import('./kl/district.mjs')).buildKL;
+  if (ikaruga && !kl) {
     const [{buildTokyo}, {buildFuji,frameFuji}] = await Promise.all([import('./ikaruga/tokyo.mjs'), import('./ikaruga/fuji.mjs')]);
     world.frameFuji = frameFuji;
     world.buildTokyo = (w, group) => { buildTokyo(w, group); buildFuji(w, group); };
   }
   const post = new Post(renderer, scene, camera, cockScene, cockCam);
-  const cockpit = new Cockpit(world, camera, cockScene, cockCam, taipei, ikaruga);
+  const cockpit = new Cockpit(world, camera, cockScene, cockCam, falconPilot, ikaruga);
   // 扶手台擋住的畫面，城市那層直接跳過不畫（?nomask 可關掉比對）
   const cockMask = cockpit.depthMask();
   cockMask.visible = false;
@@ -88,8 +100,8 @@ async function game() {
 
   // ---------------------------------------------------------------- 自機
   const SPAWN = new THREE.Vector3(0, 0, -70);
-  const hero = sideStory ? new Mech('grunt', 'ally') : new Mech('hero', 'hero');
-  if (taipei) falcon.fitFalcon(hero, A);
+  const hero = falconPilot || ikaruga ? new Mech('grunt', 'ally') : new Mech('hero', 'hero');
+  if (falconPilot) falcon.fitFalcon(hero, A);
   if (ikaruga) leftWing.fitIkaruga(hero, A);
   hero.heavy = true;   // 重量模式（anim.js HEAVY）：機身轉向限速、落腳更沉；前傳、續作不開
   scene.add(hero.root);
@@ -223,6 +235,7 @@ async function game() {
   // ---------------------------------------------------------------- 設定
   // 視角：false＝駕駛艙（第一人稱）、true＝機體後方（看得到整台機體）；記住上次的選擇
   const saveKey = k => {
+    if(kl && /^(cleared|best\d+|view)$/.test(k))return 'mech.kl.'+k;
     if(ikaruga && /^(cleared|best\d+|view)$/.test(k))return 'mech.ikaruga.'+k;
     if(!taipei || !/^(cleared|best\d+|view)$/.test(k))return 'mech.'+k;
     if(k==='cleared' || /^best[3-6]$/.test(k))return 'mech.taipei.six.'+k;
@@ -466,6 +479,7 @@ async function game() {
     historyButton.hidden=sideStory;
     combat.prep();
     world.tokyoTraffic?.reset(combat.enc.sec);
+    world.klConvoy?.reset(combat.enc.sec);
     state = 'boot'; boot = 0; bootLen = len;
     input.enabled = true;
     if (!input.touch.on) input.lock();
@@ -520,8 +534,8 @@ async function game() {
       if (RANKS.indexOf(rank) > store.get('best' + n, 0)) store.set('best' + n, RANKS.indexOf(rank));
     }
     audio.music(win ? (last ? 'allclear' : D.frontline==='landing' ? 'landingHome' : 'clear') : 'fail');
-    $('resTitle').textContent = win ? (last ? (ikaruga ? '東京左翼・三號艇靠岸' : taipei ? '台北雨線・七人全數接通' : '神戶市區停火') : `第 ${n} 關完成`) : `第 ${n} 關失敗`;
-    $('resSub').textContent = win ? (last ? (ikaruga ? 'ALL HANDS ASHORE' : taipei ? 'SIGNAL RESTORED' : 'CEASEFIRE') : 'STAGE CLEAR') : 'MISSION FAILED';
+    $('resTitle').textContent = win ? (last ? (kl ? '吉隆坡環線・全車到站' : ikaruga ? '東京左翼・三號艇靠岸' : taipei ? '台北雨線・七人全數接通' : '神戶市區停火') : `第 ${n} 關完成`) : `第 ${n} 關失敗`;
+    $('resSub').textContent = win ? (last ? (kl ? 'FOUR BELLS' : ikaruga ? 'ALL HANDS ASHORE' : taipei ? 'SIGNAL RESTORED' : 'CEASEFIRE') : 'STAGE CLEAR') : 'MISSION FAILED';
     $('resRank').textContent = rank;
     $('resRank').style.display = win ? '' : 'none';
     $('next').style.display = win && !last ? '' : 'none';
@@ -545,7 +559,7 @@ async function game() {
     codaFilm.hidden = true; codaFail.hidden = true;
     codaEmergency.hidden = true;
     delete touchUI.dataset.coda;
-    $('tCannon').textContent = ikaruga ? '貫穿' : taipei ? '羽陣' : '光波砲';
+    $('tCannon').textContent = ikaruga ? '貫穿' : falconPilot ? '羽陣' : '光波砲';
   }
 
   function codaCombat() {
@@ -874,6 +888,7 @@ async function game() {
     if (coda?.film) { hud.clear(); input.endFrame(); return; }
     fx.update(dt);
     world.update(dt);
+    world.klConvoy?.update(dt,C.enc.sec,C.enc.state === 'done');
     if (world.tokyoTraffic) world.tokyoTraffic.update(dt, C.enc.sec, C.enc.state === 'done');
     world.followShadow(player.pos);
     camera.getWorldDirection(fwd);
