@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101d20">
+  <meta name="description" content="《逆風郵差》是有 10 關與原創配樂的橫向平台遊戲，支援鍵盤和手機觸控。">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23142326'/%3E%3Cpath fill='%23f9c477' d='M16 3l3 10 10 3-10 3-3 10-3-10-10-3 10-3z'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="levels.js"></script>
+  <script defer src="physics.js"></script>
+  <script defer src="art.js"></script>
+  <script defer src="music.js"></script>
+  <script defer src="game.js"></script>
+  <title>逆風郵差 · Gale Courier</title>
+</head>
+<body>
+  <main class="machine">
+    <header class="topbar">
+      <a class="brand" href="../" aria-label="返回遊戲館" data-en-label="Back to the game shelf">
+        <span class="brand-mark" aria-hidden="true">✦</span>
+        <span>逆風郵差<span class="brand-en" lang="en">Gale Courier</span></span>
+      </a>
+      <div class="top-actions">
+        <button class="top-button" id="language" type="button" aria-label="Switch language to English">EN</button>
+        <button class="top-button" id="music" type="button" aria-pressed="true" aria-label="配樂已開啟">
+          <span class="music-symbol" aria-hidden="true">♫</span><span class="action-label" data-en="Music">配樂</span>
+        </button>
+        <button class="top-button" id="sound" type="button" aria-pressed="true" aria-label="音效已開啟">
+          <span class="sound-symbol" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="action-label" data-en="Sound">音效</span>
+        </button>
+        <button class="top-button" id="pause" type="button" aria-label="暫停遊戲" disabled>
+          <span class="pause-symbol" aria-hidden="true"></span><span class="action-label">暫停</span>
+        </button>
+      </div>
+    </header>
+
+    <section class="stage" id="stage" data-state="title" aria-label="逆風郵差遊戲畫面" data-en-label="Gale Courier playfield">
+      <canvas id="scene" aria-hidden="true"></canvas>
+      <div class="hud">
+        <div class="hud-stats">
+          <div class="hud-pill" id="health" role="img" aria-label="生命 3 / 3">
+            <span class="heart" aria-hidden="true">♥</span><span class="heart" aria-hidden="true">♥</span><span class="heart" aria-hidden="true">♥</span>
+          </div>
+          <div class="hud-pill pickups">
+            <span class="crystal" aria-hidden="true"></span><span id="seeds" aria-label="風種 0">00</span>
+          </div>
+        </div>
+        <div class="route">
+          <span id="route-label">01 / 10</span>
+          <div class="route-line" id="route-progress" role="progressbar" aria-label="本關進度" data-en-label="Course progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div>
+        </div>
+      </div>
+      <div class="game-message" id="game-message" aria-live="polite"></div>
+
+      <div class="veil" id="veil">
+        <div class="panel" id="panel">
+          <p class="chapter" id="chapter">✦ 最後一封信</p>
+          <h1 class="title" id="title" lang="en"><span>Gale</span><span>Courier</span></h1>
+          <p class="lede" id="lede">跑過十段郵路，把最後一封信送到風塔。</p>
+          <div class="panel-actions">
+            <button class="start" id="start" type="button"><span id="start-label">開始遊戲</span><kbd id="start-key">Enter</kbd></button>
+            <button class="map-open" id="map-open" type="button" data-en="Select course">選擇關卡</button>
+          </div>
+          <button class="restart" id="restart" type="button" data-en="Restart course" hidden>重玩本關</button>
+        </div>
+      </div>
+
+      <div class="touch" aria-label="觸控操作" data-en-label="Touch controls">
+        <div class="touch-move">
+          <button data-input="left" type="button" aria-label="向左移動" data-en-label="Move left">◀</button>
+          <button data-input="right" type="button" aria-label="向右移動" data-en-label="Move right">▶</button>
+        </div>
+        <button class="touch-jump" data-input="jump" type="button" aria-label="跳躍" data-en-label="Jump" data-en="Jump">跳</button>
+      </div>
+    </section>
+
+    <footer class="bottom">
+      <span class="place"><span aria-hidden="true">✧</span><span id="place">暮谷郵路</span></span>
+      <div class="keyboard" aria-label="鍵盤操作" data-en-label="Keyboard controls">
+        <span><kbd>A</kbd><kbd>D</kbd><span data-en="Move">移動</span></span>
+        <span><kbd>Space</kbd><span data-en="Jump">跳躍</span></span>
+        <span><kbd>Esc</kbd><span data-en="Pause">暫停</span></span>
+      </div>
+    </footer>
+  </main>
+  <dialog id="course-map" class="course-map" aria-labelledby="map-title">
+    <div class="map-head">
+      <div>
+        <h2 id="map-title" data-en="The mail route">郵路地圖</h2>
+        <p id="map-progress"></p>
+      </div>
+      <form method="dialog"><button class="top-button" data-en="Close" autofocus>關閉</button></form>
+    </div>
+    <div class="map-grid" id="map-grid"></div>
+  </dialog>
+</body>
+</html>
