@@ -502,6 +502,7 @@ export class Combat {
     const snap = this.snapT > 0;
     if (!snap && (!L.los || this.angTo(L) > LOCK.assistCone)) return;
     const c = L.chest(_a).sub(this.eye);
+    if (!Number.isFinite(c.lengthSq())) { this.lockTarget = null; this.snapT = 0; return; }
     const wy = Math.atan2(c.x, c.z), wp = Math.atan2(c.y, Math.hypot(c.x, c.z));
     const k = 1 - Math.exp(-(snap ? LOCK.snap : LOCK.assist) * dt);
     pl.yaw += wrap(wy - pl.yaw) * k;

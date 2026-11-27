@@ -897,7 +897,13 @@ export class Vehicles {
     const d = rand(420, 520);
     const x = at ? at.x : clamp(p.x + Math.sin(a) * d, -760, 760), z = at ? at.z : clamp(p.z + Math.cos(a) * d, -760, 760);
     v.alt = rand(42, 80);
-    v.pos.set(x, at ? at.y : Math.max(w.height(x, z) + v.alt + 15, Math.min(w.support(x, z, 9, 1e4) + 30, w.height(x, z) + 115)), z);
+    // Far/out route anchors specify horizontal coordinates only.
+    let y = at?.y;
+    if (!Number.isFinite(y)) {
+      const ground = w.height(x, z);
+      y = Math.max(ground + v.alt + 15, Math.min(w.support(x, z, 9, 1e4) + 30, ground + 115));
+    }
+    v.pos.set(x, y, z);
     v.yaw = Math.atan2(p.x - x, p.z - z);
     v.vel.set(Math.sin(v.yaw), 0, Math.cos(v.yaw)).multiplyScalar(at ? 3 : 20);
     Object.assign(v, {

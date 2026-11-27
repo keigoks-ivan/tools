@@ -8,7 +8,9 @@ import {channelsAt,riverDepth} from '../taipei/rivers.mjs';
 import {loadBasin} from '../taipei/basin.mjs';
 import {FalconCombat,FALCON_WEAPONS} from '../taipei/falcon.mjs';
 import {TAIPEI_STAGES} from '../taipei/campaign.mjs';
-import {prepareStages} from '../combat.js';
+import {Vehicles} from '../vehicles.js';
+import {Encounter} from '../encounter.js';
+import {Combat,prepareStages} from '../combat.js';
 
 test('each Taipei chapter has seven reachable sectors, recovery checkpoints and its own ending',()=>{
   assert.deepEqual(TAIPEI_STAGES.map(s=>s.route.district),['arcade','river','beitou','songyan','grassland','skyline']);
@@ -90,4 +92,29 @@ test('白夜羽陣 chains three times, stops at cover, and needs no missile mark
   c.world.raycast=(a,b)=>b.z>100?.25:-1;
   c.events[1].fn();assert.deepEqual(damage,[80,120,160,80]);
   enemies[0].dead=true;c.events[2].fn();assert.equal(damage.length,4);
+});
+
+test('Guandu upstream helicopter has a usable altitude and lock direction at the route anchor',()=>{
+  const stage=prepareStages(TAIPEI_STAGES)[1],enc=Object.create(Encounter.prototype);
+  Object.assign(enc,{E:stage.enc,sec:1});
+  const [spawn]=enc.cur.waves[0];assert.equal(spawn.kind,'heli');assert.equal(spawn.where,'far');
+  const at=enc.pFar({...spawn,k:0});
+  const c=Object.create(Combat.prototype),vehicles=Object.create(Vehicles.prototype);
+  c.player={pos:new THREE.Vector3(-314,27,14),yaw:1,pitch:0};
+  c.world={height:()=>12,support:()=>79};c.nextId=1;
+  Object.assign(vehicles,{C:c,list:[]});
+  const heli=vehicles.spawn('heli',0,1,at);
+  assert.equal(heli.pos.x,at.x);assert.equal(heli.pos.z,at.z);
+  assert.equal(heli.pos.y,Math.max(12+heli.alt+15,79+30));
+  c.eye=c.player.pos.clone();c.lockTarget=heli;c.snapT=.5;
+  c.aimAssist(.016);
+  assert.ok(Number.isFinite(c.player.pitch)&&Number.isFinite(c.player.yaw));
+  assert.equal(c.lockTarget,heli);
+  assert.equal(vehicles.spawn('heli',0,1,{...at,y:10}).pos.y,10);
+});
+test('a lock target with an invalid position cannot poison subsequent camera frames',()=>{
+  const c=Object.create(Combat.prototype),player={yaw:.81,pitch:.19};
+  Object.assign(c,{player,eye:new THREE.Vector3(),snapT:.5,lockTarget:{chest:v=>v.set(0,NaN,100)}});
+  c.aimAssist(.016);
+  assert.equal(c.lockTarget,null);assert.deepEqual(player,{yaw:.81,pitch:.19});
 });
