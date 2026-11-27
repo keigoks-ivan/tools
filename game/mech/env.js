@@ -1228,6 +1228,7 @@ export class World {
     if (!BATTLEFIELDS[profile] || !route) profile = 'city';
     if (this.battlefield === profile && (profile === 'city' || this.fieldRoute === route)) return;
     this.resetBuildings();
+    this.tokyoTraffic=null;
     this.hillsideSite?.dispose(); this.hillsideSite=null;
     this.landingSite?.dispose(); this.landingSite=null;
     if (this.fieldGroup) {
@@ -1235,6 +1236,8 @@ export class World {
       this.fieldGroup.removeFromParent(); this.fieldGroup = null;
     }
     this.battlefield = profile; this.fieldRoute = route;
+    this.bearingOffset = profile === 'tokyo' ? 180 : 0;
+    this.mountainMesh.visible = profile !== 'tokyo';
     const F = BATTLEFIELDS[profile], layout = F.mode ? fieldLayout(profile, route) : null;
     const terrainRoute = layout ? { ...route, pads: layout.structures, relief: this.A.relief } : null;
     const T = this.terrain, p = this.terrainMesh.geometry.attributes.position, uv = this.terrainMesh.geometry.attributes.uv;
@@ -1254,7 +1257,7 @@ export class World {
       terrainUniforms.battlefield.value=F.mode;
       terrainUniforms.hillside.value=profile==='hillside' ? 1 : 0;
     }
-    this.scene.fog.density = F.mode ? profile === 'landing' ? .00024 : profile === 'forest' ? .00018 : profile === 'hillside' ? .00069 : .00012 : .00024;
+    this.scene.fog.density = F.mode ? profile === 'tokyo' ? .00032 : profile === 'landing' ? .00024 : profile === 'forest' ? .00018 : profile === 'hillside' ? .00069 : .00012 : .00024;
     this.scene.environmentIntensity=profile==='landing'?.57:F.mode?.43:.7;
     if(profile==='landing')this.lightDir.set(.45,.43,-.78).normalize();
     else if(profile==='hillside')this.lightDir.set(-.53,.77,-.54).normalize();
@@ -1264,7 +1267,7 @@ export class World {
     } else this.lightDir.copy(this.cityLightDir);
     this.skyDome.material.uniforms.sunDir.value.copy(this.lightDir);
     const skyRotation=new THREE.Matrix4();
-    if(profile==='landing'||profile==='hillside') {
+    if(profile==='landing'||profile==='hillside'||profile==='tokyo') {
       // 海面可直接看見整條地平線，只旋轉天空的方位，避免拉扯近海雲層。
       const bearing=Math.atan2(this.lightDir.z,this.lightDir.x)-Math.atan2(this.sunDir.z,this.sunDir.x);
       skyRotation.makeRotationY(bearing);
@@ -1300,6 +1303,7 @@ export class World {
 
   buildBattlefield(profile, layout) {
     const group = this.fieldGroup = new THREE.Group(); this.scene.add(group);
+    if (profile === 'tokyo') { this.buildTokyo(this,group); return; }
     if (profile === 'hillside') this.hillsideSite=buildHillside(this,group);
     if (profile === 'landing') this.landingSite=buildLandingSite(this,group);
     const r = rng(601 + layout.mode * 91), walls = new GeoBucket(), roofs = new GeoBucket(), records = [], contacts = [];

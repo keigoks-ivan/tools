@@ -35,12 +35,12 @@ export class MechCompanion {
     this.combat = combat;
     this.order = order;
     this.name = order.name || '斑鳩';
-    this.mech = new Mech('grunt', 'ally');
+    this.mech = this.name === '蒼焰' ? new Mech('hero', 'hero') : new Mech('grunt', 'ally');
     this.root = this.mech.root;
     this.root.name = '第三裝甲連・' + this.name;
     this.root.position.copy(spawn.position);
     this.root.updateMatrixWorld(true);
-    this.mech.footContacts = createFootContactShadows(this.root, [this.mech.bones.ankleR, this.mech.bones.ankleL]);
+    this.mech.footContacts ??= createFootContactShadows(this.root, [this.mech.bones.ankleR, this.mech.bones.ankleL]);
     this.pos = this.root.position;
     this.heading = this.face = this.mech.legYaw = combat.player.yaw;
     this.side = spawn.side;

@@ -2,7 +2,7 @@
 //   流程：標題（機體展示鏡頭＋選關）→ 開機（擋板升起）→ 戰鬥（一關）→ 暫停／結算 → 下一關
 //   ?show=… 或 ?free 會改載入 preview.js（美術／動作預覽）
 import * as THREE from 'three';
-import { frameTitle } from './title-visual.mjs?v=1';
+import { frameTitle, createFieldTitle } from './title-visual.mjs?v=2';
 import { createTitleHarbor } from './title-harbor.mjs?v=2';
 import { qualityLevel, pixelRatio, FrameGate } from './runtime.js';
 import { ScenicMusic } from './scenic-music.mjs';
@@ -15,8 +15,10 @@ import { LESSONS } from './tutorial.mjs?v=1';
 
 const q = new URLSearchParams(location.search);
 const taipei = q.get('campaign') === 'taipei';
+const ikaruga = q.get('campaign') === 'ikaruga';
+const sideStory = taipei || ikaruga;
 // 大檔案（貼圖、HDR、模型）改從 jsDelivr 下載，網站主機給大檔很慢；不能用時照舊從本站（見 cdn.js）
-try { const f = await (await import('./cdn.js')).useCDN(); if (f) THREE.DefaultLoadingManager.setURLModifier(f); } catch (e) {}
+try { const f = await (await import('./cdn.js?v=2')).useCDN(); if (f) THREE.DefaultLoadingManager.setURLModifier(f); } catch (e) {}
 if (q.has('show') || q.has('free')) await import('./preview.js');
 else await game();
 
@@ -35,8 +37,10 @@ async function game() {
   const $ = (id) => document.getElementById(id);
 
   const falcon = taipei ? await import('./taipei/falcon.mjs') : null;
-  const Combat = falcon?.FalconCombat || KobeCombat;
-  const STAGES = taipei ? prepareStages((await import('./taipei/campaign.mjs')).TAIPEI_STAGES) : kobeStages;
+  const leftWing = ikaruga ? await import('./ikaruga/loadout.mjs') : null;
+  const Combat = leftWing?.IkarugaCombat || falcon?.FalconCombat || KobeCombat;
+  const STAGES = taipei ? prepareStages((await import('./taipei/campaign.mjs')).TAIPEI_STAGES)
+    : ikaruga ? prepareStages((await import('./ikaruga/campaign.mjs')).IKARUGA_STAGES) : kobeStages;
   // ---------------------------------------------------------------- 畫面
   const canvas = $('gl');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
@@ -52,13 +56,18 @@ async function game() {
 
   const bar = document.querySelector('#bar i'), status = $('status');
   const basin = taipei ? await import('./taipei/basin.mjs') : null;
-  const [A, heightSource] = await Promise.all([loadAssets(renderer, (p) => { bar.style.width = (p * 90).toFixed(0) + '%'; }, true, !taipei), basin ? basin.loadBasin() : loadHeroMech()]);
+  const [A, heightSource] = await Promise.all([loadAssets(renderer, (p) => { bar.style.width = (p * 90).toFixed(0) + '%'; }, true, !sideStory), basin ? basin.loadBasin() : ikaruga ? null : loadHeroMech()]);
   status.textContent = '建立城市';
   initMechMaterials(A);
-  const world = new World(renderer, scene, A, taipei ? {city:false, terrainSegments:180, heightSource, terrainSurface:basin.basinSurface} : undefined);
+  const world = new World(renderer, scene, A, taipei ? {city:false, terrainSegments:180, heightSource, terrainSurface:basin.basinSurface} : ikaruga ? {city:false,terrainSegments:180,heightSource:()=>0} : undefined);
   if (taipei) world.buildTaipei = await (await import('./taipei/district.mjs')).prepareDistrict(A,heightSource);
+  if (ikaruga) {
+    const [{buildTokyo}, {buildFuji,frameFuji}] = await Promise.all([import('./ikaruga/tokyo.mjs'), import('./ikaruga/fuji.mjs')]);
+    world.frameFuji = frameFuji;
+    world.buildTokyo = (w, group) => { buildTokyo(w, group); buildFuji(w, group); };
+  }
   const post = new Post(renderer, scene, camera, cockScene, cockCam);
-  const cockpit = new Cockpit(world, camera, cockScene, cockCam, taipei);
+  const cockpit = new Cockpit(world, camera, cockScene, cockCam, taipei, ikaruga);
   // 扶手台擋住的畫面，城市那層直接跳過不畫（?nomask 可關掉比對）
   const cockMask = cockpit.depthMask();
   cockMask.visible = false;
@@ -79,11 +88,12 @@ async function game() {
 
   // ---------------------------------------------------------------- 自機
   const SPAWN = new THREE.Vector3(0, 0, -70);
-  const hero = taipei ? new Mech('grunt', 'ally') : new Mech('hero', 'hero');
+  const hero = sideStory ? new Mech('grunt', 'ally') : new Mech('hero', 'hero');
   if (taipei) falcon.fitFalcon(hero, A);
+  if (ikaruga) leftWing.fitIkaruga(hero, A);
   hero.heavy = true;   // 重量模式（anim.js HEAVY）：機身轉向限速、落腳更沉；前傳、續作不開
   scene.add(hero.root);
-  const titleVisual = taipei ? falcon.falconTitle(renderer,hero,world) : createTitleHarbor(renderer, new Mech('hero', 'hero'), world, post);
+  const titleVisual = sideStory ? createFieldTitle(renderer,hero,world) : createTitleHarbor(renderer, new Mech('hero', 'hero'), world, post);
   const player = new Player(hero, world, {
     land: (s) => {
       audio.land(s); cockpit.kick('land', s);
@@ -107,7 +117,7 @@ async function game() {
   player.apMax = 9000;
   // n＝關卡（遭遇戰從路線起點、面向第一段出發）；cp＝檢查點
   function resetPlayer(n = 0, cp = null) {
-    const D = n ? STAGES[n - 1] : taipei ? STAGES[0] : null;
+    const D = n ? STAGES[n - 1] : sideStory ? STAGES[0] : null;
     world.setBattlefield(D?.battlefield, D?.route);
     const E = D?.enc;
     let x = SPAWN.x, z = SPAWN.z, yaw = 0;
@@ -199,7 +209,7 @@ async function game() {
     if (!keepBuildings) world.resetBuildings();   // 尾聲接續同一個戰場，保留決戰破壞
     fx.clear();
     stageNo = n;
-    combat = new Combat({ scene, world, camera, player, hero, fx, audio, cockpit, post, onEnd: finish, stage: n, stageDef: taipei ? STAGES[n-1] : undefined, campaignLength:STAGES.length, cp });
+    combat = new Combat({ scene, world, camera, player, hero, fx, audio, cockpit, post, onEnd: finish, stage: n, stageDef: sideStory ? STAGES[n-1] : undefined, campaignLength:STAGES.length, cp });
     window.__combat = combat;
   }
   newCombat();
@@ -207,6 +217,7 @@ async function game() {
   // ---------------------------------------------------------------- 設定
   // 視角：false＝駕駛艙（第一人稱）、true＝機體後方（看得到整台機體）；記住上次的選擇
   const saveKey = k => {
+    if(ikaruga && /^(cleared|best\d+|view)$/.test(k))return 'mech.ikaruga.'+k;
     if(!taipei || !/^(cleared|best\d+|view)$/.test(k))return 'mech.'+k;
     if(k==='cleared' || /^best[3-6]$/.test(k))return 'mech.taipei.six.'+k;
     return 'mech.taipei.'+k;
@@ -302,7 +313,7 @@ async function game() {
         + `${D.enc ? `<em>${D.fieldLabel || '遭遇戰'}</em>` : ''}<b>${n}</b><span>${lock ? 'LOCKED' : D.name}</span>${best ? `<i>${RANKS[best]}</i>` : ''}</button>`;
     }).join('');
     const codaButton = $('replayCoda');
-    codaButton.hidden = taipei || store.get('cleared', 0) < STAGES.length;
+    codaButton.hidden = sideStory || store.get('cleared', 0) < STAGES.length;
     codaButton.textContent = store.get('harborCoda', 0) ? '重玩第 11 章　港口未停火' : '第 11 章　港口未停火';
     const relay = RELAY_OUTCOMES[store.get('harborRelay', 0)], sequel = $('titleLastLine');
     sequel.href = lastLineURL(relay);
@@ -311,14 +322,14 @@ async function game() {
   }
 
   // ---------------------------------------------------------------- 流程
-  let state = 'title', boot = 0, bootLen = 3.4, titleT = 0, landingOpening = false;
+  let state = 'title', boot = 0, bootLen = 3.4, titleT = 0, openingShot = null;
   let pausedFrom = 'play', coda = null, stations = null;
   const codaHUD = $('codaHUD'), codaObjective = $('codaObjective'), codaDistance = $('codaDistance');
   const codaHint = $('codaHint'), codaHeading = $('codaHeading'), codaEnd = $('codaEnd');
   const codaEmergency = $('codaEmergency'), codaInterrupt = $('codaInterrupt');
   const codaFilm = $('codaFilm'), codaFail = $('codaFail'), cinematic = new HarborCinematic(camera, world);
   const history = new HistoryReader({onOpen:()=>{pause();input.unlock();},onClose:()=>{input.reset();resume();},onRead:()=>{try{localStorage.setItem('mech.history',JSON.stringify(history.snapshot()));}catch{}}});
-  const historyPlaques=taipei ? {meshes:[],items:[]} : createHistoryPlaques(scene,world.kitano);
+  const historyPlaques=sideStory ? {meshes:[],items:[]} : createHistoryPlaques(scene,world.kitano);
   world.cityObjects.push(...historyPlaques.meshes);
   try{history.restore(JSON.parse(localStorage.getItem('mech.history')));}catch{}
   window.__history=history;
@@ -384,9 +395,16 @@ async function game() {
     brief(n, () => startBoot(3.4));
   }
   // 出擊前的簡報卡（stages.js 的 brief）：點一下或按任意鍵出擊；重來（同一關）不再顯示
-  function brief(n, go) {
+  let landingHeroReady;
+  function brief(n, start) {
+    // 蒼焰只在外傳終章登艇。簡報期間載入，前六章不用下載它的模型。
+    const needsAlly = ikaruga && STAGES[n-1].frontline === 'landing';
+    if (needsAlly) landingHeroReady ??= loadHeroMech().catch(() => { landingHeroReady = null; });
     const D = STAGES[n - 1];
-    if (!D.brief || !D.brief.length || q.has('nobrief')) { go(); return; }
+    if (!D.brief || !D.brief.length || q.has('nobrief')) {
+      if (needsAlly) landingHeroReady.then(start); else start();
+      return;
+    }
     let el = $('brief');
     if (!el) {
       el = document.createElement('div'); el.id = 'brief';
@@ -399,10 +417,14 @@ async function game() {
       + '<div style="margin-top:34px;font-size:13px;letter-spacing:0.3em;color:#8aa3ab">點一下或按任意鍵出擊</div>';
     el.style.display = 'flex';
     const t0 = performance.now();
-    const done = () => {
+    const done = async () => {
       if (performance.now() - t0 < 400) return;   // 剛出現時的那一下不算
       removeEventListener('keydown', done); el.removeEventListener('pointerdown', done);
-      el.style.display = 'none'; go();
+      if (needsAlly) {
+        el.lastElementChild.textContent = '整備登陸小隊中…';
+        await landingHeroReady;
+      }
+      el.style.display = 'none'; start();
     };
     addEventListener('keydown', done); el.addEventListener('pointerdown', done);
   }
@@ -414,12 +436,13 @@ async function game() {
     audio.setPaused(false); audio.setDanger(false); audio.setLockAlert(0); audio.boost(0);
     input.unlock(); input.enabled = false;
     touchUI.style.display = 'none';
-    resetPlayer(); newCombat(taipei ? 1 : stageNo);
+    if (openingShot === 'fuji') { camera.fov=cockpit.baseFov;camera.updateProjectionMatrix(); }
+    resetPlayer(); newCombat(sideStory ? 1 : stageNo);
     cockpitView(false); cockpit.root.visible = false; seeOff();
     for (const k of ['damage', 'overdrive', 'speed', 'danger', 'flash']) post.u[k].value = 0;
     odV = speedV = flashV = dangerV = 0;
     state = 'title'; titleT = 0;
-    landingOpening = false;
+    openingShot = null;
     syncLesson();
     renderStages();
     audio.music('title');
@@ -434,14 +457,19 @@ async function game() {
     }
   }
   function startBoot(len) {
-    historyButton.hidden=taipei;
-    combat.prep();   // 遭遇戰：擺路障、第一區的遠處目標
+    historyButton.hidden=sideStory;
+    combat.prep();
+    world.tokyoTraffic?.reset(combat.enc.sec);
     state = 'boot'; boot = 0; bootLen = len;
     input.enabled = true;
     if (!input.touch.on) input.lock();
     touchUI.style.display = input.touch.on ? 'block' : 'none';
-    landingOpening = combat.def?.frontline==='landing' && !!world.landingSite && !combat.cp;
-    if (landingOpening) { cockpitView(false); cockpit.root.visible = false; seeOff(); }
+    openingShot = null;
+    if (!combat.cp) {
+      if (combat.def.frontline==='landing' && world.landingSite) openingShot='landing';
+      else if (combat.def.route?.district==='wakasu' && world.frameFuji) { openingShot='fuji'; bootLen=3.4; }
+    }
+    if (openingShot) { cockpitView(false); cockpit.root.visible = false; seeOff(); }
     else applyView();
     audio.ui('boot');
     scenicMusic.reset();
@@ -485,12 +513,12 @@ async function game() {
       if (RANKS.indexOf(rank) > store.get('best' + n, 0)) store.set('best' + n, RANKS.indexOf(rank));
     }
     audio.music(win ? (last ? 'allclear' : D.frontline==='landing' ? 'landingHome' : 'clear') : 'fail');
-    $('resTitle').textContent = win ? (last ? (taipei ? '台北雨線・七人全數接通' : '神戶市區停火') : `第 ${n} 關完成`) : `第 ${n} 關失敗`;
-    $('resSub').textContent = win ? (last ? (taipei ? 'SIGNAL RESTORED' : 'CEASEFIRE') : 'STAGE CLEAR') : 'MISSION FAILED';
+    $('resTitle').textContent = win ? (last ? (ikaruga ? '東京左翼・三號艇靠岸' : taipei ? '台北雨線・七人全數接通' : '神戶市區停火') : `第 ${n} 關完成`) : `第 ${n} 關失敗`;
+    $('resSub').textContent = win ? (last ? (ikaruga ? 'ALL HANDS ASHORE' : taipei ? 'SIGNAL RESTORED' : 'CEASEFIRE') : 'STAGE CLEAR') : 'MISSION FAILED';
     $('resRank').textContent = rank;
     $('resRank').style.display = win ? '' : 'none';
     $('next').style.display = win && !last ? '' : 'none';
-    $('playCoda').hidden = taipei || !(win && last);
+    $('playCoda').hidden = sideStory || !(win && last);
     $('again').textContent = win ? '再打一次 RETRY' : '再試一次 RETRY';
     $('cont').style.display = !win && combat.cp ? '' : 'none';
     const mm = Math.floor(S.time / 60), ss = String(Math.floor(S.time % 60)).padStart(2, '0');
@@ -510,7 +538,7 @@ async function game() {
     codaFilm.hidden = true; codaFail.hidden = true;
     codaEmergency.hidden = true;
     delete touchUI.dataset.coda;
-    $('tCannon').textContent = taipei ? '羽陣' : '光波砲';
+    $('tCannon').textContent = ikaruga ? '震波' : taipei ? '羽陣' : '光波砲';
   }
 
   function codaCombat() {
@@ -537,7 +565,7 @@ async function game() {
   }
 
   function startCoda(fromTitle = false) {
-    if (taipei) return;
+    if (sideStory) return;
     const n = STAGES.length;
     if (fromTitle ? state !== 'title' || store.get('cleared', 0) < n : state !== 'result' || $('playCoda').hidden || stageNo !== n) return;
     $('title').classList.add('hide');
@@ -760,7 +788,7 @@ async function game() {
       if (boot >= 1) { state = 'play'; combat.start(); }
     }
     const inCoda = state === 'coda', live = state === 'play' || state === 'boot' || inCoda;
-    if(!taipei&&state==='play'&&input.pressed('KeyJ')){history.open(historyAt());input.endFrame();return;}
+    if(!sideStory&&state==='play'&&input.pressed('KeyJ')){history.open(historyAt());input.endFrame();return;}
     let inp = input.state(rdt);
     if (window.__game.fake) Object.assign(inp, window.__game.fake);
     if (inp.pause && live) { input.unlock(); pause(); input.endFrame(); return; }
@@ -774,8 +802,8 @@ async function game() {
       if (done) endCodaFilm();
       return;
     }
-    if (landingOpening && (state !== 'boot' || boot >= .86 || inp.view || inp.fire || input.pressed('Space') || input.pressed('Enter'))) {
-      landingOpening = false;
+    if (openingShot && (state !== 'boot' || boot >= .86 || inp.view || inp.fire || input.pressed('Space') || input.pressed('Enter'))) {
+      openingShot = null;
       applyView();
     }
     if (inp.view && live) { tpView = !tpView; store.set('view', tpView ? 1 : 0); applyView(); }
@@ -820,7 +848,8 @@ async function game() {
       shield: C.shield, cannon: C.cannon, od: C.od, lockAlert: C.lockAlert, danger: player.ap / player.apMax < 0.3 ? 1 : 0,
       radar, px: player.pos.x, pz: player.pos.z, route: C.enc && C.enc.ahead, wp: C.enc && C.enc.wp,
     });
-    if (landingOpening) {
+    if (openingShot === 'fuji') world.frameFuji(camera, player, Math.min(1,boot/.86));
+    else if (openingShot === 'landing') {
       const bow = world.landingSite.ship.position.x;
       camera.position.set(bow - 155 + 31 * boot, 64 - 12 * boot, -143 + 24 * boot);
       camera.lookAt(bow + 39, 7, 14);
@@ -835,6 +864,7 @@ async function game() {
     if (coda?.film) { hud.clear(); input.endFrame(); return; }
     fx.update(dt);
     world.update(dt);
+    if (world.tokyoTraffic) world.tokyoTraffic.update(dt, C.enc.sec, C.enc.state === 'done');
     world.followShadow(player.pos);
     camera.getWorldDirection(fwd);
     audio.setListener(camera.position, fwd);
@@ -859,7 +889,7 @@ async function game() {
     dangerV += ((danger ? 0.6 : 0) - dangerV) * (1 - Math.exp(-rdt * 3));
     flashV = Math.max(0, flashV - rdt * 3);
     if (C.hitstop > 0 && C.killMark > 0.9) flashV = Math.max(flashV, 0.06);
-    post.u.boot.value = state === 'boot' && !landingOpening ? boot : 1;
+    post.u.boot.value = state === 'boot' && !openingShot ? boot : 1;
     post.u.damage.value = Math.min(1, C.damageFx * 0.8);
     post.u.overdrive.value = odV;
     post.u.speed.value = speedV;
@@ -867,12 +897,12 @@ async function game() {
     post.u.flash.value = flashV;
     // 瞄準鏡頭：鎖定時另拍一張小的放大畫面，貼在側邊面板
     // 第十一章低畫質保留主 HUD 鎖定，省去莢艙的第二次場景渲染。後視鏡頭看不到莢艙，也不必重畫。
-    cockpit.targetView(renderer, scene, landingOpening || (taipei || coda) && (quality === 0 || tpView) ? null : C.lockTarget);
-    if (landingOpening) seeOff();
+    cockpit.targetView(renderer, scene, openingShot || (sideStory || coda) && (quality === 0 || tpView) ? null : C.lockTarget);
+    if (openingShot) seeOff();
     else seeThrough(C);
     post.render(t);
 
-    if (landingOpening) hud.clear();
+    if (openingShot) hud.clear();
     else hud.draw(rdt, { boot: state === 'boot' ? boot : 1, combat: C, player, stages: STAGES.length, groundY, tp: tpView,
       label: coda ? `STAGE ${STAGES.length + 1}` : undefined, ceasefire: !!coda && !airCombat });
     input.endFrame();
@@ -880,7 +910,7 @@ async function game() {
   requestAnimationFrame(frame);
 
   // 從前傳《鋼鐵黃昏 零》接過來（?zero）：跳過標題，黑畫面待命；瀏覽器要先有一次操作才能鎖滑鼠、出聲，按一下就直接第 1 關開機
-  if (!taipei && q.has('zero')) {
+  if (!sideStory && q.has('zero')) {
     const tl = $('title'), kids = [...tl.children];
     tl.style.background = '#000';
     for (const el of kids) el.style.display = 'none';

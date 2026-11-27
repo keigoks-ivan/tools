@@ -40,7 +40,8 @@ export async function useCDN() {
     return (u) => {
       try {
         const url = new URL(u, location.href);
-        if (url.origin !== location.origin || !EXT.test(url.pathname)) return u;
+        // 東京地景跟著關卡程式一起發布，版本獨立於共用素材。
+        if (url.origin !== location.origin || url.pathname.startsWith('/game/mech/ikaruga/') || !EXT.test(url.pathname)) return u;
         const out = base + url.pathname.replace(/^\//, '');
         return failed.has(out) ? u : out;   // 這個檔案 CDN 抓不到過：改從本站
       } catch (e) { return u; }

@@ -27,3 +27,15 @@ export async function createHangarTitleLighting(scene, point) {
   group.add(key, rim); scene.add(group); group.visible = false;
   return { set(visible) { group.visible = visible; } };
 }
+
+export function createFieldTitle(renderer,hero,world){
+  const st={vel:hero.root.position.clone().set(0,0,0),grounded:true,boost:0,torsoYaw:2.78,pitch:0,thrust:0,aim:null,lean:0};
+  let time=0;
+  return {scene:world.scene,hero,render(dt,camera){
+    time+=dt;const [x,z]=world.fieldRoute.pts[0];hero.root.position.set(x,world.height(x,z),z);
+    hero.legYaw=st.torsoYaw;hero.animate(dt,st);const p=hero.root.position;
+    camera.position.set(p.x+12+Math.sin(time*.12)*.8,p.y+9.4,p.z-25);
+    camera.lookAt(p.x,p.y+9,p.z);world.skyDome.position.copy(camera.position);world.followShadow(p);
+    renderer.render(world.scene,camera);
+  }};
+}

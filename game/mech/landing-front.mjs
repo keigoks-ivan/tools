@@ -17,6 +17,7 @@ const barrage=[
 export class LandingFront extends BattleLine {
   constructor(combat, encounter) {
     super(combat, encounter);
+    this.leftWingPilot=combat.def?.pilot==='斑鳩';
     this.travel=0;
     this.lower=0;
     this.ashore=Boolean(combat.cp?.sec);
@@ -50,8 +51,9 @@ export class LandingFront extends BattleLine {
 
   carryPilot() {
     const pilot=this.C.player,x=this.site.ship.position.x+LANDING.offset,y=LANDING.deck+this.site.ship.position.y;
-    this.C.hero?.motion?.carry(x-pilot.pos.x,y-pilot.pos.y,-pilot.pos.z);
-    pilot.pos.set(x,y,0);
+    const z=this.leftWingPilot?-11:0;
+    this.C.hero?.motion?.carry(x-pilot.pos.x,y-pilot.pos.y,z-pilot.pos.z);
+    pilot.pos.set(x,y,z);
     pilot.vel.set(0,0,0);
     pilot.grounded=true;
   }
@@ -124,8 +126,8 @@ export class LandingFront extends BattleLine {
     const pair=checkpoint>=3?[[restored.x-12,restored.z-12],[restored.x+12,restored.z-12]]
       :checkpoint===2?[[54,-45],[52,48]]
       :checkpoint===1?[[-159,-46],[-175,51]]
-        :[[this.site.ship.position.x-21,-12],[this.site.ship.position.x-21,12]];
-    this.ikaru=this.unit('ally',...pair[0],true,'blue',{name:'斑鳩',tanks:true});
+        :[[this.site.ship.position.x-21,this.leftWingPilot?0:-12],[this.site.ship.position.x-21,12]];
+    this.ikaru=this.unit('ally',...pair[0],true,'blue',{name:this.leftWingPilot?'蒼焰':'斑鳩',tanks:true});
     this.hayabusa=this.unit('ally',...pair[1],true,'blue',{name:'白隼',aggressors:true});
     for(const [i,a] of this.allies.entries()) {
       if(!checkpoint)a.pos.y=LANDING.deck+this.site.ship.position.y;
@@ -263,8 +265,8 @@ export class LandingFront extends BattleLine {
     this.order(north,[-27,-61],[-62,-61]);this.order(northSupport,[-19,-62]);
     this.order(south,[-25,63]);this.order(southSupport,[4,64]);
     this.wallGuards={left:[north,northSupport],right:[south,southSupport]};
-    this.C.say('第三波・兩翼破口','左側是攔截機，右側是戰車。選一側打穿海堤',3,'cy');
-    this.C.lines([[COMMAND,'斑鳩從左側攔截機那邊走，白隼去對付右側的戰車。蒼焰，選一側跟上。']],true,3.2);
+    this.C.say('第三波・兩翼破口',this.leftWingPilot?'擊退左側攔截機，替後方登陸艇打開左翼通道':'左側是攔截機，右側是戰車。選一側打穿海堤',3,'cy');
+    this.C.lines([[COMMAND,this.leftWingPilot?'斑鳩，左側缺口交給你。蒼焰跟你走，白隼從右側壓上。堤內會合。':'斑鳩從左側攔截機那邊走，白隼去對付右側的戰車。蒼焰，選一側跟上。']],true,3.2);
   }
 
   crossWall(lane) {
@@ -448,7 +450,7 @@ export class LandingFront extends BattleLine {
     else if(this.phase==='beachCounter'&&p.x>-212&&this.shoreCleared())this.enterSeawall();
     else if(this.phase==='seawall'&&p.x>-78){
       const lane=p.z<0?'left':'right';
-      if(Math.abs(p.z-lanes[lane])<29&&cleared(this.wallGuards[lane]))this.crossWall(lane);
+      if((!this.leftWingPilot||lane==='left')&&Math.abs(p.z-lanes[lane])<29&&cleared(this.wallGuards[lane]))this.crossWall(lane);
     } else if(this.phase==='crossing'&&p.x>20&&Math.abs(p.z)<116&&this.shoreCleared())this.enterYard();
     else if(this.phase==='yard'&&p.x>91&&Math.abs(p.z)<116&&this.shoreCleared())this.beginBoss();
     if(this.phase==='boss'&&!this.boss.shifted&&this.boss.entity.ap<this.boss.maxAP*.55)this.bossReserve();
@@ -477,6 +479,7 @@ export class LandingFront extends BattleLine {
     if(this.phase==='ramp')return {title:'接岸',hint:'艏部跳板正在下降'};
     if(this.phase==='beach')return {title:'為第二列登陸艇開路',hint:this.site.fleetReleased?'艇隊正在靠岸，清除灘頭守軍':'擊破左前方的岸防重裝機，讓艇隊駛入'};
     if(this.phase==='beachCounter')return {title:'灘岸反擊',hint:'擊退第二線的預備隊，往海堤靠近'};
+    if(this.phase==='seawall'&&this.leftWingPilot)return {title:'打開左翼通道',hint:'擊破左側攔截機，與蒼焰穿過缺口'};
     if(this.phase==='seawall')return {title:'選一側突破海堤',hint:'左側攔截機　／　右側岸防戰車'};
     if(this.phase==='crossing')return {title:'海堤內側反擊',hint:'清掉缺口後方的預備隊'};
     if(this.phase==='yard')return {title:'攻入外港裝卸區',hint:'擊破鐵獒的前衛再往前推'};
@@ -488,7 +491,7 @@ export class LandingFront extends BattleLine {
   }
 
   get waypoints() {
-    if(this.phase==='seawall')return this.wallMarkers;
+    if(this.phase==='seawall')return this.leftWingPilot?[this.wallMarkers[0]]:this.wallMarkers;
     if(this.phase==='wings')return this.baseMarkers;
     if(this.phase==='base'&&this.wave>=this.op.waves.length-(this.op.id==='hq'?1:0))return this.lastDefenders();
     return ['beachCounter','crossing','yard','boss'].includes(this.phase)?this.lastDefenders():[];

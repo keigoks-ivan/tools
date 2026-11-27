@@ -316,7 +316,7 @@ export class Encounter {
   get wantsTutorial() { return !!this.C.def.tutorial && !this.C.cp && this.sec === 0; }
   // 開機時：擺路障、先擺好第一區的遠處戰車，光柱／警示光先畫一次（編好 shader，第一次出現不卡）
   prep() {
-    if (!this.front && this.C.def.battlefield !== 'taipei') this.R = setRoute(this.C.world, this.E);
+    if (!this.front && !this.C.def.route?.district) this.R = setRoute(this.C.world, this.E);
     this.front?.prepare?.();
     this.B = markers(this.C.scene);
     this.B.root.visible = true; this.B.a = 0;

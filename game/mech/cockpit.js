@@ -170,7 +170,7 @@ function stripeTex() {
 // 噴漆標示字（印在面板上；原創字樣，帶一點噴漆顆粒）
 const LABELS = ['RADAR', 'RNG 600', 'STATUS', 'ARMS', 'FCS', 'SPD', 'ALT', 'EN CELL', 'BALANCER', 'CAUTION', 'M-07', 'MSL ARM', 'SYS 1', 'SYS 2', 'IFF', 'COMM', 'HOT', 'VENT', 'GEN', 'LINK',
   'EJECT', 'PULL', 'MASTER ARM', 'OVRD', 'BRT', 'NO STEP', 'SAFE', 'ARM', 'HYD', 'ELEC', 'DANGER'];
-function labelTex(falcon) {
+function labelTex(unitName) {
   const W = 1024, H = 512, [c, x] = canvas(W, H), r = rng(3);
   const rect = {};
   x.font = '700 30px Rajdhani, "Arial Narrow", sans-serif';
@@ -182,7 +182,7 @@ function labelTex(falcon) {
     const warn = s === 'CAUTION' || s === 'HOT' || s === 'DANGER';
     if (warn) { x.fillStyle = '#d9a21a'; x.fillRect(px, py, w, 36); x.fillStyle = '#111'; }
     else x.fillStyle = s === 'M-07' || s === 'EJECT' ? '#e8ecef' : '#b9c3c8';
-    x.fillText(falcon && s === 'M-07' ? '白隼' : s, px + 7, py + 19);
+    x.fillText(s === 'M-07' ? unitName : s, px + 7, py + 19);
     rect[s] = [px, py, w, 36];
     px += w + 8;
   }
@@ -343,8 +343,10 @@ const DOME_FRAG = `
 
 // ---------------------------------------------------------------- 駕駛艙
 export class Cockpit {
-  constructor(world, camera, scene, cam, falcon = false) {
+  constructor(world, camera, scene, cam, falcon = false, ikaruga = false) {
     this.falcon = falcon;
+    this.ikaruga = ikaruga;
+    this.unitName = ikaruga ? '斑鳩' : falcon ? '白隼' : 'M-07';
     this.world = world; this.camera = camera; this.scene = scene; this.cam = cam;
     this.root = new THREE.Group();
     scene.add(this.root);
@@ -399,7 +401,8 @@ export class Cockpit {
       glow: new THREE.MeshBasicMaterial({ color: 0x000000 }),   // 扶手燈條（顏色每幀依狀態變）
     };
     if (this.falcon) { this.M.shell.color.setHex(0x769a94); this.M.orange.color.setHex(0xccab64); }
-    const L = labelTex(this.falcon);
+    if (this.ikaruga) { this.M.shell.color.setHex(0x5c6263); this.M.orange.color.setHex(0xd19b49); }
+    const L = labelTex(this.unitName);
     this.labels = L;
     this.M.label = new THREE.MeshStandardMaterial({ map: L.tex, transparent: true, alphaTest: 0.2, roughness: 0.6, metalness: 0, polygonOffset: true, polygonOffsetFactor: -2 });
     // 背光按鍵：沒亮＝灰字；背光＝字發淡青白光（亮度每幀依儀表電源與外面亮度調）
@@ -1368,7 +1371,7 @@ export class Cockpit {
     part(pc.armL, [[50, 28], [88, 34], [92, 128], [66, 132], [56, 60]]);
     part(pc.legR, [[-24, 124], [-4, 124], [-8, 226], [-40, 232], [-36, 180]]);
     part(pc.legL, [[24, 124], [4, 124], [8, 226], [40, 232], [36, 180]]);
-    this.tx(x, this.falcon ? '白隼' : 'M-07', 20, 56, COL.wh, 20, true);
+    this.tx(x, this.unitName, 20, 56, COL.wh, 20, true);
     // 右半：裝甲、能量、各部位、狀態
     const ap = ui.ap ?? 1, apMax = ui.apMax ?? 1, en = ui.en ?? 1, f = clamp(ap / apMax, 0, 1), X0 = 236, WW = 258;
     this.tx(x, 'ARMOR', X0, 58, COL.dim, 19);
@@ -1397,7 +1400,7 @@ export class Cockpit {
     this.tx(x, 'MSTR ARM', L, 56, COL.dim, 17); this.tx(x, 'ARM', L + 104, 56, COL.gr, 18, true);
     // 右手：光束步槍
     const rf = ui.rifle || { ammo: 40, mag: 40, reload: -1 };
-    this.tx(x, 'GUN', L, 88, COL.dim, 18); this.tx(x, this.falcon ? (ui.speed>=12?'掠翼・機動':'掠翼') : 'BEAM RIFLE', L + 50, 88, COL.wh, 19);
+    this.tx(x, 'GUN', L, 88, COL.dim, 18); this.tx(x, this.ikaruga ? '破樁' : this.falcon ? (ui.speed>=12?'掠翼・機動':'掠翼') : 'BEAM RIFLE', L + 50, 88, COL.wh, 19);
     this.tx(x, pad(rf.ammo, 2), Rr - 46, 82, rf.ammo > 0 ? COL.wh : COL.rd, 42, true, 'right');
     this.tx(x, `/${rf.mag}`, Rr, 88, COL.dim, 18, false, 'right');
     const gap = Math.min(6, (w - 32) / rf.mag * 0.35), cw = (w - 32 + gap) / rf.mag;
@@ -1405,7 +1408,7 @@ export class Cockpit {
     if (rf.reload >= 0) { this.hb(x, L, 130, w - 32 - 60, 6, rf.reload, COL.am); this.tx(x, 'RLD', Rr, 133, COL.am, 16, true, 'right'); }
     // 左肩：飛彈莢艙
     const ms = ui.msl || { ready: 6, max: 6, cd: 1, locks: 0 };
-    this.tx(x, 'MSL', L, 158, COL.dim, 18); this.tx(x, this.falcon ? '羽標' : `MISSILE ×${ms.max}`, L + 50, 158, COL.wh, 19);
+    this.tx(x, this.ikaruga ? 'ANCH' : 'MSL', L, 158, COL.dim, 18); this.tx(x, this.ikaruga ? '磁錨牽引' : this.falcon ? '羽標' : `MISSILE ×${ms.max}`, L + 50, 158, COL.wh, 19);
     this.tx(x, ms.locks ? `LOCK ${ms.locks}` : ms.cd >= 1 ? 'READY' : 'LOAD', Rr, 158, ms.locks ? COL.rd : ms.cd >= 1 ? COL.gr : COL.am, 22, true, 'right');
     const pw = (w - 32 + 8) / ms.max;
     for (let i = 0; i < ms.max; i++) {
@@ -1419,7 +1422,7 @@ export class Cockpit {
     this.tx(x, shieldText, Rr, 230, shield?.active ? COL.cy : shield?.cooldown > 0 ? COL.am : COL.gr, 20, true, 'right');
     // 光波砲：充能中閃、冷卻中顯示百分比
     const cn = ui.cannon || { cd: 1, phase: null };
-    this.tx(x, 'CAN', L, 260, COL.dim, 18); this.tx(x, this.falcon ? '白夜羽陣' : 'BEAM CANNON', L + 50, 260, COL.wh, 19);
+    this.tx(x, 'CAN', L, 260, COL.dim, 18); this.tx(x, this.ikaruga ? '定向震波' : this.falcon ? '白夜羽陣' : 'BEAM CANNON', L + 50, 260, COL.wh, 19);
     const cs = cn.phase === 'charge' ? 'CHARGE' : cn.phase === 'fire' ? 'FIRE' : cn.cd >= 1 ? 'READY [E]' : `${Math.round(cn.cd * 100)}%`;
     this.tx(x, cs, Rr, 260, cn.phase ? (Math.sin(t * 20) > 0 ? COL.cy : COL.wh) : cn.cd >= 1 ? COL.gr : COL.am, 20, true, 'right');
     if (cn.cd < 1 && !cn.phase) this.hb(x, L, 274, w - 32, 5, cn.cd, COL.am);

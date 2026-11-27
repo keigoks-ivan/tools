@@ -317,12 +317,12 @@ export class HUD {
       this.text(val, x + w, wy, 11, col, hot ? 1 : 0.75, 'right', 700);
       this.bar(x, wy + 8 * s, w, 2 * s, v, col);
     };
-    chip(0, C.weapons.rifle.mobile ? '掠翼' : 'RIFLE', R.reload >= 0 ? 'RELOAD' : `${R.ammo}/${R.mag}`, R.reload >= 0 ? R.reload : R.ammo / R.mag, R.reload >= 0 || R.ammo <= 3 ? 'am' : 'cy', true);
-    chip(1, C.weapons.rifle.mobile ? '羽標' : 'MSL', M.cd >= 1 ? 'READY' : `${Math.ceil((1 - M.cd) * M.cooldownSeconds)}s`, M.cd, M.cd >= 1 ? 'gr' : 'dim', M.cd >= 1);
+    chip(0, C.def.pilot === '斑鳩' ? '破樁' : C.weapons.rifle.mobile ? '掠翼' : 'RIFLE', R.reload >= 0 ? 'RELOAD' : `${R.ammo}/${R.mag}`, R.reload >= 0 ? R.reload : R.ammo / R.mag, R.reload >= 0 || R.ammo <= 3 ? 'am' : 'cy', true);
+    chip(1, C.def.pilot === '斑鳩' ? '牽引' : C.weapons.rifle.mobile ? '羽標' : 'MSL', M.cd >= 1 ? 'READY' : `${Math.ceil((1 - M.cd) * M.cooldownSeconds)}s`, M.cd, M.cd >= 1 ? 'gr' : 'dim', M.cd >= 1);
     const shieldReady = SH.cooldown <= 0 && !SH.active;
     const shieldText = SH.active ? `ON ${Math.ceil(SH.level * 100)}%` : shieldReady ? 'READY' : `${Math.ceil(SH.cooldown)}s`;
     chip(2, 'SHIELD F', shieldText, SH.level, SH.active ? (SH.level < 0.3 ? 'am' : 'cy') : shieldReady ? 'gr' : 'dim', shieldReady || SH.active);
-    chip(3, C.weapons.rifle.mobile ? '羽陣 E' : 'CANNON E', CN.phase ? (CN.phase === 'charge' ? 'CHARGE' : 'FIRE') : CN.cd >= 1 ? 'READY' : `${Math.ceil((1 - CN.cd) * C.weapons.cannon.cd)}s`, CN.phase ? 1 : CN.cd, CN.phase || CN.cd >= 1 ? 'cy' : 'dim', CN.cd >= 1 || !!CN.phase);
+    chip(3, C.def.pilot === '斑鳩' ? '震波 E' : C.weapons.rifle.mobile ? '羽陣 E' : 'CANNON E', CN.phase ? (CN.phase === 'charge' ? 'CHARGE' : 'FIRE') : CN.cd >= 1 ? 'READY' : `${Math.ceil((1 - CN.cd) * C.weapons.cannon.cd)}s`, CN.phase ? 1 : CN.cd, CN.phase || CN.cd >= 1 ? 'cy' : 'dim', CN.cd >= 1 || !!CN.phase);
     chip(4, 'OD Q', OD.active ? 'ACTIVE' : OD.gauge >= 1 ? 'READY' : `${Math.floor(OD.gauge * 100)}%`, OD.gauge, 'pk', OD.gauge >= 1 || OD.active);
 
     // ---- 頭目：畫面最上方名字＋血條
@@ -566,7 +566,7 @@ export class HUD {
   // 開機自我檢測（BIT）：逐行跑出來，狀態字綠色；下方進度條
   drawBoot(g) {
     const X = this.x, W = this.w, H = this.h, b = g.boot, s = this.s;
-    const lines = [g.combat.weapons.rifle.mobile ? '白隼 WHITE FALCON' : 'M-07 AZURE FLAME', 'OS  IRON DUSK  COMBAT SYSTEM  v7.2', 'REACTOR ........ ONLINE', 'FRAME ........... OK', 'FCS ............. OK', 'THRUSTERS ....... OK', 'ALL-VIEW ........ ON'];
+    const lines = [g.combat.def.pilot === '斑鳩' ? '斑鳩 IKARUGA' : g.combat.weapons.rifle.mobile ? '白隼 WHITE FALCON' : 'M-07 AZURE FLAME', 'OS  IRON DUSK  COMBAT SYSTEM  v7.2', 'REACTOR ........ ONLINE', 'FRAME ........... OK', 'FCS ............. OK', 'THRUSTERS ....... OK', 'ALL-VIEW ........ ON'];
     const n = Math.floor(clamp(b / 0.7, 0, 1) * lines.length), x0 = W * 0.5 - 170 * s, y0 = H * 0.35;
     for (let i = 0; i < n; i++) {
       const Ln = lines[i], y = y0 + i * 22 * s;

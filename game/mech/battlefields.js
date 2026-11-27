@@ -5,6 +5,7 @@ const noise = new ImprovedNoise();
 // 關卡場地：沿用既有任務路線，路線周圍整平，地形與掩體只在換關時建立。
 export const BATTLEFIELDS = {
   city: { mode: 0, label: '神戶街區', relief: 0, trees: 0, rocks: 0 },
+  tokyo: { mode:3, label:'東京灣岸', relief:0, trees:0, rocks:0 },
   taipei: { mode:1, label:'台北盆地', relief:140, trees:0, rocks:0 },
   valley: { mode: 1, label: '山谷砲兵陣地', relief: 220, trees: 220, rocks: 90 },
   forest: { mode: 2, label: '山麓林地', relief: 110, trees: 1200, rocks: 45 },
@@ -28,6 +29,7 @@ export function routeDistance(x, z, pts) {
 export function fieldHeight(x, z, profile, route, base = 0) {
   const F = BATTLEFIELDS[profile];
   if (!F || !F.mode) return base;
+  if(profile==='tokyo')return -4*smooth(116,131,z);
   if(profile==='taipei'){
     if(route.district==='grassland'){
       const edge=smooth(600,1500,Math.hypot(x,z));
@@ -78,7 +80,7 @@ export function fieldHeight(x, z, profile, route, base = 0) {
   return h * (1 - smooth(1650, 2400, r)) + base * smooth(1650, 2400, r);
 }
 export function fieldLayout(profile, route) {
-  if (profile === 'taipei') return { ...BATTLEFIELDS.taipei, structures:[] };
+  if (profile === 'tokyo' || profile === 'taipei') return { ...BATTLEFIELDS[profile], structures:[] };
   if (profile === 'landing') return { ...BATTLEFIELDS.landing, structures: [] };
   if (profile === 'hillside') return { ...BATTLEFIELDS.hillside, structures: [] };
   const targets = route.secs.flatMap(s => s.targets || []).map(t => ({ x: t.x, z: t.z, target: true, name: t.name }));
