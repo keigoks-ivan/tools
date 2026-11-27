@@ -518,7 +518,7 @@ export class HUD {
     // 要打爛的大樓：琥珀色框＋名字（還立著的才畫）
     for (const t of EN.tg || []) {
       if (t.b.st !== 0) continue;
-      const p = this.proj(_o.set(t.b.cx, Math.min(t.b.box.top, t.b.gy + 60), t.b.cz), {});
+      const p = this.proj(_o.set(t.b.cx, t.b.box.missionTarget ? t.b.gy+3 : Math.min(t.b.box.top, t.b.gy + 60), t.b.cz), {});
       if (!(p.front && p.x > 30 && p.x < W - 30 && p.y > 30 && p.y < H - 30)) { this.edgeMark(p, 'am', t.name || '目標', W, H, 0.85); continue; }
       const r = 14 * s;
       X.beginPath(); X.rect(p.x - r, p.y - r, r * 2, r * 2); this.sk('am', 0.95, 1.8);

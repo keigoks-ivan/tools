@@ -12,25 +12,42 @@ import {Vehicles} from '../vehicles.js';
 import {Encounter} from '../encounter.js';
 import {Combat,prepareStages} from '../combat.js';
 
-test('each Taipei chapter has seven reachable sectors, recovery checkpoints and its own ending',()=>{
+test('Taipei missions advance by destroying designated targets and Xinyi is a longer finale',()=>{
   assert.deepEqual(TAIPEI_STAGES.map(s=>s.route.district),['arcade','river','beitou','songyan','grassland','skyline']);
   for(const stage of prepareStages(TAIPEI_STAGES)){
-    assert.equal(stage.enc.secs.length,7);
+    const finale=stage.route.district==='skyline';
+    assert.equal(stage.enc.secs.length,finale?14:7);
+    assert.ok(stage.route.secs.every(s=>!s.pickup));
     assert.ok(stage.enc.len>=1000);
-    assert.deepEqual(stage.enc.cp,[2,4,6]);
+    assert.deepEqual(stage.enc.cp,finale?[2,4,6,8,10,12]:[2,4,6]);
     assert.ok(stage.enc.secs.every((s,i,arr)=>s.waves.length && (!i || s.s>arr[i-1].s)));
     assert.ok(stage.enc.secs.at(-1).last);
     assert.equal(stage.enc.bars.length,0);
   }
-  assert.ok(TAIPEI_STAGES[0].route.secs.find(s=>s.pickup?.portable).breakContact);
-  assert.equal(TAIPEI_STAGES[1].route.secs.filter(s=>s.pickup?.releaseFerry).length,1);
-  assert.ok(TAIPEI_STAGES[3].route.secs.some(s=>s.pickup?.travel>0&&s.breakContact));
-  const finale=TAIPEI_STAGES.at(-1).route.secs;
-  assert.ok(finale.some(s=>s.pickup?.pulse&&s.pickup.decoyX!==undefined));
-  assert.ok(finale.at(-1).pickup.afterBoss&&finale.at(-1).boss);
-  const aerial=finale.filter(s=>s.pickup?.alt);
-  assert.equal(aerial.length,2);
-  assert.ok(aerial.every(s=>s.pickup.alt<100));
+  const finale=prepareStages(TAIPEI_STAGES).at(-1);
+  assert.ok(finale.enc.len>2400);
+  assert.ok(finale.enc.secs.at(-1).boss.echo);
+  for(const chapter of TAIPEI_STAGES){
+    const targets=chapter.route.secs.flatMap(s=>s.targets||[]);
+    assert.ok(targets.length>0);
+    assert.equal(new Set(targets.map(t=>t.name)).size,targets.length);
+    assert.ok(chapter.route.secs.filter(s=>s.strike).every(s=>s.boss||s.targets?.length));
+  }
+  assert.ok(TAIPEI_STAGES[1].route.secs.find(s=>s.releaseFerry).boss);
+});
+test('only named transmitters count, including a transmitter destroyed before the encounter',()=>{
+  const enc=Object.create(Encounter.prototype);
+  const blds=[{st:1,box:{}},{st:1,box:{missionTarget:'北台'}},{st:0,box:{missionTarget:'南台'}}];
+  Object.assign(enc,{sec:0,E:{secs:[{pre:[],targets:[{name:'北台'},{name:'南台'}]}]},
+    C:{def:{battlefield:'taipei'},world:{blds}}});
+  enc.stock();
+  assert.deepEqual(enc.tg.map(t=>t.b),blds.slice(1));
+  assert.equal(enc.tgDone(),false);
+  blds[2].st=1;
+  assert.equal(enc.tgDone(),true);
+  blds.pop();
+  enc.stock();
+  assert.equal(enc.tgDone(),false);
 });
 test('surface water follows both upstream channels and leaves an exposed spit before the confluence',()=>{
   const [near,far]=channelsAt(-670);
@@ -75,7 +92,7 @@ test('羽標 fires six missiles on release and marks only an unobstructed target
   c.world.raycast=()=>-1;c.launchSalvo([e]);assert.equal(c.marked,e);assert.equal(c.markFor,8);
   assert.deepEqual(salvos.pop(),[[e],6]);assert.equal(c.cannon.cd,1);assert.equal(c.msl.cd,0);
   c.launchSalvo([]);assert.deepEqual(salvos.pop(),[[],6]);
-  c.enc={fightT:1};c.boss={ap:400,apMax:1000};assert.equal(c.echoActive,true);
+  c.enc={fightT:1,cur:{boss:{echo:true}}};c.boss={ap:400,apMax:1000};assert.equal(c.echoActive,true);
   c.marked=c.boss;assert.equal(c.echoActive,false);
 });
 test('白夜羽陣 chains three times, stops at cover, and needs no missile mark',()=>{
@@ -97,7 +114,7 @@ test('白夜羽陣 chains three times, stops at cover, and needs no missile mark
 test('Guandu upstream helicopter has a usable altitude and lock direction at the route anchor',()=>{
   const stage=prepareStages(TAIPEI_STAGES)[1],enc=Object.create(Encounter.prototype);
   Object.assign(enc,{E:stage.enc,sec:1});
-  const [spawn]=enc.cur.waves[0];assert.equal(spawn.kind,'heli');assert.equal(spawn.where,'far');
+  const spawn=enc.cur.boss;assert.equal(spawn.kind,'heli');assert.equal(spawn.where,'far');
   const at=enc.pFar({...spawn,k:0});
   const c=Object.create(Combat.prototype),vehicles=Object.create(Vehicles.prototype);
   c.player={pos:new THREE.Vector3(-314,27,14),yaw:1,pitch:0};

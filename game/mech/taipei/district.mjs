@@ -187,7 +187,7 @@ export async function prepareDistrict(A,heightSource) {
       const b={x0:x-width/2,x1:x+width/2,z0:z-depth/2,z1:z+depth/2,H:height,town:true,lamp:-1,fB:B.face,rB:B.trim,sB:B.signs,f0:count(B.face),r0:count(B.trim),s0:count(B.signs)};
       body();
       b.f1=count(B.face);b.r1=count(B.trim);b.s1=count(B.signs);
-      b.box={x0:b.x0,x1:b.x1,z0:b.z0,z1:b.z1,top:height};w.addCollider(b.box);records.push(b);
+      b.box={x0:b.x0,x1:b.x1,z0:b.z0,z1:b.z1,top:height};w.addCollider(b.box);records.push(b);return b;
     }
     function shophouse(road,side,z,width,style){
       const depth=13+rand()*5,face=road+side*15.6,x=face+side*depth/2,stories=rand()<.48?2:3,h=4.1+(stories-1)*4.35,kind=style%3;
@@ -373,69 +373,26 @@ export async function prepareDistrict(A,heightSource) {
         for(let j=-18;j<=19;j+=9)course(B.trim,x+j,-.2,156,.32,1.2,.39,metal,10);
       }
     }
+    // Enemy transmitters share the district batches, weapon impacts and structural damage.
+    for(const sector of w.fieldRoute.secs)for(const {x,z,name} of sector.targets || []){
+      const y=w.height(x,z),height=9;
+      const transmitter=building(x,z,5.8,5.2,y+height,()=>{
+        piece(x,y-.15,z,5.8,.65,5.2,dark);
+        piece(x,y+.5,z,5.3,3.6,4.8,metal);
+        for(const side of [-1,1]){
+          for(let j=0;j<5;j++)piece(x,y+1+j*.46,z+side*2.43,3.8,.17,.12,dark);
+          piece(x+side*2.32,y+3.83,z,.37,.4,4.9,stripe);
+        }
+        course(B.trim,x,z,y+4.1,.53,4.7,.29,light,8);
+        for(let j=0;j<3;j++)course(B.trim,x,z,y+5.1+j*1.45,2.2-j*.42,.32,2-j*.42,stripe,10);
+      });
+      transmitter.H=height;
+      transmitter.box.missionTarget=name;
+    }
     w.scene.environmentIntensity=city?.68:river?.64:.60;w.hemi.intensity=city?.82:.72;
     w.scene.fog.density=city?.00029:river?.00021:.00027;
     for(const [k,b] of Object.entries(B))put(b,materials[k],!['road','water'].includes(k));
     instanceStreetFurniture();parkScooters(group,scooters);
-    w.pickupVisuals=new Map();
-    for(const {pickup} of w.fieldRoute.secs){
-      if(!pickup)continue;
-      const prop=new THREE.Group();prop.position.set(pickup.x,w.height(pickup.x,pickup.z)+(pickup.alt||0),pickup.z);group.add(prop);
-      const add=(geom,color,px,py,pz)=>{
-        const mesh=new THREE.Mesh(geom,new THREE.MeshStandardMaterial({color,roughness:.55,metalness:.32}));
-        mesh.position.set(px,py,pz);mesh.castShadow=mesh.receiveShadow=true;mesh.userData.fieldGeometry=mesh.userData.fieldMaterial=true;prop.add(mesh);return mesh;
-      };
-      const boxAt=(size,color,p)=>add(new THREE.BoxGeometry(...size),color,...p);
-      boxAt(pickup.portable?[3.4,1.9,2.2]:[2.1,2.6,1.7],pickup.portable?0x885e3d:0x456467,[0,pickup.portable?.95:1.3,0]);
-      for(const x of [-.77,.77])boxAt([.17,1.95,2.27],0x373f41,[x,1,0]);
-      if(pickup.alt && !pickup.mount) {
-        for(const x of [-.9,.9])for(const z of [-.62,.62])boxAt([.18,pickup.alt,.18],0x647473,[x,-pickup.alt/2,z]);
-        for(let i=2;i<pickup.alt;i+=3.6)boxAt([1.85,.13,1.39],0x596664,[0,-i,0]);
-      }
-      if(pickup.mount==='roof'){
-        for(const dx of [-.8,0,.8])boxAt([.42,.65,.44],0xe6be7a,[dx,3.1,.15]).material.emissive.setHex(0xffb242);
-      }
-      if(!pickup.portable){
-        const dish=add(new THREE.SphereGeometry(1.26,16,6,0,Math.PI*2,0,.98),0xb4c3bd,0,3,0);
-        dish.rotation.z=-.74;dish.scale.y=.46;
-        boxAt([.12,2.4,.12],0x59645f,[.72,3.4,.1]);
-      }
-      const lamp=boxAt([1.08,.32,.28],0xffb85a,[0,1.56,1.13]);
-      const set=done=>{prop.visible=!(pickup.portable&&done);lamp.material.emissive.set(done?0x17ba81:0xfb982c);};
-      const marker=prop.position.clone().add(new THREE.Vector3(0,3,0));
-      let advance;
-      if(pickup.travel){
-        boxAt([5.8,.7,4.6],0x515f56,[0,.35,0]);
-        for(const x of [-2,2])for(const z of [-1.85,1.85]){
-          const wheel=add(new THREE.CylinderGeometry(.58,.58,.35,10),0x343b39,x,.52,z);
-          wheel.rotation.x=Math.PI/2;
-        }
-        const beacon=boxAt([.48,.4,.48],0x7edbb4,[0,3.95,0]);
-        beacon.material.emissive.setHex(0x258958);
-        advance=t=>{prop.position.x=pickup.x+pickup.travel*Math.sin(t*.14);marker.x=prop.position.x;};
-      }
-      let searchArea;
-      if(pickup.decoyX!==undefined){
-        const other=prop.clone(true);other.position.set(pickup.decoyX,pickup.pulse?prop.position.y:w.height(pickup.decoyX,pickup.decoyZ),pickup.decoyZ);
-        other.traverse(o=>{o.userData.fieldGeometry=o.userData.fieldMaterial=false;});
-        const signal=other.children[prop.children.indexOf(lamp)];signal.material=lamp.material.clone();signal.material.emissive.set(0xd18546);signal.userData.fieldMaterial=true;
-        if(pickup.pulse){
-          const lamps=prop.children.filter(o=>o.position.y===3.1);
-          const copies=lamps.map(o=>other.children[prop.children.indexOf(o)]);
-          for(const o of copies){o.material=o.material.clone();o.userData.fieldMaterial=true;}
-          // The real lamp pauses before its third flash. Both lamps rest between groups.
-          advance=t=>{
-            const phase=t%3.2,lit=starts=>starts.some(start=>phase>=start&&phase<start+.22);
-            for(const o of lamps)o.material.emissiveIntensity=lit([0,.42,1.6])?4:.03;
-            for(const o of copies)o.material.emissiveIntensity=lit([0,.42,.84])?4:.03;
-          };
-          const postHeight=other.position.y-w.height(pickup.decoyX,pickup.decoyZ);
-          const mast=boxAt([1.1,postHeight,1.1],0x505e60,[0,0,0]);prop.remove(mast);other.add(mast);mast.position.y=-postHeight/2;
-        }
-        group.add(other);searchArea=prop.position.clone().lerp(other.position,.5);searchArea.y+=3;
-      }
-      set(false);w.pickupVisuals.set(pickup.name,{searchArea,marker,advance,complete:()=>set(true),reset:()=>{advance?.(0);set(false);}});
-    }
     if(river)installFerries(group,w,materials);
     else w.taipeiRiver=null;
     return records;

@@ -12,7 +12,7 @@ export const FALCON_WEAPONS = {
 const source=new THREE.Vector3(),contact=new THREE.Vector3();
 export class FalconCombat extends Combat {
   constructor(options){super({...options,loadout:FALCON_WEAPONS});this.marked=null;this.markFor=0;
-    this.releaseSector=this.enc.E.secs.findIndex(c=>c.pickup?.releaseFerry);
+    this.releaseSector=this.enc.E.secs.findIndex(c=>c.releaseFerry);
   }
   prep(){
     super.prep();this.world.taipeiRiver?.reset(this.enc.sec>this.releaseSector);
@@ -80,7 +80,7 @@ export class FalconCombat extends Combat {
     }
   }
   get echoActive(){
-    return !!this.boss&&!this.boss.dead&&this.boss.ap<this.boss.apMax*.52&&this.enc.fightT%10<6&&this.marked!==this.boss;
+    return !!this.enc?.cur?.boss?.echo&&!!this.boss&&!this.boss.dead&&this.boss.ap<this.boss.apMax*.52&&this.enc.fightT%10<6&&this.marked!==this.boss;
   }
   damageEnemy(e,dmg,stag,pos,dir,crit=false,support=false){
     const echo=e===this.boss&&this.echoActive;
@@ -89,7 +89,7 @@ export class FalconCombat extends Combat {
   update(dt,input,rdt){
     super.update(dt,input,rdt);
     if(this.world.taipeiRiver){
-      const E=this.enc;this.world.taipeiRiver.tick(dt,E&&(E.sec>this.releaseSector||E.sec===this.releaseSector&&E.collected||E.state==='done'));
+      const E=this.enc;this.world.taipeiRiver.tick(dt,E&&(E.sec>this.releaseSector||E.state==='done'));
     }
   }
 }

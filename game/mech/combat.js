@@ -521,7 +521,20 @@ export class Combat {
     hero.muzzle.updateWorldMatrix(true, false);
     const from = hero.muzzle.getWorldPosition(V3());
     let to = V3(), hitE = null, kind = 'ground';
-    const tgt = this.fireTarget();
+    let tgt = this.fireTarget(), objectiveRange = null;
+    if (this.enc?.tg?.some(t => t.b.box.missionTarget && !t.b.st)) {
+      const k = this.aimSkip || 0;
+      const start = _a.copy(this.eye).addScaledVector(this.aimDir, k);
+      const far = _b.copy(this.eye).addScaledVector(this.aimDir, 1600);
+      const hit = w.raycast(start, far, null);
+      if (hit >= 0) {
+        const surface = w.bldAt(_c.lerpVectors(start, far, hit));
+        if (surface && this.enc.tg.some(t => t.b === surface)) {
+          objectiveRange = k + hit * (1600 - k);
+          tgt = null;
+        }
+      }
+    }
     if (tgt) {
       tgt.chest(to);
       const sc = Math.min(1, tgt.scale);   // 載具很矮，散布跟著縮（不然會打進地面）
@@ -537,8 +550,8 @@ export class Combat {
       // 沒鎖定：照準心直射
       // 後方視角：鏡頭離槍口十幾公尺，要打「準心那條線上第一個碰到的東西」（建築／地面也算），不然會跟準心差好幾公尺
       const k = this.aimSkip;
-      let best = 1600;
-      if (k) { const t0 = w.raycast(_c.copy(this.eye).addScaledVector(this.aimDir, k), _b.copy(this.eye).addScaledVector(this.aimDir, 1600), null); if (t0 >= 0) best = k + t0 * (1600 - k); }
+      let best = objectiveRange ?? 1600;
+      if (k && objectiveRange === null) { const t0 = w.raycast(_c.copy(this.eye).addScaledVector(this.aimDir, k), _b.copy(this.eye).addScaledVector(this.aimDir, 1600), null); if (t0 >= 0) best = k + t0 * (1600 - k); }
       for (const e of this.enemies) {
         if (e.dead) continue;
         const t = rayCapsule(this.eye, this.aimDir, e.m.capsule(), 1600);
