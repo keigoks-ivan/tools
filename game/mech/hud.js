@@ -111,7 +111,7 @@ export class HUD {
     const ax = aimP.x, ay = aimP.y;
 
     // ---- 俯仰梯、飛行路徑標（機體實際往哪移動）
-    if (!C.scopeActive) {
+    if (!g.scoped) {
       this.ladder();
       this.fpm(P, ax, ay);
     }
@@ -143,7 +143,7 @@ export class HUD {
       const c = e.chest(_c), p = this.proj(c, {}), dist = c.distanceTo(P.pos), locked = e === L;
       const onScr = p.front && p.x > 20 && p.x < W - 20 && p.y > 20 && p.y < H - 20;
       if (locked) { Lp = p; Lon = onScr; _L.copy(c); }
-      if (C.scopeActive && e === C.scopeContact?.enemy) continue;
+      if (g.scoped && e === C.scopeContact?.enemy) continue;
       if (!onScr) { this.edgeArrow(p, e, dist, W, H, locked); continue; }
       const top = this.proj(_w.copy(c).setY(c.y + 9 * e.scale), {});
       const hh = Math.max(12 * s, Math.abs(p.y - top.y)), hw = hh * 0.7, soft = e === tgt;
@@ -221,8 +221,25 @@ export class HUD {
     }
 
     // ---- 準心
-    if (C.scopeActive) this.scopeReticle(ax, ay, C);
+    if (g.scoped) this.scopeReticle(ax, ay, C);
     else this.reticle(ax, ay, C);
+
+    if (C.precisionShot) {
+      const {age, hits} = C.precisionShot;
+      const opacity = clamp((.85-age)/.25, 0, 1);
+      for (const [i, hit] of hits.entries()) {
+        const p = this.proj(hit.position);
+        if (!p.front || p.x<0 || p.y<0 || p.x>W || p.y>H) continue;
+        const r = (9 + 8*Math.max(0, 1-age/.18))*s;
+        X.beginPath();
+        for (const dx of [-1,1]) for (const dy of [-1,1]) {
+          X.moveTo(p.x+dx*r,p.y+dy*r);
+          X.lineTo(p.x+dx*(r+5*s),p.y+dy*(r+5*s));
+        }
+        this.sk('am',opacity,2);
+        if (i===0) this.text(hit.label+(hits.length>1?'・命中 '+hits.length+' 機':''),p.x,p.y-30*s,17,'am',opacity,'center',700,SANS);
+      }
+    }
 
     // ---- 受擊方向
     for (const d of C.dmgDirs) {
@@ -272,7 +289,7 @@ export class HUD {
     }
     const chainOn = !g.ceasefire && C.stats.chain > 1 && C.stats.time - C.stats.lastKill < 8;
     if (chainOn) this.text(`CHAIN ×${C.stats.chain}`, W / 2, hy + 24 * s, 13, 'am', 1, 'center', 700);
-    if (EN) this.objective(EN, hy + (chainOn ? 42 : 25) * s, W, H, C.scopeActive);
+    if (EN) this.objective(EN, hy + (chainOn ? 42 : 25) * s, W, H, g.scoped);
 
     // ---- 主注意（琥珀、常亮）／主警告（紅、閃）：亮起時下面列出原因
     const R = C.rifle, apR = P.ap / P.apMax, pc = C.parts || {};
@@ -358,10 +375,10 @@ export class HUD {
     if (apR < 0.3 && !C.dead) this.text('DANGER  AP LOW', W / 2, y0 - 30 * s, 14, 'rd', 0.5 + 0.5 * Math.sin(this.t * 9), 'center', 700);
 
     // ---- 小提示（準心右下）
-    C.notes.forEach((n, i) => this.text(n.text, ax + (C.scopeActive ? 110 : 46) * s, ay + (30 + i * 18) * s, 15, n.color, clamp(n.t / 0.4, 0, 1), 'left', 700, SANS));
+    C.notes.forEach((n, i) => this.text(n.text, ax + (g.scoped ? 110 : 46) * s, ay + (30 + i * 18) * s, 15, n.color, clamp(n.t / 0.4, 0, 1), 'left', 700, SANS));
 
     // ---- 橫幅
-    if (C.banner && !C.scopeActive) {
+    if (C.banner && !g.scoped) {
       const B = C.banner, age = B.T - B.t;
       const a = clamp(age / 0.25, 0, 1) * clamp(B.t / 0.5, 0, 1);
       const y = H * 0.38;

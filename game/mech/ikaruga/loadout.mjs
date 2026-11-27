@@ -109,6 +109,7 @@ export class IkarugaCombat extends Combat {
     this.componentKit=componentKit();
     this.scopeActive=false;this.scopeContact=null;this.penetratorArmed=false;
     this.slide=0;
+    this.precisionShot=null;
   }
 
   spawn(kind,i,n,at=null){
@@ -121,7 +122,7 @@ export class IkarugaCombat extends Combat {
   }
 
   aimAssist(dt){
-    if(!this.precisionFrame)super.aimAssist(dt);
+    if(!this.precisionFrame && !this.followingShot)super.aimAssist(dt);
   }
 
   getSight(){
@@ -210,6 +211,7 @@ export class IkarugaCombat extends Combat {
   shoot(precision){
     const spec=precision?this.weapons.msl:this.weapons.rifle, ap=this.penetratorArmed;
     this.stats.shots++;
+    if(precision)this.precisionShot={age:0,hits:[]};
     if(ap){this.penetratorArmed=false;this.cannon.cd=0;}
     this.getSight();
     // Zero the offset barrel on the reticle within 30 m. Beyond that distance every target
@@ -244,6 +246,10 @@ export class IkarugaCombat extends Combat {
         const lethal=precision && !hit.part && !shot.damaged.size && !enemy.vehicle && enemy!==this.boss && !enemy.bossName && !enemy.fleeAt;
         const damage=lethal ? enemy.ap : hit.part ? dmg*.23 : dmg;
         this.damageEnemy(enemy,damage,spec.stag,point,dir,!!hit.part);
+        if(precision){
+          this.precisionShot.hits.push({position:point.clone(),label:enemy.dead?'擊破':hit.part?.disabled?hit.part.name+'損毀':'命中'});
+          this.fx.precisionImpact(point);
+        }
         this.fx.impact(point,check.copy(dir).negate(),'armor');this.audio.impact(point,'armor');
         shot.damaged.add(hit.enemy);
         if(shot.damaged.size===(ap?3:1)){travel=hit.distance;shot.blocked=true;break;}
@@ -263,7 +269,9 @@ export class IkarugaCombat extends Combat {
     };
     feed(from,bore,from.distanceTo(join));
     if(!shot.blocked)feed(join,axis,spec.range-zero);
-    this.fx.shellTracer(muzzle,far,precision?1800:1250);this.fx.muzzle(muzzle,bore,precision?'cannon':'mg');
+    if(precision)this.fx.precisionTracer(from,far);
+    else this.fx.shellTracer(muzzle,far,1250);
+    this.fx.muzzle(muzzle,bore,precision?'cannon':'mg');
     if(precision)this.audio.cannon(muzzle);else this.audio.mg(muzzle);
     this.cockpit.kick('fire',precision?1.35:.62);
     this.cockpit.flashAt(amber,precision?4:2,.4,-.27,-1.1);
@@ -279,11 +287,17 @@ export class IkarugaCombat extends Combat {
     this.note(part.name+'損毀','am');
   }
 
+  get followingShot(){return this.precisionShot?.age < .42;}
+
   cancelScope(){
     this.scopeActive=false;this.precisionFrame=false;this.scopeContact=null;
   }
 
   update(dt,input,rdt){
+    if(this.precisionShot){
+      this.precisionShot.age+=rdt;
+      if(this.precisionShot.age>=.85)this.precisionShot=null;
+    }
     if(!input||this.dead||this.phase==='done')this.cancelScope();
     super.update(dt,input,rdt);
   }

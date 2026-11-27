@@ -733,6 +733,16 @@ export class FX {
   // 戰車砲彈：慢速粗曳光，回傳槽位（可用 projEnd 提前結束）
   shellTracer(from, to, speed) { return this._pa(from, to, 4, speed || 260, 6); }
 
+  precisionTracer(from, to) {
+    // Draw the whole discharge on the damage frame; its afterimage outlasts the flash.
+    this._pa(from, to, 5, 0, 0);
+  }
+
+  precisionImpact(pos) {
+    this._glow(pos.x,pos.y,pos.z,6.5,1,.48,.10,9,.23,1.4);
+    this._glow(pos.x,pos.y,pos.z,2.2,1,.93,.74,18,.14,1);
+  }
+
   projEnd(j) { if (j >= 0 && j < PMAX) this.P.alive[j] = 0; }
 
   // 履帶揚塵：往後方低低散開的小塵團，amount 0..1
@@ -1884,6 +1894,14 @@ export class FX {
       P.trav[j] += P.speed[j] * dt;
       const len = P.len[j], trav = P.trav[j], bl = P.blen[j], kind = P.kind[j];
       const fx = P.fx[j], fy = P.fy[j], fz = P.fz[j], dx = P.dx[j], dy = P.dy[j], dz = P.dz[j];
+      if(kind===5){
+        const fade=1-P.age[j]/.42;
+        if(fade<=0){P.alive[j]=0;continue;}
+        const x=fx+dx*len, y=fy+dy*len, z=fz+dz*len;
+        this._imm(fx,fy,fz,x,y,z,.40*fade,K_BEAM,6*fade,2.4*fade,.35*fade,0);
+        this._imm(fx,fy,fz,x,y,z,.12*fade,K_BEAM,23*fade,18*fade,10*fade,0);
+        continue;
+      }
       if(kind===3){
         const intensity=1-P.age[j]/.18;
         if(intensity<=0){P.alive[j]=0;continue;}

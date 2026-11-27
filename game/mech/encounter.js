@@ -818,7 +818,7 @@ export class Encounter {
     else if (c && this.state !== 'done' && !this.training && !this.front) { const q = pointAt(E, this.prog); A.push(q.x, q.z); for (const P of E.pts) if (P.s > this.prog + 1) A.push(P.x, P.z); }
     if (this.R) { const on = Math.sin(this.t * 5) > 0; this.R.la.color.setRGB(on ? 6 : 0.3, on ? 0.45 : 0.02, on ? 0.2 : 0.01); this.R.lb.color.setRGB(on ? 0.3 : 6, on ? 0.02 : 0.45, on ? 0.01 : 0.2); }
     if (!B) return;
-    if(C.def.pilot==='斑鳩')B.root.visible=!C.scopeActive;
+    if(C.def.pilot==='斑鳩')B.root.visible=!(C.scopeActive || C.followingShot);
     B.a += ((this.wp ? 1 : 0) - B.a) * (1 - Math.exp(-dt * 3));
     const pillar = target || wp;
     if (pillar) B.root.position.set(pillar.x, ranged ? ranged.pos.y : w.height(pillar.x, pillar.z), pillar.z);

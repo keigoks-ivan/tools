@@ -94,6 +94,7 @@ test('hitting visible triangles on the shoulder breaks its weapon, the rear modu
   assert.equal(c.scopeContact.part,cannon);assert.ok(c.scopeContact.parts.includes(cannon));
   assert.ok(!c.scopeContact.parts.includes(booster),'hull hides the rear nozzle from the front');
   c.playerWeapons(.016,{lockRelease:true});
+  assert.equal(c.precisionShot.hits[0].label,cannon.name+'損毀');
   assert.equal(cannon.disabled,true);assert.equal(cannon.mesh.visible,false);assert.equal(booster.hp,booster.maxHP);
   assert.equal(e.dead,false);
   e.burst=1;e.burstT=0;
@@ -164,5 +165,21 @@ test('solid rising terrain wins over a penetrable wall in the same terrain sampl
   const hit={},n=V(),fraction=c.world.raycast(V(0,10,0),V(0,10,192),n,null,hit);
   assert.equal(hit.box,null);assert.equal(n.y,1);
   assert.ok(fraction*192<50);
+  c.dispose();
+});
+
+test('precision feedback ends on real geometry and confirms only damaged enemies',()=>{
+  const c=mission(), e=enemy(c,0,540);
+  const trails=[], flashes=[];
+  c.fx={...c.fx,precisionTracer:(from,to)=>trails.push(to.clone()),precisionImpact:pos=>flashes.push(pos.clone()),impact:noop,muzzle:noop};
+  c.camera=new THREE.PerspectiveCamera();lookAt(c,V(80,10,540));
+  scopeShot(c);
+  assert.equal(trails.length,1);assert.equal(flashes.length,0);assert.deepEqual(c.precisionShot.hits,[]);
+  lookAt(c,e.chest(V()));coverWorld(c,[wall(90,false)]);c.msl.cd=1;scopeShot(c);
+  assert.ok(Math.abs(trails[1].z-90)<.001);assert.deepEqual(c.precisionShot.hits,[]);
+  coverWorld(c,[]);c.msl.cd=1;scopeShot(c);
+  const [hit]=c.precisionShot.hits;
+  assert.equal(hit.label,'擊破');assert.ok(trails[2].distanceTo(hit.position)<.001);
+  assert.equal(flashes.length,1);assert.deepEqual(flashes[0],hit.position);
   c.dispose();
 });

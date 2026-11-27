@@ -822,7 +822,7 @@ async function game() {
 
     // ---- 自機
     if (combat.enc?.front?.pilot) inp = combat.enc.front.pilot(dt, inp);
-    const aiming = !!(ikaruga && canMove && !openingShot && combat.phase !== 'done' && (inp.lockHold || inp.lockRelease));
+    const aiming = !!(ikaruga && canMove && !openingShot && combat.phase !== 'done' && (inp.lockHold || inp.lockRelease || (scopeView && combat.followingShot && !inp.fire && !inp.view)));
     if (aiming !== scopeView) { scopeView = aiming; applyView(false); }
     if (aiming) inp = { ...inp, lookX: inp.lookX / scopeZoom, lookY: inp.lookY / scopeZoom };
     player.update(dt, inp);
@@ -913,7 +913,7 @@ async function game() {
     post.render(t);
 
     if (openingShot) hud.clear();
-    else hud.draw(rdt, { boot: state === 'boot' ? boot : 1, combat: C, player, stages: STAGES.length, groundY, tp: tpView && !scopeView,
+    else hud.draw(rdt, { boot: state === 'boot' ? boot : 1, combat: C, player, stages: STAGES.length, groundY, tp: tpView && !scopeView, scoped: scopeView,
       label: coda ? `STAGE ${STAGES.length + 1}` : undefined, ceasefire: !!coda && !airCombat });
     input.endFrame();
   }
