@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#d7f6e9">
+  <meta name="description" content="和小龍咻咻一起跑跳，吹泡泡抓住果凍，再跳過去戳破。">
+  <title>泡泡跳跳谷 · Bubble Valley</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./game.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="nav-button" href="../"><span aria-hidden="true">‹</span><b data-en="Games">遊戲機台</b></a>
+    <div class="top-actions">
+      <button class="nav-button" id="language" type="button" aria-label="Switch to English">EN</button>
+      <button class="nav-button" id="sound" type="button" aria-pressed="true"><span data-en="Sound">音效</span><i aria-hidden="true">♪</i></button>
+      <button class="nav-button" id="help" type="button"><span data-en="Help">玩法</span><i aria-hidden="true">?</i></button>
+    </div>
+  </header>
+
+  <main>
+    <header class="hero">
+      <div class="wordmark" aria-hidden="true">BUBBLE VALLEY</div>
+      <h1><span data-en="Bubble ">泡泡</span><strong data-en="Valley">跳跳谷</strong></h1>
+      <p data-en="Run, jump and help Zuzu catch the runaway jellies!">跟著咻咻跑跑跳跳，把逃跑的果凍都抓回來！</p>
+    </header>
+
+    <section class="arcade" aria-label="遊戲區" data-en-label="Play area">
+      <div class="hud">
+        <div class="level">
+          <span class="badge" id="level-number">第 1 關</span>
+          <b id="level-name">蜜糖草地</b>
+        </div>
+        <div class="hearts" id="hearts" role="img" aria-label="剩下 3 顆心"><span>♥</span><span>♥</span><span>♥</span></div>
+        <div class="meters">
+          <span class="meter"><i class="jelly-icon" aria-hidden="true"></i><span class="sr-only" data-en="Jellies left">剩餘果凍</span><b id="remaining">3</b></span>
+          <span class="meter"><i class="score-icon" aria-hidden="true">✦</i><span class="sr-only" data-en="Score">分數</span><b id="score">0</b></span>
+        </div>
+      </div>
+      <div class="stage">
+        <canvas id="screen" width="800" height="480" tabindex="0" aria-label="泡泡跳跳谷的遊戲畫面" data-en-label="Bubble Valley game screen" aria-describedby="controls"></canvas>
+        <div class="overlay" id="overlay">
+          <div class="overlay-card">
+            <img class="overlay-mascot" src="./assets/zuzu.webp" width="420" height="415" alt="">
+            <h2 id="overlay-title">準備好了嗎？</h2>
+            <p id="overlay-text">先吹泡泡把果凍包起來，再靠過去戳破它。</p>
+            <button class="primary" id="action" type="button">開始玩</button>
+          </div>
+        </div>
+      </div>
+      <div class="arcade-footer" id="controls">
+        <div class="move-pad" aria-label="移動" data-en-label="Movement">
+          <button type="button" class="pad" id="left" aria-label="往左" data-en-label="Move left"><span aria-hidden="true">‹</span></button>
+          <button type="button" class="pad" id="right" aria-label="往右" data-en-label="Move right"><span aria-hidden="true">›</span></button>
+        </div>
+        <div class="footer-hint">
+          <span class="keyboard"><kbd>←</kbd> <kbd>→</kbd> <span data-en="Move">移動</span></span>
+          <span class="keyboard"><kbd data-en="Space">空白鍵</kbd> <span data-en="Jump">跳躍</span></span>
+          <span class="keyboard"><kbd>X</kbd> <span data-en="Bubble">吹泡泡</span></span>
+        </div>
+        <div class="action-pad">
+          <button type="button" class="pad jump" id="jump"><span data-en="Jump">跳躍</span></button>
+          <button type="button" class="pad puff" id="puff"><span data-en="Bubble">吹泡泡</span></button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="details">
+      <p><span aria-hidden="true">★</span> <span data-en="Best score">最高分</span> <strong id="best">0</strong></p>
+      <button class="restart" id="restart" type="button"><span aria-hidden="true">↻</span> <b data-en="Restart">重新開始</b></button>
+    </footer>
+    <p class="sr-only" id="announcement" role="status" aria-live="polite"></p>
+  </main>
+  <dialog id="instructions" aria-labelledby="instructions-title">
+    <form method="dialog">
+      <h2 id="instructions-title" data-en="How to play">怎麼玩？</h2>
+      <ol>
+        <li data-en="Use the arrow keys to move, Space to jump and X to blow a bubble. On a phone, use the buttons below the arena.">左右方向鍵移動、空白鍵跳躍、X 吹泡泡。手機用遊戲下方的按鈕。</li>
+        <li data-en="Blow a bubble at a jelly to catch it. Run or jump into the trapped jelly to pop it before it escapes.">朝果凍吹泡泡就能抓住它。趕在它逃出前，跑或跳過去把泡泡戳破。</li>
+        <li data-en="Touching a free jelly costs one heart. Catch them all to clear the level!">碰到還在跑的果凍會扣一顆心。抓到所有果凍就能過關！</li>
+      </ol>
+      <button class="primary" type="submit" data-en="Back to the game">回到遊戲</button>
+    </form>
+  </dialog>
+</body>
+</html>

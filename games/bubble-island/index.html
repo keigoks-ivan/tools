@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eae1ff">
+  <meta name="description" content="和小龍噗噗一起瞄準、反彈、消除彩色泡泡。手機和電腦都能玩。">
+  <title>小龍泡泡島 · Bubble Island</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./game.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="back" href="../"><span aria-hidden="true">‹</span><b data-en="Games">遊戲機台</b></a>
+    <div class="top-actions">
+      <button class="pill language" id="language" type="button" aria-label="Switch to English">EN</button>
+      <button class="pill" id="sound" type="button" aria-pressed="true"><i class="sound-icon" aria-hidden="true"></i><span data-en="Sound">音效</span></button>
+      <button class="pill" id="help" type="button"><i class="help-icon" aria-hidden="true">?</i><span data-en="Help">玩法</span></button>
+    </div>
+  </header>
+
+  <main>
+    <header class="hero">
+      <div class="wordmark" aria-hidden="true"><span></span>BUBBLE ISLAND<span></span></div>
+      <h1><i class="spark hero-spark-left" aria-hidden="true"></i><span data-en="Bubble ">小龍</span><span data-en="Island">泡泡島</span><i class="spark hero-spark-right" aria-hidden="true"></i></h1>
+      <p data-en="Pop colorful bubbles with Pupu the little dragon!">跟小龍噗噗一起，把彩色泡泡消光吧！</p>
+    </header>
+
+    <div class="layout">
+      <aside class="left" aria-label="分數和泡泡" data-en-label="Score and bubble queue">
+        <section class="panel stats">
+          <div class="stat score">
+            <span class="stat-icon" aria-hidden="true">✦</span>
+            <div><h2 data-en="Score">目前分數</h2><strong id="score">0</strong></div>
+          </div>
+          <div class="stat best">
+            <span class="stat-icon" aria-hidden="true">♛</span>
+            <div><h2 data-en="Best score">最高分</h2><strong id="best">0</strong></div>
+          </div>
+        </section>
+        <section class="panel queue">
+          <div class="queue-label">
+            <canvas id="next" width="96" height="96" aria-hidden="true"></canvas>
+            <div><h2 data-en="Up next">下一顆</h2><span id="next-name">粉紅泡泡</span></div>
+          </div>
+          <button class="swap" id="swap" type="button"><span class="swap-icon" aria-hidden="true">⤨</span><span data-en="Swap bubble">交換泡泡</span><kbd aria-hidden="true">X</kbd></button>
+        </section>
+        <button class="restart" id="restart" type="button"><span aria-hidden="true">↻</span><b data-en="Restart">重新開始</b></button>
+      </aside>
+
+      <section class="game" aria-label="遊戲區" data-en-label="Play area">
+        <div class="frame">
+          <div class="game-bar">
+            <div class="stage-heading"><span class="stage-badge" id="stage-badge">第 1 關</span><h2 id="stage-name">棉花雲朵</h2></div>
+            <div class="pressure"><span data-en="Until drop">降一排前</span><span id="misses" class="misses" role="img" aria-label="還可以打空 5 球"></span></div>
+          </div>
+          <div class="playfield">
+            <canvas id="board" width="548" height="514" tabindex="0" aria-label="泡泡射擊遊戲" data-en-label="Bubble shooter" aria-describedby="controls">
+              你的瀏覽器需要支援 Canvas 才能遊玩。
+            </canvas>
+            <div class="feedback" id="feedback" aria-hidden="true"></div>
+            <div class="result" id="result" hidden>
+              <div class="result-card">
+                <div class="result-stars" aria-hidden="true">✦ ★ ✦</div>
+                <h2 id="result-title"></h2>
+                <p id="result-text"></p>
+                <button class="primary" id="result-action" type="button">下一關</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="controls" id="controls">
+          <span class="mouse-controls" data-en="Move to aim, click to shoot">移動滑鼠瞄準，點一下發射</span>
+          <span class="key-controls"><kbd>←</kbd> <kbd>→</kbd> <span data-en="Aim">瞄準</span> <span class="divider">·</span> <kbd data-en="Space">空白鍵</kbd> <span data-en="Shoot">發射</span></span>
+          <span class="touch-controls" data-en="Drag to aim, release to shoot">拖曳瞄準，放開發射</span>
+        </p>
+      </section>
+
+      <aside class="right" aria-label="遊戲提示" data-en-label="Game tips">
+        <figure class="mascot">
+          <div class="mascot-glow" aria-hidden="true"></div>
+          <img src="./assets/pupu.webp" width="720" height="720" alt="坐在雲朵上揮手的紫色小龍噗噗" data-en-alt="Pupu, a little purple dragon, waving from a cloud">
+          <figcaption id="mascot-text">試試讓泡泡反彈！</figcaption>
+        </figure>
+        <section class="panel tips">
+          <h2><span class="tip-icon" aria-hidden="true">✦</span><span data-en="Pupu’s tip">噗噗的小提示</span></h2>
+          <p><span data-en="Match ">湊滿 </span><strong data-en="3 bubbles of the same color">3 顆同色泡泡</strong><span data-en=" to pop them. Bubbles that lose their connection to the top fall too!"> 就會消失。上面的泡泡一消掉，底下連不到頂端的泡泡也會掉下來！</span></p>
+        </section>
+      </aside>
+    </div>
+    <div class="sr-only" id="announcement" role="status" aria-live="polite"></div>
+  </main>
+
+  <dialog id="instructions" aria-labelledby="instructions-title">
+    <form method="dialog">
+      <button class="dialog-close" type="submit" aria-label="關閉玩法" data-en-label="Close instructions">×</button>
+      <div class="result-stars" aria-hidden="true">✦ ★ ✦</div>
+      <h2 id="instructions-title" data-en="How to play">怎麼玩？</h2>
+      <ol>
+        <li data-en="Move the mouse to aim and click to shoot. On a touchscreen, drag to aim and release to shoot.">滑鼠移動瞄準、點一下發射。手機拖曳瞄準、放開發射。</li>
+        <li data-en="Match at least three bubbles of the same color to pop them. Falling bubbles are worth extra points.">連成 3 顆以上同色泡泡就能消除，底下掉落的泡泡會加更多分。</li>
+        <li data-en="After several misses, a new row comes down. Clear the board before the bubbles reach the dotted line!">打空幾次後，頂端會多一排泡泡。趕在泡泡碰到虛線前清空這一關！</li>
+      </ol>
+      <p class="dialog-keys"><kbd>←</kbd> <kbd>→</kbd> <b data-en="Aim">瞄準</b> <span>·</span> <kbd data-en="Space">空白鍵</kbd> <b data-en="Shoot">發射</b> <span>·</span> <kbd>X</kbd> <b data-en="Swap">交換</b></p>
+      <button class="primary" type="submit" data-en="Back to the game">回到遊戲</button>
+    </form>
+  </dialog>
+</body>
+</html>
