@@ -2,32 +2,20 @@
 
 const W = 800;
 const H = 480;
-const FLOOR = 443;
 const GRAVITY = 1320;
 const SPEED = 240;
 const JUMP = 560;
 const MAX_HEARTS = 3;
-const STAGES = [
-  {
-    zh: "蜜糖草地", en: "Honey Meadow",
-    shelves: [[80, 351, 235], [486, 345, 230], [294, 264, 220], [118, 181, 232], [499, 180, 186]],
-    jellies: [[304, FLOOR, 0], [542, 345, 1], [375, 264, 2]]
-  },
-  {
-    zh: "粉桃樹梢", en: "Peach Treetops",
-    shelves: [[67, 361, 192], [356, 366, 165], [558, 341, 189], [164, 277, 194], [463, 261, 176], [306, 187, 192]],
-    jellies: [[362, FLOOR, 2], [155, 361, 0], [633, 341, 1], [492, 261, 0]]
-  },
-  {
-    zh: "星露山頂", en: "Stardew Summit",
-    shelves: [[113, 355, 174], [357, 350, 177], [577, 342, 150], [28, 272, 173], [249, 264, 214], [533, 259, 187], [122, 188, 193], [379, 182, 253]],
-    jellies: [[394, FLOOR, 1], [185, 355, 0], [642, 342, 2], [310, 264, 1], [569, 182, 2]]
-  }
-];
 const COLORS = [
   { pale: "#ffd6e3", base: "#e98fae", edge: "#9d537b", ink: "#74385c" },
   { pale: "#ffe7a8", base: "#f4bd63", edge: "#a97237", ink: "#754820" },
   { pale: "#d4dcff", base: "#9ea7eb", edge: "#665ca3", ink: "#4f447d" }
+];
+const PLATFORM_COLORS = [
+  ["#c5f5bf", "#ace4a2", "#75bd8d", "#58aa89", "#407c65", "#eaffeb30"],
+  ["#f3dcff", "#dbbdf0", "#b18bc9", "#9675b6", "#795b9c", "#ffe0ff42"],
+  ["#ffedbd", "#fdd394", "#e8a975", "#cc865f", "#945f47", "#ffe0b957"],
+  ["#d5f1ff", "#b3dcfd", "#85b1e1", "#659bce", "#4f75a7", "#9db9ff47"]
 ];
 const get = (id) => document.getElementById(id);
 const canvas = get("screen");
@@ -37,6 +25,7 @@ const action = get("action");
 const help = get("instructions");
 const mutedKey = "bubble-valley-muted";
 const bestKey = "bubble-valley-best";
+const progressKey = "bubble-valley-progress";
 const reduced = matchMedia("(prefers-reduced-motion: reduce)");
 const formatter = new Intl.NumberFormat("zh-TW");
 const translatedElements = [
@@ -51,6 +40,20 @@ function read(name) {
 }
 function store(name, value) {
   try { localStorage.setItem(name, value); } catch { /* Preferences also work for the current visit. */ }
+}
+
+function readProgress() {
+  try {
+    const [index, score, hearts] = JSON.parse(read(progressKey)) ?? [];
+    if (Number.isInteger(index) && index >= 0 && index <= STAGES.length &&
+      Number.isSafeInteger(score) && score >= 0 && Number.isInteger(hearts) && hearts > 0 &&
+      hearts <= MAX_HEARTS) return [index, score, hearts];
+  } catch { /* Invalid progress starts a new game. */ }
+  return [0, 0, MAX_HEARTS];
+}
+
+function saveProgress(index, score, hearts = MAX_HEARTS) {
+  store(progressKey, JSON.stringify([index, score, hearts]));
 }
 
 const keys = new Set();
@@ -121,10 +124,12 @@ function startLevel(index, score = 0, hearts = MAX_HEARTS, mode = "playing") {
   const level = STAGES[index];
   const ground = { x: 0, y: FLOOR, width: W };
   const platforms = [...level.shelves.map(([x, y, width]) => ({ x, y, width })), ground];
+  const jellies = mode === "clear" ? [] : level.jellies;
   game = {
-    index, level, score, hearts, mode, platforms, ground, time: 0, prompt: null,
+    index, level, score, startingScore: score, hearts, mode, platforms, ground, time: 0, prompt: null,
+    jellySpeed: 58 + Math.min(index, 2) * 11 + Math.max(0, index - 2) * 2,
     player: { x: 73, y: FLOOR, vx: 0, vy: 0, dir: 1, on: ground, cooldown: 0, immune: 0, jumpBuffer: 0 },
-    enemies: level.jellies.map(([x, y, kind], i) => ({
+    enemies: jellies.map(([x, y, kind], i) => ({
       x, y, kind, vy: 0, dir: i % 2 ? 1 : -1, on: platforms.find((p) => p.y === y && x >= p.x && x <= p.x + p.width),
       step: i * 1.1 + .7, trap: 0, angry: false
     })),
@@ -146,7 +151,8 @@ function updateHud() {
     best = game.score;
     store(bestKey, String(best));
   }
-  get("level-number").textContent = t(`第 ${game.index + 1} 關`, `Level ${game.index + 1}`);
+  const progress = `${game.index + 1} / ${STAGES.length}`;
+  get("level-number").textContent = t(`第 ${progress} 關`, `Lv. ${progress}`);
   get("level-name").textContent = t(game.level.zh, game.level.en);
   get("score").textContent = formatter.format(game.score);
   get("remaining").textContent = String(game.enemies.length);
@@ -161,13 +167,13 @@ function updateOverlay() {
   if (overlay.hidden) return;
   let title, detail, label;
   if (game.mode === "ready") {
-    title = t("準備好了嗎？", "Ready to play?");
+    title = game.index > 0 ? t("接著玩吧！", "Ready to continue?") : t("準備好了嗎？", "Ready to play?");
     detail = t("先吹泡泡把果凍包起來，再靠過去戳破它。", "Catch a jelly in a bubble, then run into it to pop it.");
-    label = t("開始玩", "Start game");
+    label = game.index > 0 ? t(`繼續第 ${game.index + 1} 關`, `Continue level ${game.index + 1}`) : t("開始玩", "Start game");
   } else if (game.mode === "lost") {
     title = t("咻咻需要休息一下", "Zuzu needs a breather");
-    detail = t(`拿到 ${game.score} 分。要再抓一次果凍嗎？`, `You scored ${game.score}. Ready to try again?`);
-    label = t("再玩一次", "Play again");
+    detail = t(`目前總分 ${formatter.format(game.score)}。補滿愛心，再挑戰這一關吧！`, `You scored ${formatter.format(game.score)}. Try this level again with full hearts!`);
+    label = t("重試本關", "Retry level");
   } else {
     const final = game.index === STAGES.length - 1;
     title = final ? t("果凍全部抓回來了！", "You caught every jelly!") : t("這關的果凍抓完了！", "Level cleared!");
@@ -181,6 +187,9 @@ function updateOverlay() {
 
 function finish(mode) {
   game.mode = mode;
+  if (mode === "clear") {
+    saveProgress(game.index + 1, game.score, Math.min(MAX_HEARTS, game.hearts + 1));
+  }
   clearInputs();
   updateHud();
   updateOverlay();
@@ -271,7 +280,7 @@ function moveJelly(jelly, dt) {
     jelly.dir = jelly.x < p.x + 16 ? 1 : -1;
   }
   if (jelly.x < 18 || jelly.x > W - 18) jelly.dir = jelly.x < 18 ? 1 : -1;
-  const speed = 58 + game.index * 11 + jelly.kind * 9 + (jelly.angry ? 36 : 0);
+  const speed = game.jellySpeed + jelly.kind * 9 + (jelly.angry ? 36 : 0);
   jelly.x = clamp(jelly.x + speed * jelly.dir * dt, 14, W - 14);
   jelly.step -= dt;
   if (jelly.step <= 0 && p && (jelly.kind !== 0 || jelly.angry)) {
@@ -404,7 +413,8 @@ function makeScenery() {
   scenery.height = canvas.height;
   const layer = scenery.getContext("2d");
   layer.scale(scenery.width / W, scenery.height / H);
-  layer.fillStyle = "#eaffeb30";
+  const [highlight, top, base, shadow, edge, wash] = PLATFORM_COLORS[Math.floor(game.index / 6)];
+  layer.fillStyle = wash;
   layer.fillRect(0, 0, W, H);
   const clip = [[36, 117, 7], [701, 112, 9], [423, 126, 5], [330, 73, 4], [535, 60, 5], [755, 216, 5], [66, 207, 4]];
   for (const [x, y, size] of clip) sparkle(layer, x, y, size, "#fffbe5");
@@ -413,16 +423,16 @@ function makeScenery() {
     const height = isFloor ? 43 : 17;
     const inset = isFloor ? -3 : 0;
     const platform = layer.createLinearGradient(0, y, 0, y + height);
-    platform.addColorStop(0, "#c5f5bf");
-    platform.addColorStop(.24, "#ace4a2");
-    platform.addColorStop(.55, "#75bd8d");
-    platform.addColorStop(1, "#58aa89");
+    platform.addColorStop(0, highlight);
+    platform.addColorStop(.24, top);
+    platform.addColorStop(.55, base);
+    platform.addColorStop(1, shadow);
     layer.beginPath();
     layer.roundRect(x + inset, y, width - inset * 2, height, isFloor ? 7 : 10);
     layer.fillStyle = platform;
     layer.fill();
     layer.lineWidth = 1.9;
-    layer.strokeStyle = "#407c65";
+    layer.strokeStyle = edge;
     layer.stroke();
     layer.beginPath();
     layer.roundRect(x + 5, y + 2.7, width - 10, 3.2, 3);
@@ -610,14 +620,23 @@ for (const button of pads) {
 }
 
 action.addEventListener("click", () => {
-  if (game.mode === "clear" && game.index < STAGES.length - 1) {
+  if (game.mode === "ready") {
+    startLevel(game.index, game.score, game.hearts);
+  } else if (game.mode === "lost") {
+    saveProgress(game.index, game.startingScore);
+    startLevel(game.index, game.startingScore);
+  } else if (game.index < STAGES.length - 1) {
     startLevel(game.index + 1, game.score, Math.min(MAX_HEARTS, game.hearts + 1));
   } else {
-    startLevel(0);
+    restartGame();
   }
   chime([509, 650]);
 });
-get("restart").addEventListener("click", () => startLevel(0));
+function restartGame() {
+  saveProgress(0, 0);
+  startLevel(0);
+}
+get("restart").addEventListener("click", restartGame);
 get("help").addEventListener("click", () => {
   clearInputs();
   help.showModal();
@@ -637,6 +656,8 @@ sprite.addEventListener("load", () => { if (game) draw(); });
 
 setLanguage();
 resize();
-startLevel(0, 0, MAX_HEARTS, "ready");
+const [savedLevel, savedScore, savedHearts] = readProgress();
+const completed = savedLevel === STAGES.length;
+startLevel(Math.min(savedLevel, STAGES.length - 1), savedScore, savedHearts, completed ? "clear" : "ready");
 new ResizeObserver(resize).observe(canvas);
 requestAnimationFrame(loop);

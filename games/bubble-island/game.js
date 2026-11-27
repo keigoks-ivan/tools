@@ -20,20 +20,6 @@ const PALETTE = [
   { name: "黃色泡泡", en: "Yellow bubble", light: "#fff3bd", mid: "#ffdb76", dark: "#e9a54f", ink: "#8c551d" },
   { name: "蜜桃泡泡", en: "Peach bubble", light: "#ffe4ce", mid: "#ffb58d", dark: "#e88169", ink: "#943f4c" }
 ];
-const LEVELS = [
-  {
-    name: "棉花雲朵", en: "Cotton Clouds", shots: 5, first: 3, next: 0, bonus: 150,
-    rows: ["00111223344", "0011223344", ".011223344.", ".00222344.", "..00.33.44.", "...33....."]
-  },
-  {
-    name: "蜜桃山丘", en: "Peach Hills", shots: 5, first: 5, next: 2, bonus: 250,
-    rows: ["44550052211", "4450052211", ".410055221.", "..110552..", "...11550...", "...1550..."]
-  },
-  {
-    name: "星星花園", en: "Star Garden", shots: 4, first: 1, next: 4, bonus: 400,
-    rows: ["03344211550", "0334221550", ".334422550.", "1440012550", ".144011253.", "..4401155.", "...401.55.."]
-  }
-];
 const TIPS = [
   ["試試讓泡泡反彈！", "Try bouncing off the wall!"],
   ["好厲害，再來一關！", "Nicely done! Keep going!"],
@@ -139,6 +125,7 @@ const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 const format = new Intl.NumberFormat("zh-TW");
 const colorKey = "bubble-island-best";
 const soundKey = "bubble-island-muted";
+const progressKey = "bubble-island-progress";
 const translations = [
   ["data-en", null],
   ["data-en-label", "aria-label"],
@@ -153,6 +140,19 @@ function readPreference(name) {
 
 function savePreference(name, value) {
   try { localStorage.setItem(name, value); } catch { /* The game also works without storage. */ }
+}
+
+function readProgress() {
+  try {
+    const [index, score] = JSON.parse(readPreference(progressKey)) ?? [];
+    if (Number.isInteger(index) && index >= 0 && index <= LEVELS.length &&
+      Number.isSafeInteger(score) && score >= 0) return [index, score];
+  } catch { /* Invalid progress starts a new game. */ }
+  return [0, 0];
+}
+
+function saveProgress(index, score) {
+  savePreference(progressKey, JSON.stringify([index, score]));
 }
 
 let best = Math.max(0, Number.parseInt(readPreference(colorKey), 10) || 0);
@@ -224,8 +224,9 @@ function startLevel(index, score = 0) {
     if (color !== ".") grid.set(key(r, col), Number(color));
   }));
   state = {
-    index, level, grid, score, phase: 0, misses: 0, current: level.first, next: level.next,
-    angle: -.08, projectile: null, particles: [], mode: "playing", resultDelay: 0, recentColors: [], tip: index
+    index, level, grid, score, startingScore: score, phase: 0, misses: 0, current: level.first, next: level.next,
+    angle: -.08, projectile: null, particles: [], mode: "playing", resultDelay: 0, recentColors: [],
+    tip: index === LEVELS.length - 1 ? 2 : Math.min(index, 1)
   };
   activePointer = null;
   ui.result.hidden = true;
@@ -239,7 +240,8 @@ function startLevel(index, score = 0) {
 
 function updateStage() {
   const number = state.index + 1;
-  ui["stage-badge"].textContent = t(`第 ${number} 關`, `Level ${number}`);
+  const progress = `${number} / ${LEVELS.length}`;
+  ui["stage-badge"].textContent = t(`第 ${progress} 關`, `Lv. ${progress}`);
   ui["stage-name"].textContent = t(state.level.name, state.level.en);
   ui["mascot-text"].textContent = t(...TIPS[state.tip]);
 }
@@ -305,6 +307,7 @@ function endRound(mode) {
   state.resultDelay = reducedMotion.matches ? 0 : 470;
   if (mode === "clear") {
     state.score += state.level.bonus;
+    saveProgress(state.index + 1, state.score);
     sound([[540, 0, .07], [680, .08, .07], [810, .16, .07], [1080, .24, .06]]);
   } else {
     sound([[420, 0, .06], [320, .12, .06]]);
@@ -321,8 +324,10 @@ function showResult(focus = true) {
     : t("碰到警戒線了", "The bubbles reached the line");
   ui["result-text"].textContent = won
     ? t(`拿到 ${state.level.bonus} 分通關獎勵，目前總分 ${total}。`, `${state.level.bonus} bonus points! Your total is ${total}.`)
-    : t(`這一輪拿到 ${total} 分。要和噗噗再試一次嗎？`, `You scored ${total}. Try again with Pupu?`);
-  ui["result-action"].textContent = won && !last ? t("下一關", "Next level") : t("再玩一次", "Play again");
+    : t(`目前總分 ${total}。可以從本關起點再試一次。`, `You scored ${total}. Try this level again.`);
+  ui["result-action"].textContent = won
+    ? (last ? t("再玩一次", "Play again") : t("下一關", "Next level"))
+    : t("重試本關", "Retry level");
   ui.result.hidden = false;
   if (focus) {
     ui["result-action"].focus({ preventScroll: true });
@@ -761,12 +766,19 @@ ui.swap.addEventListener("click", () => {
   ui.board.focus({ preventScroll: true });
 });
 ui.restart.addEventListener("click", () => {
+  saveProgress(0, 0);
   startLevel(0);
   ui.board.focus({ preventScroll: true });
 });
 ui["result-action"].addEventListener("click", () => {
-  if (state.mode === "clear" && state.index < LEVELS.length - 1) startLevel(state.index + 1, state.score);
-  else startLevel(0);
+  if (state.mode === "lost") {
+    startLevel(state.index, state.startingScore);
+  } else if (state.index < LEVELS.length - 1) {
+    startLevel(state.index + 1, state.score);
+  } else {
+    saveProgress(0, 0);
+    startLevel(0);
+  }
   ui.board.focus({ preventScroll: true });
 });
 ui.help.addEventListener("click", () => ui.instructions.showModal());
@@ -787,7 +799,14 @@ ui.feedback.addEventListener("animationend", () => {
 });
 
 updateLanguage();
-startLevel(0);
+const [savedLevel, savedScore] = readProgress();
+startLevel(Math.min(savedLevel, LEVELS.length - 1), savedScore);
+if (savedLevel === LEVELS.length) {
+  state.grid.clear();
+  state.mode = "clear";
+  updateHud();
+  showResult(false);
+}
 resize();
 new ResizeObserver(resize).observe(ui.board);
 requestAnimationFrame(frame);
