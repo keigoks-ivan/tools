@@ -210,7 +210,7 @@ class Rail extends Exercise{
     const old=ride?.train?.position,x=old?.x,z=old?.z;
     this.time+=dt;this.site.moveTrains(this.time);
     if(ride){p.pos.x+=old.x-x;p.pos.z+=old.z-z;this.safeLane=ride.lane;this.safeZ=p.pos.z-old.z;}
-    if(p.pos.y<5){
+    if(p.pos.y<this.site.recoveryHeight){
       const t=this.train(this.safeLane);this.relocate(t.x,DECK,t.z+this.safeZ,p.yaw);
       this.C.note('磁索回收・返回上一節車頂','am');p.en=Math.max(20,p.en-12);
     }
