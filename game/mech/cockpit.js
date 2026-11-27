@@ -1274,14 +1274,15 @@ export class Cockpit {
     x.strokeStyle = COL.grid; x.beginPath();
     for (const s of [-1, 1]) { x.moveTo(cx, cy); x.lineTo(cx + Math.sin(s * 50 * D) * R, cy - Math.cos(50 * D) * R); }
     x.stroke();
+    const compassYaw=yaw-(this.world?.bearingOffset||0)*D;
     // 羅盤刻度：每 10° 一格、30° 長格；北方跟著機頭轉
     x.strokeStyle = COL.dim; x.beginPath();
     for (let d = 0; d < 360; d += 10) {
-      const a = d * D + yaw, r0 = d % 30 === 0 ? R + 12 : R + 6;
+      const a = d * D + compassYaw, r0 = d % 30 === 0 ? R + 12 : R + 6;
       x.moveTo(cx + Math.sin(a) * R, cy - Math.cos(a) * R); x.lineTo(cx + Math.sin(a) * r0, cy - Math.cos(a) * r0);
     }
     x.stroke();
-    for (let d = 0; d < 360; d += 90) { const a = d * D + yaw; this.tx(x, 'NESW'[d / 90], cx + Math.sin(a) * (R - 18), cy - Math.cos(a) * (R - 18), d === 0 ? COL.am : COL.dim, 22, true, 'center'); }
+    for (let d = 0; d < 360; d += 90) { const a = d * D + compassYaw; this.tx(x, 'NESW'[d / 90], cx + Math.sin(a) * (R - 18), cy - Math.cos(a) * (R - 18), d === 0 ? COL.am : COL.dim, 22, true, 'center'); }
     // 掃描線
     const sw = (t * 2.4) % (Math.PI * 2);
     if (x.createConicGradient) {
@@ -1342,7 +1343,7 @@ export class Cockpit {
     // 自機
     x.fillStyle = COL.cy; x.beginPath(); x.moveTo(cx, cy - 12); x.lineTo(cx + 8, cy + 8); x.lineTo(cx, cy + 4); x.lineTo(cx - 8, cy + 8); x.closePath(); x.fill();
     // 航向框（框下緣對準羅盤正上方）：往右轉數字變大
-    const hdg = Math.round(((-yaw / D) % 360 + 360) % 360) % 360;
+    const hdg = Math.round(((-compassYaw / D) % 360 + 360) % 360) % 360;
     x.fillStyle = COL.bg; x.fillRect(cx - 36, cy - R - 44, 72, 30);
     x.strokeStyle = COL.cy; x.lineWidth = 2; x.strokeRect(cx - 36, cy - R - 44, 72, 30);
     this.tx(x, pad(hdg), cx, cy - R - 28, COL.wh, 24, true, 'center');

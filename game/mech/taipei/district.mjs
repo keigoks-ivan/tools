@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {marketCourt,cityPlaza,parkScooters} from './streets.mjs';
+import {buildXinyi} from './xinyi.mjs';
 import {channelsAt,buildGuandu} from './rivers.mjs';
 import {buildTaipei101,TAIPEI_101} from './landmark.mjs';
 import {carGeometry} from '../env.js';
@@ -7,13 +8,25 @@ import {instancedCarMaterial} from '../car-material.js';
 
 const WHITE = [1,1,1], uv = [[0,0],[1,0],[1,1],[0,1]];
 const names = ['茶行','永安布莊','南北貨','蔘藥行','河濱步道','碼頭','信義商圈','連通空橋','淡水河','基隆河','關渡碼頭','河濱自行車道','迪化街','大稻埕','信義路','台北101'];
-function signs() {
+function signs(labels=names,commercial=false) {
   const c=document.createElement('canvas'); c.width=1024; c.height=512;
   const ctx=c.getContext('2d');
-  names.forEach((name,i)=>{
+  labels.forEach((name,i)=>{
     const x=(i%4)*256, y=(i>>2)*128;
     ctx.fillStyle=['#593a2c','#294546','#733c30','#303c34','#315658','#334b61','#384952','#485256'][i%8];
     ctx.fillRect(x,y,256,128);ctx.strokeStyle='#c3ab78';ctx.lineWidth=2;ctx.strokeRect(x+7,y+7,242,114);
+    if(commercial&&i>=7&&i<=9){
+      const hue=['#173b47','#6b3b3c','#496454'][i-7];
+      const tone=ctx.createLinearGradient(x,y,x+256,y+128);
+      tone.addColorStop(0,hue);tone.addColorStop(1,'#d5b692');
+      ctx.fillStyle=tone;ctx.fillRect(x,y,256,128);
+      ctx.save();ctx.beginPath();ctx.rect(x,y,256,128);ctx.clip();
+      ctx.strokeStyle='#edcf9b';ctx.lineWidth=3;
+      for(let k=0;k<6;k++){ctx.beginPath();ctx.ellipse(x+174,y+53,26+k*3,41+k*4,-.46,0,Math.PI*2);ctx.stroke();}
+      ctx.restore();ctx.fillStyle='#fbede1';ctx.textAlign='left';ctx.textBaseline='middle';
+      ctx.font='600 35px "PingFang TC",serif';ctx.fillText(name,x+15,y+67,112);
+      return;
+    }
     ctx.fillStyle='#f1e8ce';ctx.font='600 47px "PingFang TC","Noto Serif TC",serif';
     ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(name,x+128,y+66,222);
   });
@@ -38,7 +51,7 @@ export async function prepareDistrict(A,heightSource) {
   bank.colorSpace=THREE.SRGBColorSpace;bank.wrapS=THREE.MirroredRepeatWrapping;bank.repeat.x=6;bank.anisotropy=4;
   const backdrop=new THREE.MeshBasicMaterial({map:bank,side:THREE.BackSide,alphaTest:.18,color:0xdddcd2});
   map.colorSpace=THREE.SRGBColorSpace;map.anisotropy=4;
-  const materials={
+  const sharedMaterials={
     face:smokeDamage(lit({map,metalness:.07})), trim:lit({roughnessMap:A.wearM}),
     signs:lit({map:signs()}), glass:lit({map,metalness:.44,roughness:.27}),
     road:lit({map:A.asphD,normalMap:A.asphN,normalScale:new THREE.Vector2(.55,.55),roughnessMap:A.asphA,roughness:.69}),
@@ -46,14 +59,28 @@ export async function prepareDistrict(A,heightSource) {
     water:lit({color:0x466d68,metalness:.22,roughness:.39,normalMap:A.asphN,normalScale:new THREE.Vector2(.11,.05)}),
 
   };
-  materials.water.onBeforeCompile=s=>{
-    s.uniforms.riverClock={value:0};materials.water.userData.clock=s.uniforms.riverClock;
+  sharedMaterials.water.onBeforeCompile=s=>{
+    s.uniforms.riverClock={value:0};sharedMaterials.water.userData.clock=s.uniforms.riverClock;
     s.fragmentShader='uniform float riverClock;\n'+s.fragmentShader.replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\nnormal.x += .017*sin(vNormalMapUv.y*5.0+riverClock+sin(vNormalMapUv.x*.81))+.011*sin(vNormalMapUv.x*14.0+riverClock*.65);normal=normalize(normal);');
   };
+  let xinyiMaterials;
+  function commercialMaterials(){
+    if(xinyiMaterials)return xinyiMaterials;
+    const face=smokeDamage(lit({map,metalness:.1})),glass=lit({map,metalness:.32,roughness:.25});
+    const labels=['香堤大道','世貿一館','台北101／世貿','松高路','松壽路','市府路','信義商圈','秋日展','光之間','設計季',...names.slice(10)];
+    xinyiMaterials={...sharedMaterials,face,glass,signs:lit({map:signs(labels,true)})};
+    loader.load(new URL('./xinyi-facades.webp',import.meta.url).href,texture=>{
+      texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=4;
+      face.map=glass.map=texture;
+    });
+    return xinyiMaterials;
+  }
   const carFinish=instancedCarMaterial(A.wearM);
   return (w,group,{bucket,box,put})=>{
     const district=w.fieldRoute.district, river=district==='river', city=district==='skyline';
+    const materials=city?commercialMaterials():sharedMaterials;
     w.terrainMesh.material.userData.setBasinView(district,basinColor);
+    w.bearingOffset=city?180:0;
     w.scenicPoints=heightSource.peaks(district);
     const landmark=(name,x,y,z)=>w.scenicPoints.push({name,p:new THREE.Vector3(x,y,z)});
     if(river){landmark('關渡大橋',481,54,275);landmark('基隆河匯流口',-498,4,178);}
@@ -101,7 +128,7 @@ export async function prepareDistrict(A,heightSource) {
       const gauge=city||river?34:22;
       pave(x,z,alongX?len:gauge,alongX?gauge:len);
       for(let d=-len/2+4;d<len/2;d+=12){
-        if(!alongX && (Math.abs(z+d+56)<16||Math.abs(z+d-100)<16)) continue;
+        if(city ? (alongX?[-120,0,130,250]:[-65,110,278]).some(v=>Math.abs((alongX?x:z)+d-v)<22) : !alongX && (Math.abs(z+d+56)<16||Math.abs(z+d-100)<16)) continue;
         const line=(off,sz,c)=>piece(x+(alongX?d:off),.055,z+(alongX?off:d),alongX?sz:.13,.016,alongX?.13:sz,c);
         line(-.17,9,stripe);line(.17,9,stripe);if(city||river){line(-8,3,light);line(8,3,light);}
       }
@@ -177,9 +204,10 @@ export async function prepareDistrict(A,heightSource) {
     }
     function office(x,z,width,depth,h,modern=false,solid=false){
       if(city&&Math.abs(x-TAIPEI_101.x)<125&&Math.abs(z-TAIPEI_101.z)<70)return;
-      const index=modern?5:2,b=modern&&!solid?B.glass:B.face;
+      const b=modern&&!solid?B.glass:B.face;
       const body=()=>{
         const bands=Math.max(1,Math.round(h/(modern?9:8))),variant=Math.floor(rand()*4);
+        const index=modern?[3,4,5,1][variant]:2;
         let lastW=width,lastD=depth;
         const tint=modern?[[.72,.84,.83],[.80,.84,.88],[.69,.77,.83],[.81,.78,.74]][variant]:[.85,.85,.82];
         for(let j=0;j<bands;j++){
@@ -205,11 +233,16 @@ export async function prepareDistrict(A,heightSource) {
         body();w.addCollider({x0:x-width/2,x1:x+width/2,z0:z-depth/2,z1:z+depth/2,top:h+.4});
       }
     }
-    function skywalk(x,z,width){
-      const y=25,depth=4.6;
+    function skywalk(x,z,width,y=25){
+      const depth=4.6;
+      // Clear the mech below the enclosed walkway.
       w.addCollider({x0:x-width/2,x1:x+width/2,z0:z-depth/2,z1:z+depth/2,bottom:y,top:y+5.05});
-      piece(x,y,z,width,1,depth,dark);skin(B.glass,x,z,width,depth,y+1,y+4.6,5,Math.ceil(width/8),1);
+      piece(x,y,z,width,1,depth,dark);skin(B.glass,x,z,width,depth,y+1,y+4.6,3,Math.ceil(width/8),1);
       piece(x,y+4.6,z,width,.45,depth+.4,metal);
+      for(const side of [-1,1]){
+        piece(x,y+.5,z+side*depth/2,width,.85,.25,paint(0xa44239));
+        piece(x,y+4.18,z+side*depth/2,width,.50,.25,paint(0xb85642));
+      }
       for(const side of [-1,1]){
         const xx=x+side*(width/2+1.5);
         skin(B.glass,xx,z,4,6,0,y+5,5,1,1);piece(xx,y+5,z,4.45,.33,6.45,metal);
@@ -235,6 +268,11 @@ export async function prepareDistrict(A,heightSource) {
       for(const z of cross){street(45,z,590,true);
         for(const x of [0,offset])for(const side of [-1,1])for(let i=-12;i<=12;i+=2.3)piece(x+i,.08,z+side*19,.97,.015,3.8,light);
       }
+      if(city)for(const z of cross)for(const x of [0,offset])for(const side of [-1,1]){
+        for(let k=-13;k<=13;k+=2.3)piece(x+side*20,.08,z+k,3.8,.015,.97,light);
+        piece(x+side*25,.08,z+side*8,.46,.016,15,light);
+        piece(x-side*8,.08,z+side*24,15,.016,.46,light);
+      }
       for(const road of [0,offset])for(const side of [-1,1]){
         if(!city){
           let i=0;
@@ -243,17 +281,11 @@ export async function prepareDistrict(A,heightSource) {
             if(road===120&&side===-1&&Math.abs(center+275)<55||cross.some(c=>Math.abs(center-c)<20+width/2)||Math.abs(center-248)<24&&road===0&&side===1)continue;
             shophouse(road,side,center,width,(++i+Math.floor(rand()*5)));
           }
-        }else{
-          for(let z=-393;z<414;z+=51){
-            if(cross.some(c=>Math.abs(z-c)<40)||road===0&&Math.abs(z-270)<50)continue;
-            const width=24+rand()*10,depth=22+rand()*15;
-            office(road+side*(27+width/2),z,width,depth,19+rand()*68,true,true);
-          }
         }
         for(let z=-405;z<397;z+=27){
           if(cross.some(c=>Math.abs(z-c)<24))continue;
           const curb=city?19:13.1;
-          piece(road+side*curb,.045,z,3.5,.14,26.9,stone);lamp(road+side*(curb-.8),z,-side);
+          piece(road+side*(city?22:curb),.045,z,city?10:3.5,.14,26.9,city?light:stone);lamp(road+side*(curb-.8),z,-side);
           if(!city&&rand()<.52)for(let k=0;k<4;k++)scooters.push([road+side*11.5,z+k*1.13,side*1.2]);
           if(rand()<.38)park(road+side*(city?14.8:9.9),z+5,side*Math.PI/2);
           if(city||Math.floor(z)%3===0)tree(road+side*curb,z+6);
@@ -261,15 +293,18 @@ export async function prepareDistrict(A,heightSource) {
       }
       for(const road of [0,offset])for(const z of cross){streetSignal(road-16,z+16,1);streetSignal(road+16,z-16,-1);}
       for(const [x,z] of (city?[[14,-162],[106,-78],[147,116],[-18,233]]:[[13,-184],[103,-100],[135,77],[-14,190]]))shelter(x,z,0);
-      for(const [x,z,name] of [[-12,-275,city?14:12],[city?147:132,98,city?6:13]]){
+      for(const [x,z,name] of (city?[[-18,-85,3],[148,89,4],[-18,253,5]]:[[-12,-275,12],[132,98,13]])){
         piece(x,.1,z,.15,5.7,.15,metal);front(B.signs,x-.1,z,3.1,4.75,5.68,-1,name,4);
         front(B.signs,x+.1,z,3.1,4.75,5.68,1,name,4);
       }
       if(!city)marketCourt({x:87,z:-290,piece,course,trim:B.trim,quad,uv,paint});
-      else cityPlaza({x:28,z:273,piece,trim:B.trim,course,paint,tree});
-      if(city){skywalk(0,-142,58);skywalk(offset,-64,60);office(157,250,17,15,36,true,false);buildTaipei101(w,{quad,glass:B.glass,trim:B.trim,piece,paint,glassUV:tile(5),uv});}
+      else cityPlaza({x:29,z:211,piece,trim:B.trim,course,paint,tree});
+      if(city){
+        buildXinyi({B,skin,quad,tile,uv,paint,piece,building,tree,front,world:w});
+        skywalk(0,-142,60,19.7);skywalk(offset,-22,62);office(157,250,17,15,36,true,false);buildTaipei101(w,{quad,glass:B.glass,trim:B.trim,piece,paint,glassUV:tile(4),uv});}
       for(const s of [-1,1])for(let i=0;i<30;i++){
-        const x=s<0?-84-(i%3)*53:offset+82+(i%3)*49,z=-420+Math.floor(i/3)*94+rand()*33;
+        const x=s<0?(city?-157:-84)-(i%3)*53:offset+(city?166:82)+(i%3)*49,z=-420+Math.floor(i/3)*94+rand()*33;
+        if(city&&s<0&&z>335&&z<510)continue;
         office(x,z,24+rand()*12,19+rand()*15,city?34+rand()*117:12+rand()*29,city);
       }
       for(let i=-5;i<=5;i++)office(i*64,530+rand()*60,28,30,city?38+rand()*103:13+rand()*34,city);

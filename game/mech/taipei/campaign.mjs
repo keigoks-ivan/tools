@@ -43,7 +43,7 @@ export const TAIPEI_STAGES = [
     route:{district:'skyline',cp:[2,4,6],arena:140,fin:54,par:520,pts:[[0,-399],[0,-264],[0,-142],[0,-65],[130,-65],[130,50],[130,110],[0,110],[0,278],[130,278],[130,362],[130,407]],secs:[
       {at:1,amb:'grunt@roof heli@far',amb2:'brawler@side',tip:'沿百貨外街接近第一座空橋'},
       {at:2,amb:'heavy@out grunt@roof',amb2:'heli@rise',tip:'從橋下切入或飛越屋頂，突破封鎖'},
-      {at:4,amb:'heavy@out heli@far',pickup:{x:145,z:-64,alt:30,mount:'bridge',name:'空橋天線'},tip:'起飛至天線高度，抄收第二段訊號',clear:[['白隼','收到兩份求救訊號，一份始終比我慢半拍。']]},
+      {at:4,amb:'heavy@out heli@far',pickup:{x:145,z:-22,alt:30,mount:'bridge',name:'空橋天線'},tip:'起飛至天線高度，抄收第二段訊號',clear:[['白隼','收到兩份求救訊號，一份始終比我慢半拍。']]},
       {at:6,amb:'ace@drop grunt@side',amb2:'heli@rise*2',tip:'沿空橋追蹤延遲的訊號，穿過兩棟百貨之間'},
       {at:8,amb:'grunt@roof*2 heli@rise',amb2:'brawler@side heavy@out',tip:'從廣場上空或側巷突破交錯火線'},
       {at:9,amb:'ace@out heli@far',pickup:{x:157,z:250,name:'屋頂燈號',alt:36.4,mount:'roof'},tip:'在高處接收阿澄的燈號，確認複聲所在的廣場',clear:[['阿澄','我要關燈了。接下來還會重播這句話的，就是它。']]},

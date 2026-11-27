@@ -3,7 +3,7 @@ import * as THREE from 'three';
 const frames={
   arcade:[[-4,0,-500],[0,4,-1200]],
   river:[[-1.68,-3.64,-4900],[3.64,-1.68,5600]],
-  skyline:[[-4,0,4900],[0,4,-3850]],
+  skyline:[[4,0,5300],[0,-4,-1890]],
 };
 // Mapzen Terrarium z10, NASA SRTM. Signed little-endian metres, south-to-north rows.
 // Grid centred at 25.069 N, 121.515 E. 161 samples at 250 m cover a 40 km square.

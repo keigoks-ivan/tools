@@ -28,15 +28,29 @@ export function buildTaipei101(world,{quad,glass,trim,piece,paint,glassUV,uv}) {
       solid(bottom,(r+t)/2,step);
     }
   }
-  // Low mall podium on the far side leaves the approach to the tower visible.
-  const mallX=x-61;
-  piece(mallX,0,z+4,67,1.2,84,jade);
-  for(let j=0;j<7;j++){
-    const w=64-j*.9,d=82-j*.7;
-    piece(mallX,1.2+j*3.6,z+4,w,3.6,d,dark);
-    piece(mallX,4.55+j*3.6,z+4,w+.8,.45,d+.8,silver);
+  // The shopping podium reaches north from the tower, with a glazed, ribbed barrel roof.
+  const mallX=x-38,mallZ=z-67,hw=36,hd=43;
+  piece(mallX,0,mallZ,hw*2,1,hd*2,silver);
+  for(let floor=0;floor<5;floor++){
+    const y=1+floor*5.1;
+    piece(mallX,y,mallZ,hw*2,5.1,hd*2,dark);
+    for(const side of [-1,1])for(let k=0;k<10;k++){
+      const zz=mallZ+side*(hd-k*hd*.2),xx=mallX+side*(hw+.04);
+      quad(glass,[[xx,y,zz],[xx,y,zz-side*hd*.2],[xx,y+4.78,zz-side*hd*.2],[xx,y+4.78,zz]],glassUV,panes);
+    }
+    piece(mallX,y+4.8,mallZ,hw*2+.6,.35,hd*2+.6,silver);
   }
-  world.addCollider({x0:mallX-33.5,x1:mallX+33.5,z0:z-38,z1:z+46,top:27,landmark:'台北101'});
+  function vault(i,dz){
+    const a=i*Math.PI/14;
+    return [mallX+25*Math.cos(a),26.6+8.5*Math.sin(a),mallZ+dz];
+  }
+  for(let i=0;i<14;i++)for(let k=-36;k<36;k+=6){
+    quad(glass,[vault(i,k),vault(i+1,k),vault(i+1,k+6),vault(i,k+6)],glassUV,panes);
+    const rib=(j,d)=>{const p=vault(j,d);p[1]+=.10;return p;};
+    quad(trim,[rib(i,k),rib(i+1,k),rib(i+1,k+.24),rib(i,k+.24)],uv,silver);
+  }
+  world.addCollider({x0:mallX-hw,x1:mallX+hw,z0:mallZ-hd,z1:mallZ+hd,top:26.5,landmark:'台北101'});
+  for(let i=-2;i<=2;i++)world.addCollider({x0:mallX+i*10-5,x1:mallX+i*10+5,z0:mallZ-36,z1:mallZ+36,top:26.6+8.5*Math.sqrt(1-(i/2.5)**2),landmark:'台北101'});
   shaft(0,39.5,112,29.5,23);
   segment(112,29.5,3,30,true);solid(112,30,3);
   for(let i=0;i<8;i++){

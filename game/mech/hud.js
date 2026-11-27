@@ -89,7 +89,8 @@ export class HUD {
     const C = g.combat, P = g.player;
     if (!C) return;
     this.cam.getWorldDirection(this.fwd);
-    const f = this.fwd, hdg = ((-Math.atan2(f.x, f.z) / D) % 360 + 360) % 360;
+    const northOffset = C.world?.bearingOffset || 0;
+    const f = this.fwd, hdg = ((northOffset-Math.atan2(f.x, f.z) / D) % 360 + 360) % 360;
 
     // ---- 受傷：畫面邊緣紅光
     if (C.damageFx > 0.01) {
@@ -255,7 +256,7 @@ export class HUD {
     this.text(pad(hdg % 360), hx, hy - 15.5 * s, 12, 'cy', 1, 'center', 700);
     X.beginPath(); X.moveTo(hx, hy + 2 * s); X.lineTo(hx - 4 * s, hy + 8 * s); X.lineTo(hx + 4 * s, hy + 8 * s); X.closePath(); this.sk('cy', 0.95, 1.2);
     // 航向帶上的方位記號：鎖定目標（琥珀直線）、遭遇戰目標點（青色菱形）；超出範圍就貼在帶子兩端
-    const brg = (px, pz) => wrapD(-Math.atan2(px - this.cam.position.x, pz - this.cam.position.z) / D - hdg);
+    const brg = (px, pz) => wrapD(northOffset-Math.atan2(px - this.cam.position.x, pz - this.cam.position.z) / D - hdg);
     if (L) {
       const rb = brg(_L.x, _L.z), x = hx + clamp(rb, -30, 30) * kp;
       X.beginPath(); X.moveTo(x, hy + 3 * s); X.lineTo(x, hy + 12 * s); this.sk('am', Math.abs(rb) > 30 ? 0.55 : 1, 2);
