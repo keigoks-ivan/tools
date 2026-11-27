@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import {EchoTape,echoFigure,replayShot} from '../sim/tape.mjs';
 import {buildExercise} from '../sim/scenery.mjs';
+import {World} from '../env.js';
+import {foldedSolids} from '../sim/fold-architecture.mjs';
 import {SIM_STAGES,HEIGHT,DECK} from '../sim/campaign.mjs';
 
 test('three independent courses build their own collision and moving geometry',()=>{
@@ -25,6 +27,25 @@ test('three independent courses build their own collision and moving geometry',(
       }
     }
     root.traverse(o=>{if(o.isMesh){o.geometry.dispose();o.material.dispose();}});
+  }
+});
+test('folded skybridge stays open below its deck and mirrors into the opposite grid cells',()=>{
+  const site={boxes:[]},solids=foldedSolids(site),world=Object.create(World.prototype);
+  Object.assign(world,{grid:new Map(),cellSize:60,boxes:[],height:()=>0});
+  solids.register([
+    {x0:80,x1:96,z0:20,z1:34,bottom:0,top:36},
+    {x0:80,x1:96,z0:50,z1:64,bottom:0,top:31},
+    {x0:85,x1:91,z0:32,z1:52,bottom:19,top:24},
+  ],true);
+  for(const b of site.boxes)world.addCollider(b);
+  function ray(x1,x2,y,z){return world.raycast(new THREE.Vector3(x1,y,z),new THREE.Vector3(x2,y,z));}
+  for(const upper of [true,false,true]){
+    solids.orient(upper);
+    const x=upper?1:-1,Y=y=>upper?y:HEIGHT-y;
+    assert.equal(ray(64*x,110*x,Y(8),42),-1);
+    assert.ok(ray(64*x,110*x,Y(21),42)>0);
+    assert.ok(ray(64*x,110*x,Y(8),28)>0);
+    assert.equal(ray(-64*x,-110*x,Y(21),42),-1);
   }
 });
 test('echo preserves both endpoints on long recordings and interpolates across yaw wrap',()=>{

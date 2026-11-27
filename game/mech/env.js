@@ -1494,7 +1494,14 @@ export class World {
     for (let gx = Math.floor((x - r) / cs); gx <= Math.floor((x + r) / cs); gx++)
       for (let gz = Math.floor((z - r) / cs); gz <= Math.floor((z + r) / cs); gz++) {
         const l = this.grid.get(gx * 10007 + gz);
-        if (l) for (const i of l) if (!seen.has(i)) { seen.add(i); out.push(this.boxes[i]); }
+        if (l) for (const i of l) if (!seen.has(i)) {
+          seen.add(i);
+          const box=this.boxes[i];
+          if (!box.collisionParts) out.push(box);
+          else if (x+r>=box.x0 && x-r<=box.x1 && z+r>=box.z0 && z-r<=box.z1) {
+            for (const part of box.collisionParts) if (x+r>=part.x0 && x-r<=part.x1 && z+r>=part.z0 && z-r<=part.z1) out.push(part);
+          }
+        }
       }
     if(this.exerciseSite?.boxes)for(const b of this.exerciseSite.boxes){
       if(x+r>b.x0&&x-r<b.x1&&z+r>b.z0&&z-r<b.z1)out.push(b);

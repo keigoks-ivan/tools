@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
+import {building,foldedSolids} from './fold-architecture.mjs';
 import {createExercise} from './missions.mjs';
 
 import {HEIGHT,DECK} from './campaign.mjs';
@@ -10,6 +11,8 @@ const arc=new THREE.TorusGeometry(1, .065, 6, 8, Math.PI/3.4);
 const glassTube=new THREE.CylinderGeometry(.5,.5,1,24,1,true);
 const dome=new THREE.SphereGeometry(.5,12,8,0,Math.PI*2,0,Math.PI/2);
 const surfaces={
+  quayside:{span:[19,23],roughness:.81,metalness:.05},
+  curtain:{span:[16,25],roughness:.34,metalness:.37},
   paving:{span:[19,19],roughness:.79,metalness:.07},
   ceramic:{span:[21,21],roughness:.47,metalness:.14},
   'car-deck':{span:[17,22],roughness:.31,metalness:.58},
@@ -108,32 +111,12 @@ function sky(root,world,district){
   m.userData.fieldGeometry=m.userData.fieldMaterial=true;root.add(m);
 }
 const block=(x,z,w,d,top,bottom=0)=>({x0:x-w/2,x1:x+w/2,z0:z-d/2,z1:z+d/2,top,bottom});
-// A chamfered perimeter picks up the grazing light on the curved corner bays.
-const cornerBlock=(()=>{
-  const ring=[[-.36,-.5],[.36,-.5],[.45,-.465],[.5,-.36],[.5,.36],
-    [.455,.465],[.36,.5],[-.36,.5],[-.46,.465],[-.5,.36],[-.5,-.36],[-.46,-.465]];
-  const p=[],uv=[],index=[];
-  for(let i=0;i<ring.length;i++){
-    const [x,z]=ring[i],[xx,zz]=ring[(i+1)%ring.length],v=p.length/3;
-    p.push(x,-.5,z,x,.5,z,xx,.5,zz,xx,-.5,zz);
-    uv.push(0,0,0,1,1,1,1,0);index.push(v,v+1,v+2,v,v+2,v+3);
-  }
-  for(const y of [-.5,.5]){
-    const start=p.length/3;
-    for(const [x,z] of ring){p.push(x,y,z);uv.push(x+.5,z+.5);}
-    for(let i=1;i<ring.length-1;i++){
-      if(y>0)index.push(start,start+i+1,start+i);else index.push(start,start+i,start+i+1);
-    }
-  }
-  const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(p,3));geometry.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geometry.setIndex(index);geometry.computeVertexNormals();return geometry;
-})();
 function fold(root,site){
-  const pair=new THREE.Group();root.add(pair);site.city=pair;
+  const pair=new THREE.Group(),solids=foldedSolids(site);root.add(pair);site.city=pair;
   for(const ceiling of [false,true]){
     const layer=new THREE.Group();pair.add(layer);
     if(ceiling){layer.rotation.z=Math.PI;layer.position.y=HEIGHT;}
     const p=batch(layer,ceiling?'琥珀上城':'青色下城'),accent=ceiling?amber:teal;
-    const brass=ceiling?0xcd9868:0x719895;
     const limestone=ceiling?0xf0d2b5:0xd3e0dc,trim=ceiling?0xab7957:0x567b86;
     p.box(0,-1,0,1240,2,1330,ceiling?0xffe2c5:0xd3e7eb,'paving');
     for(let i=-4;i<=4;i++)for(let j=-5;j<=5;j++){
@@ -155,62 +138,7 @@ function fold(root,site){
         }
         continue;
       }
-      const h=21+((Math.abs(i)*13+(j+13)*19)%37),w=38+(Math.abs(i)*9+j+5)%14,d=53;
-      const variant=(Math.abs(i)+j+6)%3;
-      const mass=variant===1||Math.abs(i)>1?cube:cornerBlock;
-      p.add(mass,x,3,z,w+2,6,d+2,limestone);
-      p.add(mass,x,(h+5)/2,z,w,h-5,d,ceiling?0xffe9d2:0xe2f4ff,'glazing');
-      p.add(mass,x,6.2,z,w+2.2,.86,d+2.2,trim);
-      for(let floor=12;floor<h;floor+=variant===1?12:9)
-        p.add(mass,x,floor,z,w+1.2,.66,d+1.2,limestone);
-      for(const side of [-1,1]){
-        p.box(x+side*(variant===1?w/2-.6:w*.32),h/2,z+d/2,1.45,h,1.45,limestone);
-        p.box(x+side*(variant===1?w/2-.6:w*.32),h/2,z-d/2,1.45,h,1.45,limestone);
-      }
-      p.add(mass,x,h+.64,z,w+1.9,1.3,d+1.9,limestone);
-      if(variant===0){
-        p.box(x,h+2,z,w*.69,3,d*.73,trim);p.add(dome,x,h+3.4,z,w*.46,6,d*.45,0x879ba0);
-      }else if(variant===1){
-        p.box(x,h+2,z,w*.82,3,d*.78,trim);
-        for(let fin=-2;fin<=2;fin++)p.box(x+fin*4.1,h+4,z,1.35,3,d*.62,limestone);
-      }else{
-        p.box(x,h+2,z,w*.58,3.5,d*.82,0x829899);
-        p.add(round,x-w*.27,h+2,z+12,5,4.4,5,trim);
-      }
-      if(Math.abs(i)===1){
-        const face=x-Math.sign(i)*(w/2+.45);
-        if(variant===1){
-          // Bronze fins, a stone drum and an inset dial mark the civic buildings on the boulevard.
-          p.add(round,x,h+3.2,z,20,5.4,20,limestone);
-          p.add(dome,x,h+5.8,z,19,11,19,brass);
-          for(const dir of [-1,1]){
-            const front=z+dir*(d/2+.38);
-            p.box(x,h*.54,front,12,h*.90,1.5,trim);
-            p.add(round,x,h-9,front+dir*.85,8,1.2,8,0xe2cda4,false,Math.PI/2);
-            p.box(x,h-7.95,front+dir*1.56,.32,2.35,.18,shell);
-            p.box(x+1,h-9.3,front+dir*1.56,2.1,.32,.18,shell);
-            for(const dx of [-8,8])p.box(x+dx,h*.52,front,1.5,h*.96,2.3,brass);
-          }
-        }else if(variant===0){
-          for(const dx of [-1,1])p.box(x+dx*w*.36,h*.53,z-d*.5,2.2,h*.95,2.4,trim);
-          p.box(x,5.6,z-d*.5-1.4,w*.76,1.1,4.2,brass);
-        }
-        for(const offset of [-14,0,14]){
-          p.box(face,2.6,z+offset,1,4.7,9,0x40565c);
-          p.box(face-Math.sign(i)*1.4,5.2,z+offset,3.7,.7,11,trim);
-        }
-        if(j%2===0){
-          // Gallery bridges join the blocks behind the avenue, leaving the flight corridor clear.
-          p.box(x,14,z+52,w*.34,4.1,52,0x8ea9a9,'glazing');
-          p.box(x,16.3,z+52,w*.38,.8,52,limestone);
-          for(let k=0;k<3;k++)p.strut([face,0,z-18+k*16],[face,10,z-10+k*16],.8,.95,trim);
-        }
-      }
-      // Both layers have identical footprints in the player's current gravity frame.
-      if(!ceiling){
-        site.boxes.push(block(x,z,w+2,d+2,h+2),block(x,z,w+2,d+2,HEIGHT,HEIGHT-h-2));
-        if(Math.abs(i)===1&&j%2===0)site.boxes.push(block(x,z+52,w*.38,52,16.7,11.95),block(x,z+52,w*.38,52,HEIGHT-11.95,HEIGHT-16.7));
-      }
+      building(p,solids,i,j,ceiling);
     }
     for(const z of [-96,195,314]){
       const activeRing=ceiling===(z===-96);
@@ -233,7 +161,11 @@ function fold(root,site){
     }
     p.finish();
   }
-  site.setLayer=upper=>{pair.position.y=upper?HEIGHT:0;pair.rotation.z=upper?Math.PI:0;};
+  site.setLayer=upper=>{
+    pair.position.y=upper?HEIGHT:0;pair.rotation.z=upper?Math.PI:0;
+    solids.orient(upper);
+  };
+  site.setLayer(false);
 }
 function echo(root,site){
   const p=batch(root,'殘響雙翼'),porcelain=0xe7e3d5,frame=0x586879;
