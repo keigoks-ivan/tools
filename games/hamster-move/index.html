@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6dcc1">
+  <meta name="description" content="和倉鼠栗栗一起搬家，把紙箱推上星星地墊。24 關原創推箱子遊戲。">
+  <title>倉鼠搬家 · Hamster Move</title>
+  <link rel="stylesheet" href="../little-arcade.css">
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./game.js"></script>
+</head>
+<body class="hamster">
+  <header class="topbar">
+    <a class="pill" href="../"><span data-en="Games">遊戲機台</span></a>
+    <nav aria-label="遊戲選項" data-en-label="Game options">
+      <button class="pill" id="language" type="button">EN</button>
+      <button class="pill" id="sound" type="button" aria-pressed="false"><span class="audio-icon" aria-hidden="true">♪</span><span data-en="Sound">音效</span></button>
+      <button class="pill" id="help" type="button" data-en="Help">玩法</button>
+    </nav>
+  </header>
+  <main>
+    <header class="hero">
+      <h1><span data-en="Hamster ">倉鼠</span><em data-en="Move">搬家</em></h1>
+      <p data-en="Give every box a home on a star mat.">跟栗栗一起把紙箱推到星星地墊上。</p>
+    </header>
+    <div class="arcade-grid">
+      <aside class="panel sidebar" aria-label="本關紀錄" data-en-label="Room stats">
+        <h2 data-en="Moving day">搬家紀錄</h2>
+        <dl class="meters">
+          <div><dt data-en="Steps">步數</dt><dd id="steps">0</dd></div>
+          <div><dt data-en="Pushes">推箱次數</dt><dd id="pushes">0</dd></div>
+        </dl>
+        <p class="subtle record" id="record"></p>
+        <div class="action-row">
+          <button class="text-button" id="undo" type="button" data-en="Undo">撤銷一步</button>
+          <button class="text-button" id="restart" type="button" data-en="Retry room">重玩本關</button>
+        </div>
+        <p class="subtle solved" id="solved"></p>
+      </aside>
+
+      <section class="panel workspace" aria-label="遊戲區" data-en-label="Play area">
+        <header class="game-head">
+          <div class="stage-title"><span class="badge" id="round">1 / 24</span><h2 id="room-name">第一個紙箱</h2></div>
+          <label class="level-picker"><span class="sr-only" data-en="Choose room">選擇關卡</span><select id="level"></select></label>
+        </header>
+        <div class="board-wrap">
+          <div class="puzzle" id="board" tabindex="0" role="group" aria-label="推箱子棋盤" data-en-label="Box puzzle board"></div>
+          <div class="result" id="result" hidden>
+            <div class="result-card">
+              <h2 id="result-title">搬好了！</h2>
+              <p class="subtle" id="result-detail"></p>
+              <div class="action-row">
+                <button class="text-button" id="review" type="button" data-en="View room">看棋盤</button>
+                <button class="text-button primary" id="next" type="button" data-en="Next room">下一關</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <footer class="play-footer">
+          <div class="pad" aria-label="方向鍵" data-en-label="Direction buttons">
+            <button class="text-button" type="button" data-move="left" aria-label="往左" data-en-label="Move left">←</button>
+            <button class="text-button" type="button" data-move="up" aria-label="往上" data-en-label="Move up">↑</button>
+            <button class="text-button" type="button" data-move="down" aria-label="往下" data-en-label="Move down">↓</button>
+            <button class="text-button" type="button" data-move="right" aria-label="往右" data-en-label="Move right">→</button>
+          </div>
+          <p class="keyboard-hint" data-en="Arrow keys to move · Z to undo">方向鍵移動，Z 撤銷</p>
+          <button class="text-button primary" id="resolved-next" type="button" data-en="Next room" hidden>下一關</button>
+        </footer>
+      </section>
+
+      <figure class="mascot">
+        <img src="./assets/lili.webp" width="396" height="570" alt="戴著綠領巾的倉鼠栗栗" data-en-alt="Lili the hamster wearing a green scarf">
+        <figcaption class="panel note">
+          <strong data-en="Lili’s tip">栗栗的小提示</strong>
+          <p id="tip">站到箱子左邊，再往右推。</p>
+        </figcaption>
+      </figure>
+    </div>
+    <p class="sr-only" id="announcement" role="status" aria-live="polite"></p>
+  </main>
+  <dialog id="instructions" aria-labelledby="instructions-title">
+    <form method="dialog">
+      <h2 id="instructions-title" data-en="How to move in">怎麼搬家？</h2>
+      <ol>
+        <li data-en="Use the arrow keys, swipe on the board, or tap the direction buttons to move Lili.">用方向鍵、滑動棋盤，或點畫面上的方向按鈕移動栗栗。</li>
+        <li data-en="Push boxes onto the star mats. Lili can push one box at a time and cannot pull it.">把紙箱推到星星地墊上。栗栗一次只能推一個箱子。</li>
+        <li data-en="Use Z or Undo to try a different move. Your moves and records are saved in this browser.">推錯了可以按 Z 或點「撤銷一步」。同一個瀏覽器會記住進度和紀錄。</li>
+      </ol>
+      <button class="text-button primary" type="submit" data-en="Back to the game">回到遊戲</button>
+    </form>
+  </dialog>
+</body>
+</html>

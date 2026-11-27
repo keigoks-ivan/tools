@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#c0e8d8">
+  <meta name="description" content="踩著浮木和荷葉，閃過推車，把小鴨帶回家。24 關原創過河遊戲。">
+  <title>小鴨過溪 · Duck Crossing</title>
+  <link rel="stylesheet" href="../little-arcade.css">
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./game.js"></script>
+</head>
+<body class="duck">
+  <header class="topbar">
+    <a class="pill" href="../"><span data-en="Games">遊戲機台</span></a>
+    <nav aria-label="遊戲選項" data-en-label="Game options">
+      <button class="pill" id="language" type="button">EN</button>
+      <button class="pill" id="sound" type="button" aria-pressed="false"><span class="audio-icon" aria-hidden="true">♪</span><span data-en="Sound">音效</span></button>
+      <button class="pill" id="help" type="button" data-en="Help">玩法</button>
+    </nav>
+  </header>
+  <main>
+    <header class="hero">
+      <h1><span data-en="Duck ">小鴨</span><em data-en="Crossing">過溪</em></h1>
+      <p data-en="Hop over logs and lily pads to bring the ducklings home.">踩著浮木和荷葉，把鴨寶寶一隻隻帶回家。</p>
+    </header>
+    <div class="arcade-grid">
+      <aside class="panel sidebar" aria-label="過溪紀錄" data-en-label="Crossing stats">
+        <h2 data-en="Crossing record">過溪紀錄</h2>
+        <dl class="meters">
+          <div><dt data-en="Home">已到家</dt><dd id="home-count">0 / 2</dd></div>
+          <div><dt data-en="Lives">愛心</dt><dd id="hearts" role="img" aria-label="剩下 3 顆愛心">♥♥♥</dd></div>
+        </dl>
+        <p class="subtle" id="solved">已通過 0 / 24 關</p>
+        <button class="text-button retry" id="restart" type="button" data-en="Retry stage">重玩本關</button>
+      </aside>
+
+      <section class="panel workspace" aria-label="遊戲區" data-en-label="Play area">
+        <header class="game-head">
+          <div class="stage-title"><span class="badge" id="round">1 / 24</span><h2 id="course-name">蒲公英溪</h2></div>
+          <label class="level-picker"><span class="sr-only" data-en="Choose stage">選擇關卡</span><select id="level"></select></label>
+        </header>
+        <div class="compact-stats">
+          <span><span data-en="Home">已到家</span> <b id="compact-home">0 / 2</b></span>
+          <span class="hearts" id="compact-hearts" role="img" aria-label="剩下 3 顆愛心">♥♥♥</span>
+        </div>
+        <div class="board-wrap">
+          <canvas id="board" width="540" height="600" tabindex="0" aria-label="小鴨過溪遊戲畫面" data-en-label="Duck Crossing game canvas"></canvas>
+          <div class="result" id="result">
+            <div class="result-card">
+              <h2 id="result-title">準備過溪</h2>
+              <p class="subtle" id="result-detail">到對岸後，跳進還空著的鳥巢。</p>
+              <button class="text-button primary" id="action" type="button">開始玩</button>
+            </div>
+          </div>
+        </div>
+        <footer class="play-footer">
+          <div class="pad" aria-label="方向鍵" data-en-label="Direction buttons">
+            <button class="text-button" type="button" data-move="left" aria-label="往左" data-en-label="Move left">←</button>
+            <button class="text-button" type="button" data-move="up" aria-label="往上" data-en-label="Move up">↑</button>
+            <button class="text-button" type="button" data-move="down" aria-label="往下" data-en-label="Move down">↓</button>
+            <button class="text-button" type="button" data-move="right" aria-label="往右" data-en-label="Move right">→</button>
+          </div>
+          <p class="keyboard-hint" data-en="Arrow keys to hop">方向鍵跳躍</p>
+        </footer>
+      </section>
+
+      <figure class="mascot">
+        <img src="./assets/duck.webp" width="378" height="570" alt="戴著薄荷色領巾的黃色小鴨" data-en-alt="A small yellow duck with a mint scarf">
+        <figcaption class="panel note">
+          <strong data-en="Creek tip">過溪小提示</strong>
+          <p id="tip">在草地等浮木漂過來，再跳上去。</p>
+        </figcaption>
+      </figure>
+    </div>
+    <p class="sr-only" id="announcement" role="status" aria-live="polite"></p>
+  </main>
+  <dialog id="instructions" aria-labelledby="instructions-title">
+    <form method="dialog">
+      <h2 id="instructions-title" data-en="How to cross">怎麼過溪？</h2>
+      <ol>
+        <li data-en="Use the arrow keys, swipe, or tap a direction button to hop across one row at a time.">按方向鍵、滑動遊戲畫面，或點方向按鈕，每次跳一格。</li>
+        <li data-en="Avoid carts. In the creek, land on a log, boat, stone or lily pad. A flashing lily pad is about to sink.">閃開推車。過水面時要踩浮木、小船、石頭或荷葉。荷葉開始閃，就快沉下去了。</li>
+        <li data-en="Land in each empty nest to bring the ducklings home. Clearing a stage saves your progress in this browser.">跳進空著的鳥巢，把鴨寶寶一隻隻帶回家。過關後瀏覽器會自動存進度。</li>
+      </ol>
+      <button class="text-button primary" type="submit" data-en="Back to the game">回到遊戲</button>
+    </form>
+  </dialog>
+</body>
+</html>
