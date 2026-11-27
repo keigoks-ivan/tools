@@ -9,9 +9,9 @@ class Element extends EventTarget {
   querySelector() { return this.knob; }
 }
 
-function browser(t) {
+function browser(t, options) {
   const window = new EventTarget(), document = new EventTarget();
-  const nodes = Object.fromEntries(['touch', 'tPad', 'tLook', 'tFire', 'tJump'].map(id => [id, new Element()]));
+  const nodes = Object.fromEntries(['touch', 'tPad', 'tLook', 'tFire', 'tJump', 'tMsl'].map(id => [id, new Element()]));
   nodes.tPad.knob = new Element();
   document.getElementById = id => nodes[id] || null;
   document.querySelector = () => nodes.tPad.knob;
@@ -24,7 +24,7 @@ function browser(t) {
       else delete globalThis[key];
     }
   });
-  const canvas = new Element(), input = new Input(canvas);
+  const canvas = new Element(), input = new Input(canvas, options);
   return { input, canvas, document, nodes };
 }
 
@@ -148,4 +148,23 @@ test('leaving gameplay clears touch owners even without the mouse fallback', t =
   pointer(nodes.tFire, 'pointerdown', 5);
   pointer(nodes.tFire, 'lostpointercapture', 2);
   assert.equal(input.state(1 / 60).fire, true);
+});
+
+test('optical sight captures drag and only an intentional lift releases a shot', t => {
+  const { input, nodes } = browser(t, { scopeDrag: true });
+  input.enabled = true;
+  for (const end of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+    pointer(nodes.tMsl, 'pointerdown', 7, 100, 100);
+    pointer(nodes.tMsl, 'pointermove', 8, 190, 190);
+    pointer(nodes.tMsl, 'pointermove', 7, 118, 92);
+    const state = input.state(.016);
+    assert.ok(state.lockPress && state.lockHold);
+    assert.equal(state.lookX, 18 * 2.2 * .0022);
+    assert.equal(state.lookY, -8 * 2.2 * .0022);
+    input.endFrame();
+    pointer(nodes.tMsl, end, 7);
+    assert.equal(input.state(.016).lockRelease, end === 'pointerup');
+    assert.equal(input.state(.016).lockHold, false);
+    input.endFrame();
+  }
 });

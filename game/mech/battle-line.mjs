@@ -118,9 +118,10 @@ export class BattleLine {
     if(route.length && Math.hypot(goal.x-pos.x,goal.z-pos.z)<3.7) goal.copy(route.shift());
     const dx=goal.x-pos.x,dz=goal.z-pos.z, d=Math.hypot(dx,dz);
     if(d<4 && !route.length && actor.leave) { this.remove(actor); return; }
-    const dash=actor.maneuver?.kind==='dash';
+    const impaired=v.components?.booster?.disabled;
+    const dash=!impaired && actor.maneuver?.kind==='dash';
     const brace=!actor.friendly&&!actor.vehicle&&actor.kind==='heavy'&&actor.target&&actor.cool<.52;
-    const speed=Math.min(actor.weapon.speed*(actor.leave?2:dash?2.15:brace?.32:1),d*2);
+    const speed=Math.min(actor.weapon.speed*(impaired?.48:1)*(actor.leave?2:dash?2.15:brace?.32:1),d*2);
     if(actor.stuck&&this.clock>=(actor.navAt??0)&&d>5){
       actor.navAt=this.clock+.32;
       w.nearBoxes(pos.x,pos.z,150,actor.boxes);
@@ -165,7 +166,8 @@ export class BattleLine {
   }
   fire(actor,target) {
     const C=this.C, shell=actor.vehicle||actor.kind==='heavy', end=center(target,V());
-    const muzzle=actor.mech?.muzzle;
+    if (actor.entity.components?.cannon?.disabled) { actor.cool=.5; return; }
+    const muzzle=actor.entity.components?.cannon?.muzzle || actor.mech?.muzzle;
     const from=actor.vehicle&&actor.entity.muz.lengthSq()>0?actor.entity.muz.clone():muzzle?muzzle.getWorldPosition(V()):center(actor,V());
     if(shell&&!actor.friendly){
       const velocity=target.player?C.player.vel:target.vel;

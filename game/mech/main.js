@@ -82,7 +82,7 @@ async function game() {
   }
   const audio = new Sound(), scenicMusic = new ScenicMusic();
   if (q.has('mute')) audio.setVolume(0);   // 測試用：?mute 全程靜音
-  const input = new Input(canvas);
+  const input = new Input(canvas, { scopeDrag: ikaruga });
   const hud = new HUD($('hud'), camera);
   bar.style.width = '100%';
 
@@ -123,7 +123,7 @@ async function game() {
     let x = SPAWN.x, z = SPAWN.z, yaw = 0;
     if (cp) { x = cp.x; z = cp.z; yaw = cp.yaw; }
     else if (E) { const [a, b] = E.pts; x = a.x; z = a.z; yaw = Math.atan2(b.x - a.x, b.z - a.z); }
-    player.pos.set(x, world.height(x, z), z);
+    player.pos.set(x, cp?.y ?? world.height(x, z), z);
     player.vel.set(0, 0, 0); player.yaw = yaw; player.pitch = 0; hero.legYaw = yaw;
     player.grounded = true; player.en = 100; player.overheat = 0; player.odT = 0; player.dashT = 0; player.lockMove = 0; player.flying=false;player.flightCut=false;player.hovering=0;player.airT=0;
     player.ap = player.apMax;
@@ -140,8 +140,14 @@ async function game() {
     for (const gl of hero.glows) gl.visible = false;
   }
 
-  function applyView() {
-    if (tpView && Math.abs(player.pitch) < 0.02) player.pitch = -0.12;
+  let scopeView = false;
+  const scopeZoom = 6;
+  function applyView(adjustPitch = true) {
+    if (scopeView) {
+      cockpitView(true); cockpit.root.visible = false; cockMask.visible = false; seeOff();
+      return;
+    }
+    if (adjustPitch && tpView && Math.abs(player.pitch) < 0.02) player.pitch = -0.12;
     cockpitView(!tpView); cockpit.root.visible = !tpView; if (!tpView) seeOff();
   }
   addEventListener('wheel', (e) => { if (!tpView) return; chaseD = clamp(chaseD * Math.exp(e.deltaY * 0.001), 6, 40); store.set('camd2', chaseD.toFixed(1)); }, { passive: true });
@@ -436,7 +442,7 @@ async function game() {
     audio.setPaused(false); audio.setDanger(false); audio.setLockAlert(0); audio.boost(0);
     input.unlock(); input.enabled = false;
     touchUI.style.display = 'none';
-    if (openingShot === 'fuji') { camera.fov=cockpit.baseFov;camera.updateProjectionMatrix(); }
+    if (scopeView || openingShot === 'fuji') { scopeView=false; camera.fov=cockpit.baseFov;camera.updateProjectionMatrix(); }
     resetPlayer(); newCombat(sideStory ? 1 : stageNo);
     cockpitView(false); cockpit.root.visible = false; seeOff();
     for (const k of ['damage', 'overdrive', 'speed', 'danger', 'flash']) post.u[k].value = 0;
@@ -477,6 +483,7 @@ async function game() {
   }
   function pause() {
     if (state !== 'play' && state !== 'boot' && state !== 'coda') return;
+    if (scopeView) { combat.cancelScope(); scopeView = false; applyView(false); camera.fov = cockpit.baseFov; camera.updateProjectionMatrix(); }
     pausedFrom = state;
     state = 'paused';
     syncLesson();
@@ -538,7 +545,7 @@ async function game() {
     codaFilm.hidden = true; codaFail.hidden = true;
     codaEmergency.hidden = true;
     delete touchUI.dataset.coda;
-    $('tCannon').textContent = ikaruga ? '震波' : taipei ? '羽陣' : '光波砲';
+    $('tCannon').textContent = ikaruga ? '貫穿' : taipei ? '羽陣' : '光波砲';
   }
 
   function codaCombat() {
@@ -815,6 +822,9 @@ async function game() {
 
     // ---- 自機
     if (combat.enc?.front?.pilot) inp = combat.enc.front.pilot(dt, inp);
+    const aiming = !!(ikaruga && canMove && !openingShot && combat.phase !== 'done' && (inp.lockHold || inp.lockRelease));
+    if (aiming !== scopeView) { scopeView = aiming; applyView(false); }
+    if (aiming) inp = { ...inp, lookX: inp.lookX / scopeZoom, lookY: inp.lookY / scopeZoom };
     player.update(dt, inp);
     if (inCoda) updateCoda(rdt, inp.cannon);
     // 互動當下即交給過場鏡頭，不讓這一幀的 E 在新戰鬥裡變成光波砲。
@@ -840,7 +850,7 @@ async function game() {
     const C = combat;
     const radar = C.radar();
     cockpit.update(dt, hero, {
-      yaw: player.yaw, pitch: player.pitch, boot,
+      yaw: player.yaw, pitch: player.pitch, boot, scopeZoom: scopeView ? scopeZoom : 1, penetratorArmed: C.penetratorArmed,
       move: { x: inp.mx, y: inp.my }, turn: { x: inp.lookX * 25, y: inp.lookY * 25 },
       boost: player.boosting, hover: player.hovering, speed: player.speed, alt: agl, vs: player.vel.y,
       ap: player.ap, apMax: player.apMax, en: player.en / 100, parts: C.parts,
@@ -853,8 +863,8 @@ async function game() {
       const bow = world.landingSite.ship.position.x;
       camera.position.set(bow - 155 + 31 * boot, 64 - 12 * boot, -143 + 24 * boot);
       camera.lookAt(bow + 39, 7, 14);
-    } else if (tpView) chaseCam(rdt);
-    C.aimSkip = tpView ? chaseSkip : 0;
+    } else if (tpView && !scopeView) chaseCam(rdt);
+    C.aimSkip = tpView && !scopeView ? chaseSkip : 0;
 
     // ---- 戰鬥、特效、世界
     const airCombat = inCoda && coda.air?.fighting;
@@ -898,12 +908,12 @@ async function game() {
     // 瞄準鏡頭：鎖定時另拍一張小的放大畫面，貼在側邊面板
     // 第十一章低畫質保留主 HUD 鎖定，省去莢艙的第二次場景渲染。後視鏡頭看不到莢艙，也不必重畫。
     cockpit.targetView(renderer, scene, openingShot || (sideStory || coda) && (quality === 0 || tpView) ? null : C.lockTarget);
-    if (openingShot) seeOff();
+    if (openingShot || scopeView) seeOff();
     else seeThrough(C);
     post.render(t);
 
     if (openingShot) hud.clear();
-    else hud.draw(rdt, { boot: state === 'boot' ? boot : 1, combat: C, player, stages: STAGES.length, groundY, tp: tpView,
+    else hud.draw(rdt, { boot: state === 'boot' ? boot : 1, combat: C, player, stages: STAGES.length, groundY, tp: tpView && !scopeView,
       label: coda ? `STAGE ${STAGES.length + 1}` : undefined, ceasefire: !!coda && !airCombat });
     input.endFrame();
   }

@@ -112,6 +112,34 @@ function bridge(p,x,z,length,gate) {
   }
 }
 
+// A floating work platform is part of the fictional recovery operation. It is low
+// enough to walk under the actual bridge deck without treating the truss as a floor.
+function serviceFloats({box,solid}){
+  for(const x of [28,160]){
+    for(let j=0;j<9;j++){
+      const z=132+j*27;
+      box(x,.28,z,20,1.25,26.9,0x5e7376);
+      box(x,.94,z,20,.12,26.4,0x9a9c8f);
+      for(const s of [-1,1]){
+        box(x+s*9.76,1.015,z,.24,.06,23,yellow);
+        box(x+s*10.05,.25,z+8,.45,.85,2.4,dark);
+      }
+    }
+    // Keep the landward ramp on the flat sampled terrain, even on the coarse mesh.
+    box(x,.23,105,20,.34,12,0x87908a);
+    box(x,.65,115,20,.46,8.4,0x87908a);
+    solid(x,105,20,12,.4,-.5);
+    solid(x,237.25,20,252.5,1,-.5);
+  }
+  for(let j=0;j<6;j++){
+    const x=26+j*26;
+    box(x,.24,370,25.9,1.35,25,0x566a6c);
+    box(x,.95,370,25.6,.10,25,0xa1a193);
+    for(const s of [-1,1])box(x+s*8,1.02,381.9,7.5,.08,.38,yellow);
+  }
+  solid(91,370,156,25,1,-.5);
+}
+
 function dockCrane(p,x,z,scale,gantry) {
   const {box,beam,solid}=p;
   const place=(a,b,c)=>[x+a*scale,b*scale,z+c*scale];
@@ -236,7 +264,7 @@ export function waterfront(p,district){
   if(district==='toyosu')toyosu(p);
   if(district==='rail')railway(p);
   if(district==='wakasu'){
-    bridge(p,-120,370,620,true);
+    bridge(p,-120,370,620,true);serviceFloats(p);
     const x=218,z=19;
     beam([x,0,z],[x,53,z],2.1,cream);
     box(x,54,z,3.3,3.1,5.5,cream);solid(x,z,2.4,2.4,52);

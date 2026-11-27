@@ -1532,7 +1532,8 @@ export class World {
   }
 
   // 線段對建築／地形求交，回傳 t (0..1) 或 -1；normal 寫進 outN
-  raycast(a, b, outN) {
+  raycast(a, b, outN, ignoreBox = null, hit = null) {
+    if (hit) hit.box = null;
     let best = 2;
     const dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z;
     const kb = this.kitano?.bounds;
@@ -1549,7 +1550,7 @@ export class World {
     for (let s = 0; s <= steps; s++) {
       const t = s / steps;
       for (const bx of this.nearBoxes(a.x + dx * t, a.z + dz * t, 50, this._tmpC || (this._tmpC = []))) {
-        if (seen.has(bx)) continue; seen.add(bx);
+        if (bx === ignoreBox || seen.has(bx)) continue; seen.add(bx);
         if (bx.top < 0) continue;   // 停用中的瓦礫台階
         // slab
         let t0 = 0, t1 = 1, nAxis = -1, nSign = 0;
@@ -1566,6 +1567,7 @@ export class World {
         }
         if (ok && t0 < best && t0 >= 0) {
           best = t0;
+          if (hit) hit.box = bx;
           if (outN) { outN.set(0, 0, 0); if (nAxis >= 0) outN.setComponent(nAxis, nSign); else outN.set(0, 1, 0); }
         }
       }
@@ -1574,15 +1576,16 @@ export class World {
     const tsteps = Math.max(2, Math.ceil(Math.hypot(dx, dy, dz) / 8));
     let prevAbove = a.y - this.height(a.x, a.z);
     for (let s = 1; s <= tsteps; s++) {
-      const t = s / tsteps;
-      if (t > best) break;
+      const t = Math.min(s / tsteps, best);
       const x = a.x + dx * t, y = a.y + dy * t, z = a.z + dz * t;
       const above = y - this.height(x, z);
       if (above < 0 && prevAbove >= 0) {
-        const tt = (s - 1 + prevAbove / (prevAbove - above)) / tsteps;
-        if (tt < best) { best = tt; if (outN) outN.set(0, 1, 0); }
+        const prevT = (s - 1) / tsteps;
+        const tt = prevT + (t - prevT) * prevAbove / (prevAbove - above);
+        if (tt < best) { best = tt; if (hit) hit.box = null; if (outN) outN.set(0, 1, 0); }
         break;
       }
+      if (t >= best) break;
       prevAbove = above;
     }
     return best <= 1 ? best : -1;

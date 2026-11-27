@@ -567,7 +567,7 @@ export class Cockpit {
       this.holoRoot.add(g);
       return { ...o, mesh, gl: 0, ph: Math.random() * 10 };
     });
-    this.buildTgp();
+    if (!this.ikaruga) this.buildTgp();
 
     // ---- 兩支操縱桿＋手
     this.sticks = [this.buildStick(1), this.buildStick(-1)];
@@ -773,10 +773,14 @@ export class Cockpit {
     const vp = ui.pitch - 0.5 * tX + this.sp.p * 0.1 + jx;
     const vy = ui.yaw + Math.PI + this.sp.y * 0.08 + jy;
     const vr = -0.5 * tZ + this.sp.r * 0.1;
-    cam.quaternion.setFromEuler(_e.set(vp, vy, vr, 'YXZ'));
+    const scoped = ui.scopeZoom > 1;
+    cam.quaternion.setFromEuler(scoped ? _e.set(ui.pitch, ui.yaw + Math.PI, 0, 'YXZ') : _e.set(vp, vy, vr, 'YXZ'));
     this.fovKick = damp(this.fovKick, 0, 4, dt);
-    const fov = this.baseFov + (ui.boost || 0) * 5 + this.fovKick;
+    const fov = scoped ? 2 * Math.atan(Math.tan(this.baseFov * Math.PI / 360) / ui.scopeZoom) * 180 / Math.PI
+      : this.baseFov + (ui.boost || 0) * 5 + this.fovKick;
     if (Math.abs(fov - cam.fov) > 0.01) { cam.fov = fov; cam.updateProjectionMatrix(); }
+
+    if (scoped) return;  // 望遠鏡畫面只使用主鏡頭與 HUD，艙內儀表在離鏡後恢復更新。
 
     // ---- 駕駛艙相對視線：機身慢半拍（扭轉）、頭部彈簧位移、推進器高頻震
     const rY = clamp(wrap(tY - ui.yaw) * 0.5, -0.07, 0.07);
@@ -1400,7 +1404,7 @@ export class Cockpit {
     this.tx(x, 'MSTR ARM', L, 56, COL.dim, 17); this.tx(x, 'ARM', L + 104, 56, COL.gr, 18, true);
     // 右手：光束步槍
     const rf = ui.rifle || { ammo: 40, mag: 40, reload: -1 };
-    this.tx(x, 'GUN', L, 88, COL.dim, 18); this.tx(x, this.ikaruga ? '破樁' : this.falcon ? (ui.speed>=12?'掠翼・機動':'掠翼') : 'BEAM RIFLE', L + 50, 88, COL.wh, 19);
+    this.tx(x, 'GUN', L, 88, COL.dim, 18); this.tx(x, this.ikaruga ? '平射炮' : this.falcon ? (ui.speed>=12?'掠翼・機動':'掠翼') : 'BEAM RIFLE', L + 50, 88, COL.wh, 19);
     this.tx(x, pad(rf.ammo, 2), Rr - 46, 82, rf.ammo > 0 ? COL.wh : COL.rd, 42, true, 'right');
     this.tx(x, `/${rf.mag}`, Rr, 88, COL.dim, 18, false, 'right');
     const gap = Math.min(6, (w - 32) / rf.mag * 0.35), cw = (w - 32 + gap) / rf.mag;
@@ -1408,9 +1412,9 @@ export class Cockpit {
     if (rf.reload >= 0) { this.hb(x, L, 130, w - 32 - 60, 6, rf.reload, COL.am); this.tx(x, 'RLD', Rr, 133, COL.am, 16, true, 'right'); }
     // 左肩：飛彈莢艙
     const ms = ui.msl || { ready: 6, max: 6, cd: 1, locks: 0 };
-    this.tx(x, this.ikaruga ? 'ANCH' : 'MSL', L, 158, COL.dim, 18); this.tx(x, this.ikaruga ? '磁錨牽引' : this.falcon ? '羽標' : `MISSILE ×${ms.max}`, L + 50, 158, COL.wh, 19);
-    this.tx(x, ms.locks ? `LOCK ${ms.locks}` : ms.cd >= 1 ? 'READY' : 'LOAD', Rr, 158, ms.locks ? COL.rd : ms.cd >= 1 ? COL.gr : COL.am, 22, true, 'right');
-    const pw = (w - 32 + 8) / ms.max;
+    this.tx(x, this.ikaruga ? 'OPT' : 'MSL', L, 158, COL.dim, 18); this.tx(x, this.ikaruga ? '精準炮' : this.falcon ? '羽標' : `MISSILE ×${ms.max}`, L + 50, 158, COL.wh, 19);
+    this.tx(x, this.ikaruga ? (ms.cd >= 1 ? '6× 就緒' : '復位中') : ms.locks ? `LOCK ${ms.locks}` : ms.cd >= 1 ? 'READY' : 'LOAD', Rr, 158, ms.locks ? COL.rd : ms.cd >= 1 ? COL.gr : COL.am, 22, true, 'right');
+    const pw = (w - 32 + 8) / Math.max(1, ms.max);
     for (let i = 0; i < ms.max; i++) {
       const px = L + i * pw, c = i < ms.locks ? COL.rd : ms.cd >= 1 ? COL.cy : COL.grid;
       x.fillStyle = c; x.beginPath(); x.moveTo(px, 180); x.lineTo(px + pw - 22, 180); x.lineTo(px + pw - 8, 190); x.lineTo(px + pw - 22, 200); x.lineTo(px, 200); x.closePath(); x.fill();
@@ -1422,8 +1426,8 @@ export class Cockpit {
     this.tx(x, shieldText, Rr, 230, shield?.active ? COL.cy : shield?.cooldown > 0 ? COL.am : COL.gr, 20, true, 'right');
     // 光波砲：充能中閃、冷卻中顯示百分比
     const cn = ui.cannon || { cd: 1, phase: null };
-    this.tx(x, 'CAN', L, 260, COL.dim, 18); this.tx(x, this.ikaruga ? '定向震波' : this.falcon ? '白夜羽陣' : 'BEAM CANNON', L + 50, 260, COL.wh, 19);
-    const cs = cn.phase === 'charge' ? 'CHARGE' : cn.phase === 'fire' ? 'FIRE' : cn.cd >= 1 ? 'READY [E]' : `${Math.round(cn.cd * 100)}%`;
+    this.tx(x, 'CAN', L, 260, COL.dim, 18); this.tx(x, this.ikaruga ? '貫穿彈' : this.falcon ? '白夜羽陣' : 'BEAM CANNON', L + 50, 260, COL.wh, 19);
+    const cs = ui.penetratorArmed ? '已裝填' : cn.phase === 'charge' ? 'CHARGE' : cn.phase === 'fire' ? 'FIRE' : cn.cd >= 1 ? 'READY [E]' : `${Math.round(cn.cd * 100)}%`;
     this.tx(x, cs, Rr, 260, cn.phase ? (Math.sin(t * 20) > 0 ? COL.cy : COL.wh) : cn.cd >= 1 ? COL.gr : COL.am, 20, true, 'right');
     if (cn.cd < 1 && !cn.phase) this.hb(x, L, 274, w - 32, 5, cn.cd, COL.am);
     // 覺醒

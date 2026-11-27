@@ -331,7 +331,7 @@ export function buildTokyo(world,group){
   box(0,1.14,119.5,1580,.35,2.5,curb);
   for(let x=-760;x<=760;x+=13){
     box(x,-.54,121.10,.13,3.1,.12,0x69746d);
-    if(district!=='aomi'){
+    if(district!=='aomi' && !(district==='wakasu' && [28,160].some(gate=>Math.abs(x+6.5-gate)<17))){
       box(x,1.9,118.4,.15,1.42,.17,metal);
       box(x+6.5,2.57,118.4,13,.12,.13,metal);
       box(x+6.5,2.03,118.4,13,.10,.10,metal);
@@ -429,6 +429,32 @@ export function buildTokyo(world,group){
       }
     }
   }
+  const screens=[];
+  // Portable hostile blast screens on the street shoulder. Their footing remains when the panel falls.
+  if(district==='lock'||district==='aomi'){
+    const street=district==='lock'?-260:-420;
+    const x=district==='lock'?-77:-83,z=street-10;
+    const start=batches.get('solid').matrices.length;
+    box(x,7.0,z,.83,12.8,11.6,0x545e67);
+    for(const side of [-1,1]){
+      box(x+side*.45,8,z,.10,.48,10.7,0xe3894f);
+      for(const dz of [-5.5,0,5.5])box(x+side*.47,6.9,z+dz,.18,13.2,.36,0x768087);
+    }
+    const intact=batches.get('solid').matrices.slice(start);
+    box(x,.22,z,3.6,.44,12.2,0x626b69);
+    const b={x0:x-.6,x1:x+.6,z0:z-5.8,z1:z+5.8,top:13.4,penetrable:true};
+    let integrity=4;
+    function setPanel(up){
+      const mesh=group.getObjectByName('東京・solid');
+      if(!mesh)return;
+      const hidden=new THREE.Matrix4().makeScale(0,0,0);
+      intact.forEach((m,i)=>mesh.setMatrixAt(start+i,up?m:hidden));
+      mesh.instanceMatrix.needsUpdate=true;b.top=up?13.4:-100;
+    }
+    b.hit=amount=>{if(integrity>0 && (integrity-=amount)<=0)setPanel(false);};
+    world.addCollider(b);
+    screens.push(()=>{if(integrity<=0)setPanel(true);integrity=4;});
+  }
   waterfront({box,beam,deck,solid,sign,container,tree,clearLot},district);
   distantCity({tower:wallFaces,box,beam,ground:(x,z,w,d)=>ground(walk,x,z,w,d,1.8,0xa5aaa4,8),rand,district});
 
@@ -463,6 +489,10 @@ export function buildTokyo(world,group){
     m.computeBoundingSphere();group.add(m);
   }
   world.tokyoTraffic=tokyoTraffic(world,group);
+  if(screens.length && world.tokyoTraffic){
+    const reset=world.tokyoTraffic.reset;
+    world.tokyoTraffic.reset=sec=>{reset(sec);for(const restore of screens)restore();};
+  }
   const atlas=signAtlas(group,signs);
   if(atlas)group.children.at(-1).geometry.addEventListener('dispose',()=>atlas.dispose());
 }

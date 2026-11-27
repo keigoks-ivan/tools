@@ -107,12 +107,14 @@ export class HUD {
       }
     }
     // ---- 準心位置＝瞄準方向投影
-    const aimP = this.proj(_a.copy(C.eye).addScaledVector(C.aimDir, 400), {});
+    const aimP = C.def.pilot === '斑鳩' ? {x: W/2, y: H/2} : this.proj(_a.copy(C.eye).addScaledVector(C.aimDir, 400), {});
     const ax = aimP.x, ay = aimP.y;
 
     // ---- 俯仰梯、飛行路徑標（機體實際往哪移動）
-    this.ladder();
-    this.fpm(P, ax, ay);
+    if (!C.scopeActive) {
+      this.ladder();
+      this.fpm(P, ax, ay);
+    }
 
     for (const ally of [C.companion, C.secondaryCompanion]) {
       if (!ally || ally.pos.distanceToSquared(P.pos) >= 180 ** 2) continue;
@@ -141,6 +143,7 @@ export class HUD {
       const c = e.chest(_c), p = this.proj(c, {}), dist = c.distanceTo(P.pos), locked = e === L;
       const onScr = p.front && p.x > 20 && p.x < W - 20 && p.y > 20 && p.y < H - 20;
       if (locked) { Lp = p; Lon = onScr; _L.copy(c); }
+      if (C.scopeActive && e === C.scopeContact?.enemy) continue;
       if (!onScr) { this.edgeArrow(p, e, dist, W, H, locked); continue; }
       const top = this.proj(_w.copy(c).setY(c.y + 9 * e.scale), {});
       const hh = Math.max(12 * s, Math.abs(p.y - top.y)), hw = hh * 0.7, soft = e === tgt;
@@ -218,7 +221,8 @@ export class HUD {
     }
 
     // ---- 準心
-    this.reticle(ax, ay, C);
+    if (C.scopeActive) this.scopeReticle(ax, ay, C);
+    else this.reticle(ax, ay, C);
 
     // ---- 受擊方向
     for (const d of C.dmgDirs) {
@@ -268,7 +272,7 @@ export class HUD {
     }
     const chainOn = !g.ceasefire && C.stats.chain > 1 && C.stats.time - C.stats.lastKill < 8;
     if (chainOn) this.text(`CHAIN ×${C.stats.chain}`, W / 2, hy + 24 * s, 13, 'am', 1, 'center', 700);
-    if (EN) this.objective(EN, hy + (chainOn ? 42 : 25) * s, W, H);
+    if (EN) this.objective(EN, hy + (chainOn ? 42 : 25) * s, W, H, C.scopeActive);
 
     // ---- 主注意（琥珀、常亮）／主警告（紅、閃）：亮起時下面列出原因
     const R = C.rifle, apR = P.ap / P.apMax, pc = C.parts || {};
@@ -317,12 +321,13 @@ export class HUD {
       this.text(val, x + w, wy, 11, col, hot ? 1 : 0.75, 'right', 700);
       this.bar(x, wy + 8 * s, w, 2 * s, v, col);
     };
-    chip(0, C.def.pilot === '斑鳩' ? '破樁' : C.weapons.rifle.mobile ? '掠翼' : 'RIFLE', R.reload >= 0 ? 'RELOAD' : `${R.ammo}/${R.mag}`, R.reload >= 0 ? R.reload : R.ammo / R.mag, R.reload >= 0 || R.ammo <= 3 ? 'am' : 'cy', true);
-    chip(1, C.def.pilot === '斑鳩' ? '牽引' : C.weapons.rifle.mobile ? '羽標' : 'MSL', M.cd >= 1 ? 'READY' : `${Math.ceil((1 - M.cd) * M.cooldownSeconds)}s`, M.cd, M.cd >= 1 ? 'gr' : 'dim', M.cd >= 1);
+    chip(0, C.def.pilot === '斑鳩' ? '平射炮' : C.weapons.rifle.mobile ? '掠翼' : 'RIFLE', R.reload >= 0 ? 'RELOAD' : `${R.ammo}/${R.mag}`, R.reload >= 0 ? R.reload : R.ammo / R.mag, R.reload >= 0 || R.ammo <= 3 ? 'am' : 'cy', true);
+    if (C.def.pilot === '斑鳩') chip(1, '精準炮', M.cd >= 1 ? '就緒' : ((1-M.cd)*M.cooldownSeconds).toFixed(1)+'s', M.cd, M.cd >= 1 ? 'cy' : 'am', true);
+    else chip(1, C.weapons.rifle.mobile ? '羽標' : 'MSL', M.cd >= 1 ? 'READY' : `${Math.ceil((1 - M.cd) * M.cooldownSeconds)}s`, M.cd, M.cd >= 1 ? 'gr' : 'dim', M.cd >= 1);
     const shieldReady = SH.cooldown <= 0 && !SH.active;
     const shieldText = SH.active ? `ON ${Math.ceil(SH.level * 100)}%` : shieldReady ? 'READY' : `${Math.ceil(SH.cooldown)}s`;
     chip(2, 'SHIELD F', shieldText, SH.level, SH.active ? (SH.level < 0.3 ? 'am' : 'cy') : shieldReady ? 'gr' : 'dim', shieldReady || SH.active);
-    chip(3, C.def.pilot === '斑鳩' ? '震波 E' : C.weapons.rifle.mobile ? '羽陣 E' : 'CANNON E', CN.phase ? (CN.phase === 'charge' ? 'CHARGE' : 'FIRE') : CN.cd >= 1 ? 'READY' : `${Math.ceil((1 - CN.cd) * C.weapons.cannon.cd)}s`, CN.phase ? 1 : CN.cd, CN.phase || CN.cd >= 1 ? 'cy' : 'dim', CN.cd >= 1 || !!CN.phase);
+    chip(3, C.def.pilot === '斑鳩' ? '貫穿 E' : C.weapons.rifle.mobile ? '羽陣 E' : 'CANNON E', C.penetratorArmed ? '已裝填' : CN.phase ? (CN.phase === 'charge' ? 'CHARGE' : 'FIRE') : CN.cd >= 1 ? 'READY' : `${Math.ceil((1 - CN.cd) * C.weapons.cannon.cd)}s`, CN.phase ? 1 : CN.cd, CN.phase || CN.cd >= 1 ? 'cy' : 'dim', CN.cd >= 1 || !!CN.phase);
     chip(4, 'OD Q', OD.active ? 'ACTIVE' : OD.gauge >= 1 ? 'READY' : `${Math.floor(OD.gauge * 100)}%`, OD.gauge, 'pk', OD.gauge >= 1 || OD.active);
 
     // ---- 頭目：畫面最上方名字＋血條
@@ -353,10 +358,10 @@ export class HUD {
     if (apR < 0.3 && !C.dead) this.text('DANGER  AP LOW', W / 2, y0 - 30 * s, 14, 'rd', 0.5 + 0.5 * Math.sin(this.t * 9), 'center', 700);
 
     // ---- 小提示（準心右下）
-    C.notes.forEach((n, i) => this.text(n.text, ax + 46 * s, ay + (30 + i * 18) * s, 15, n.color, clamp(n.t / 0.4, 0, 1), 'left', 700, SANS));
+    C.notes.forEach((n, i) => this.text(n.text, ax + (C.scopeActive ? 110 : 46) * s, ay + (30 + i * 18) * s, 15, n.color, clamp(n.t / 0.4, 0, 1), 'left', 700, SANS));
 
     // ---- 橫幅
-    if (C.banner) {
+    if (C.banner && !C.scopeActive) {
       const B = C.banner, age = B.T - B.t;
       const a = clamp(age / 0.25, 0, 1) * clamp(B.t / 0.5, 0, 1);
       const y = H * 0.38;
@@ -444,6 +449,35 @@ export class HUD {
     list.slice(0, 3).forEach((t, i) => this.text(t, x, y + h / 2 + (9 + i * 12) * s, 10, col, 0.95, 'center'));
   }
 
+  scopeReticle(x, y, C) {
+    const X = this.x, s = this.s, contact = C.scopeContact;
+    const col = contact?.part ? 'am' : 'cy';
+    X.beginPath();
+    for (const sign of [-1, 1]) {
+      X.moveTo(x + sign * 4*s, y); X.lineTo(x + sign * 87*s, y);
+      X.moveTo(x, y + sign * 4*s); X.lineTo(x, y + sign * 38*s);
+      for (let i = 1; i <= 4; i++) {
+        const tick = x + sign * i * 18*s, h = (i % 2 ? 2.5 : 5)*s;
+        X.moveTo(tick, y-h); X.lineTo(tick, y+h);
+      }
+    }
+    this.sk(col, .9, 1);
+    if (C.msl.cd < 1) this.text('復位中', x, y-52*s, 12, 'am', 1, 'center', 700, SANS);
+    this.text('6×', x-88*s, y+17*s, 12, 'cy', .95, 'left', 700);
+    if (!contact) return;
+    this.text(Math.round(contact.distance)+' m', x+88*s, y+17*s, 12, 'cy', .95, 'right', 700);
+    for (const part of contact.parts) {
+      const p = this.proj(part.position);
+      if (!p.front) continue;
+      const active = contact.part === part;
+      const r = (active ? 6 : 4)*s;
+      X.beginPath(); X.moveTo(p.x, p.y-r); X.lineTo(p.x+r, p.y);
+      X.lineTo(p.x, p.y+r); X.lineTo(p.x-r, p.y); X.closePath();
+      this.sk(part.disabled ? 'dim' : 'am', active ? 1 : .65, 1);
+      if (active) this.text(part.name + (part.disabled ? '・已失效' : ''), x, y+54*s, 14, 'am', 1, 'center', 700, SANS);
+    }
+  }
+
   // 準心：細圓＋四根刻線＋中心點（有目標可打時變琥珀色）；右弧＝彈匣（一格一發）、左弧＝飛彈冷卻
   reticle(x, y, C) {
     const X = this.x, s = this.s, tgt = C.fireTarget(), col = tgt ? 'am' : 'cy', r = 15 * s;
@@ -499,13 +533,13 @@ export class HUD {
   }
 
   // 遭遇戰：前進距離、目標點（菱形／畫面外箭頭）、伏兵警示（紅色 !）
-  objective(EN, y, W, H) {
+  objective(EN, y, W, H, scoped) {
     const X = this.x, s = this.s;
     const front = EN.front?.objective;
     if (front) {
       this.text(front.title, W / 2, y, 19, 'cy', 1, 'center', 700, SANS);
       this.text(front.hint, W / 2, y + 20 * s, 14, 'ink2', .96, 'center', 700, SANS);
-      for (const { name, position } of EN.front.waypoints) {
+      for (const { name, position } of scoped ? [] : EN.front.waypoints) {
         const p = this.proj(position, {});
         if (!p.front || p.x < 30 || p.x > W - 30 || p.y < 30 || p.y > H - 35) this.edgeMark(p, 'cy', name, W, H);
         else {
@@ -540,6 +574,7 @@ export class HUD {
     }
     if (!EN.wp) return;
     if (!front && hl == null && !(EN.tg && EN.tg.length && EN.state === 'fight')) this.text(`${EN.deviceHint || '前進 ▶'} ${Math.round(EN.dist)}m`, W / 2, y, 15, 'cy', 0.8 + 0.2 * Math.sin(this.t * 4), 'center', 700, SANS);
+    if (scoped) return;
     const p = this.proj(_o.set(EN.wp.x, EN.wp.y, EN.wp.z), {});
     if (!(p.front && p.x > 30 && p.x < W - 30 && p.y > 30 && p.y < H - 30)) { this.edgeMark(p, 'cy', `${Math.round(EN.dist)}m`, W, H, 0.9); return; }
     const r = 11 * s, b = 1 + 0.12 * Math.sin(this.t * 5);

@@ -149,7 +149,8 @@ export class LandingFront extends BattleLine {
     if(checkpoint===1) { this.enterSeawall(false);return; }
     this.phase='inbound';
     const guard=this.unit('grunt',-224,21,false,'beach');
-    const cannon=this.unit('heavy',-179,-44,false,'beach');
+    // The flank gun must be visible over the low port rail while the bow gate is raised.
+    const cannon=this.unit('heavy',-179,this.leftWingPilot?-112:-44,false,'beach');
     const tank=this.unit('tank',-195,59,false,'beach');
     cannon.entity.ap=cannon.entity.apMax=5600;
     cannon.entity.label='岸防重裝機'; guard.entity.label='灘岸反應機';
@@ -178,7 +179,8 @@ export class LandingFront extends BattleLine {
 
   escortFire() {
     if(!this.site.fleetReleased){
-      if(!this.shoreCannon.entity.dead)return;
+      const e=this.shoreCannon.entity;
+      if(!e.dead && !(this.leftWingPilot && e.components?.cannon?.disabled))return;
       this.site.fleetReleased=true;
       this.C.lines([['三號艇','岸砲停了！全隊跟上。白隼，你右邊那條灘我看得到。']],true,3);
     }
@@ -350,7 +352,7 @@ export class LandingFront extends BattleLine {
   beginBase(op) {
     const duel=op.id==='hq'&&this.C.cp?.commandDuel;
     this.phase='base';this.op=op;this.wave=duel?op.waves.length-1:0;this.sideSupport=false;this.bayOpen=false;
-    this.boss=null;this.C.boss=null;
+    this.boss=null;this.focusTarget=null;this.C.boss=null;
     this.repairAt=this.clock+8;
     const [x,z]=op.point;
     this.waypoint(x,z);
@@ -436,6 +438,14 @@ export class LandingFront extends BattleLine {
     return false;
   }
 
+  pick(actor) {
+    const boss=this.focusTarget;
+    if(actor.friendly && boss && this.canFight(boss) && actor.pos.distanceTo(boss.pos)<actor.weapon.range){
+      const from=actor.pos.clone(),to=boss.pos.clone();from.y+=11;to.y+=11;
+      if(this.C.world.raycast(from,to,null)<0)return boss;
+    }
+    return super.pick(actor);
+  }
   react(actor) {
     if(actor.kind==='brawler'&&actor.post==='seawall'&&!actor.leave&&actor.target&&actor.target.pos.z<-33) {
       actor.goal.copy(this.point(clamp(actor.target.pos.x+36,-100,-14),lanes.left));
@@ -445,7 +455,11 @@ export class LandingFront extends BattleLine {
 
   update(dt) {
     const p=this.C.player.pos;
-    if(this.phase==='beach'||this.phase==='beachCounter')this.escortFire();
+    if(this.phase==='beach'||this.phase==='beachCounter'||(this.leftWingPilot&&this.shoreCannon&&!this.ashore))this.escortFire();
+    if(this.leftWingPilot && this.boss?.entity.components?.booster?.disabled && !this.boss.entity.dead && !this.focusTarget){
+      this.focusTarget=this.boss;
+      this.C.lines([['白隼','推進器停了！蒼焰跟我一起，集中射擊。']],true,2.5);
+    }
     if(this.phase==='beach'&&p.x>-261&&Math.abs(p.z)<115&&cleared(this.defenders))this.beachCounter();
     else if(this.phase==='beachCounter'&&p.x>-212&&this.shoreCleared())this.enterSeawall();
     else if(this.phase==='seawall'&&p.x>-78){
@@ -475,15 +489,15 @@ export class LandingFront extends BattleLine {
   }
 
   get objective() {
-    if(this.phase==='inbound')return {title:'近岸登陸',hint:'可瞄準與開火，準備跨過跳板'};
+    if(this.phase==='inbound')return {title:'近岸登陸',hint:this.leftWingPilot?'開鏡射擊岸防重裝肩砲，可提前放行第二列':'可瞄準與開火，準備跨過跳板'};
     if(this.phase==='ramp')return {title:'接岸',hint:'艏部跳板正在下降'};
-    if(this.phase==='beach')return {title:'為第二列登陸艇開路',hint:this.site.fleetReleased?'艇隊正在靠岸，清除灘頭守軍':'擊破左前方的岸防重裝機，讓艇隊駛入'};
+    if(this.phase==='beach')return {title:'為第二列登陸艇開路',hint:this.site.fleetReleased?'艇隊正在靠岸，清除灘頭守軍':(this.leftWingPilot?'擊破肩砲或重裝機，讓艇隊駛入':'擊破左前方的岸防重裝機，讓艇隊駛入')};
     if(this.phase==='beachCounter')return {title:'灘岸反擊',hint:'擊退第二線的預備隊，往海堤靠近'};
     if(this.phase==='seawall'&&this.leftWingPilot)return {title:'打開左翼通道',hint:'擊破左側攔截機，與蒼焰穿過缺口'};
     if(this.phase==='seawall')return {title:'選一側突破海堤',hint:'左側攔截機　／　右側岸防戰車'};
     if(this.phase==='crossing')return {title:'海堤內側反擊',hint:'清掉缺口後方的預備隊'};
     if(this.phase==='yard')return {title:'攻入外港裝卸區',hint:'擊破鐵獒的前衛再往前推'};
-    if(this.phase==='boss')return {title:'奪回外港裝卸區',hint:'擊退鐵獒和護衛機'};
+    if(this.phase==='boss')return {title:'奪回外港裝卸區',hint:this.leftWingPilot?'擊破鐵獒推進器，讓蒼焰與白隼集火':'擊退鐵獒和護衛機'};
     if(this.phase==='link')return {title:'登陸完成・轉入基地作戰',hint:'沿碼頭右側聯絡道向南門集結'};
     if(this.phase==='wings')return {title:'選擇先奪取的設施',hint:'西翼供電所支援裝甲修復，東翼車輛庫派出增援'};
     if(this.phase==='base')return {title:'機甲基地 '+(this.secured.length+1)+'/8　'+this.op.name,hint:(this.bayOpen?'進入已開門的機庫，清除守軍並接管整備架':this.op.hint)+'　'+this.wave+'/'+this.op.waves.length};

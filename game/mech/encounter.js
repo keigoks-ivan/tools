@@ -43,7 +43,7 @@ export function parse(R, n) {
   const secs = R.secs.map((c, i) => {
     const a = P[c.at - 1], b = P[c.at], d = P[c.at + 1];
     const turn = !!d && Math.abs((b.x - a.x) * (d.z - b.z) - (b.z - a.z) * (d.x - b.x)) > 1;
-    return { i, at: c.at, s: b.s, turn, tip: c.tip, strike:c.strike, releaseFerry:c.releaseFerry, last: i === N - 1, trig: i === N - 1 ? R.fin : 58, pre: L(c.pre), waves: [c.amb, c.amb2, c.amb3].filter(Boolean).map(L),
+    return { i, at: c.at, s: b.s, turn, tip: c.tip, posts:c.posts, strike:c.strike, releaseFerry:c.releaseFerry, last: i === N - 1, trig: i === N - 1 ? R.fin : 58, pre: L(c.pre), waves: [c.amb, c.amb2, c.amb3].filter(Boolean).map(L),
       go: c.go, lines: c.lines, talkClear: c.clear, hold: c.hold, gap: c.gap, waveGap: c.waveGap,
       boss: c.boss ? { ...c.boss, halfWave: L(c.boss.halfWave), lowWave: L(c.boss.lowWave) } : null,
       beats: (c.beats || []).map(b => ({ ...b, spawn: L(b.spawn) })), targets: c.targets };
@@ -371,6 +371,7 @@ export class Encounter {
     this.beatT += dt;
     const pr = project(E, p.x, p.z, this.prog - 40, this.prog + 260);
     if (pr && pr.d < 90) this.prog = Math.max(this.prog, pr.s);
+    if (c.posts || c.boss?.post) this.updatePosts(dt);
     this.updQueue(dt);
     const live = this.alive() + this.queue.length;
     if (live > this.peak) this.peak = live;
@@ -431,7 +432,7 @@ export class Encounter {
       C.lines(c.lines, true);   // 開打的喊話：插隊
       this.holdT = 0; this.bossTalk = 0; this.bossOver = false;
       this.fightT = 0; this.beatSeen.clear();
-      if (c.boss) this.queue.push({ kind: c.boss.kind || 'ace', where: c.boss.where || 'drop', k: 0, t: 1.1, at: null, boss: true });
+      if (c.boss && !c.boss.post) this.queue.push({ kind: c.boss.kind || 'ace', where: c.boss.where || 'drop', k: 0, t: 1.1, at: null, boss: true });
     } else C.say('REINFORCEMENTS', `敵方增援 ×${L.length}`, 2.4, 'am');
     C.audio.ui('wave');
     const cnt = {};
@@ -458,6 +459,9 @@ export class Encounter {
       if (q.t > 0) continue;
       this.queue.splice(i--, 1); armed--; live++;
       const e = C.spawn(q.kind, 0, 1, q.at);
+      if(q.at.deck){
+        e.pos.set(q.at.x,q.at.y,q.at.z);e.dropping=false;e.grounded=true;e.vel.set(0,0,0);
+      }
       if (q.boss) {   // 頭目：血量加倍、上方顯示名字與血條；可以設定剩幾成撤退
         const bd = this.cur.boss;
         e.ap = e.apMax = Math.round(e.apMax * (bd.ap || 2)); e.bossName = bd.name; if(this.cur.strike)e.label=bd.name; e.fleeAt = bd.flee || 0;
@@ -487,12 +491,59 @@ export class Encounter {
         : this.findBld(t.x, t.z);
       return { ...t, b };
     }).filter(t => t.b);
+    if(c.boss?.post)this.spawnPost(c.boss,c.boss.post);
+    for(const post of c.posts || [])this.spawnPost(post,post);
     const cnt = {};
     for (const o of c.pre) {
       cnt[o.where] = (cnt[o.where] ?? -1) + 1;
       const v = this.C.spawn(o.kind, 0, 1, this.place({ kind: o.kind, where: o.where, k: cnt[o.where] }));
       v.hold = 1e4; v.pre = true; v.pref = rand(90, 150);
       this.mine.push(v);
+    }
+  }
+  // These fictional machines are present when the sector opens, so a distant first hit counts.
+  // The same enemy mesh, armour parts, damage and death pipeline serve both near and distant combat.
+  spawnPost(def,post) {
+    const C=this.C, y=post.y ?? C.world.height(post.x,post.z);
+    const e=C.spawn(def.kind,0,1,{x:post.x,z:post.z,ground:true});
+    const station=e.frontActor={station:post,boss:def===this.cur.boss,age:0,scan:0};
+    e.pos.set(post.x,y,post.z);e.vel.set(0,0,0);
+    e.grounded=!post.air;e.airborne=!!post.air;e.dropping=false;e.thrust=post.air?.6:0;
+    e.label=def.name;e.fireCd=4.5+(e.id%3)*.8;e.boostT=0;
+    if(station.boss){
+      e.bossName=def.name;e.ap=e.apMax=Math.round(e.apMax*(def.ap||1));
+      this.bossE=C.boss=e;
+    }
+    this.mine.push(e);
+  }
+  updatePosts(dt) {
+    const C=this.C, p=C.player.pos;
+    for(const e of this.mine){
+      const state=e.frontActor,post=state?.station;
+      if(!post || e.dead)continue;
+      const stopped=e.components?.booster?.disabled;
+      e.stagT=Math.max(0,e.stagT-dt);
+      if(post.air)e.thrust=stopped?.15:.60;
+      const t=state.age+=dt*(stopped?.21:1)*(e.stagT>0?.25:1);
+      const speed=post.air?.18:.14;
+      const x=post.x+(post.slide||0)*Math.sin(t*speed), y=post.air?post.y+2.8*Math.sin(t*.37):e.pos.y;
+      e.vel.set((x-e.pos.x)/Math.max(dt,.001),(y-e.pos.y)/Math.max(dt,.001),0);
+      e.pos.set(x,y,post.z);
+      // The flying ace turns to present its flank between volleys, exposing its rear module.
+      const bank=post.air&&!stopped ? Math.sin(t*speed)*1.6 : 0;
+      e.face=Math.atan2(p.x-x,p.z-post.z)+bank;
+      const aim=_u.copy(p);aim.y+=12;
+      if((state.scan-=dt)<=0){state.scan=.32;e.los=C.world.raycast(e.chest(_t),aim,null)<0;}
+      e.m.animate(dt,{vel:e.vel,grounded:e.grounded,thrust:e.thrust,boost:0,torsoYaw:e.face,aim:Math.abs(bank)>.8?null:aim,groundAt:e.groundAt,stagger:e.stagT,brace:e.fireCd<.9?.7:0});
+      e.fireCd-=dt;
+      const dist=e.pos.distanceTo(aim);
+      e.warn=!C.dead&&e.los&&Math.abs(bank)<.8&&dist<1120&&e.fireCd<.95?1:0;
+      if(e.fireCd>0||!e.warn||e.stagT>0)continue;
+      const cannon=e.components?.cannon, damaged=cannon?.disabled;
+      const muzzle=(damaged ? e.m.muzzle : cannon?.muzzle || e.m.muzzle).getWorldPosition(_t);
+      if(C.world.raycast(muzzle,aim,null)>=0){e.fireCd=.6;continue;}
+      e.fireCd=(state.boss?3.7:5.4)*(damaged?1.7:1);
+      C.shell(e,muzzle,aim,255,damaged?160:state.boss?505:305);
     }
   }
   findBld(x, z) {
@@ -522,7 +573,8 @@ export class Encounter {
     this.sec++; this.state = 'move'; this.beat = 0;
     if ([].concat(E.cp).includes(this.sec)) {
       const q = pointAt(E, c.s + 5);
-      C.cp = { sec: this.sec, x: q.x, z: q.z, yaw: Math.atan2(q.dx, q.dz), stats: JSON.parse(JSON.stringify(C.stats)), used: 0 };
+      const surface=C.def.battlefield==='tokyo' && q.z>116 ? {y:C.world.support(q.x,q.z,1,3)} : {};
+      C.cp = { sec: this.sec, x: q.x, z: q.z, ...surface, yaw: Math.atan2(q.dx, q.dz), stats: JSON.parse(JSON.stringify(C.stats)), used: 0 };
       C.events.push({ t: 0.9, fn: () => C.note('CHECKPOINT　檢查點', 'am') });
     }
     C.events.push({ t: 1.8, fn: () => C.note('前進 ▶', 'cy') });
@@ -534,6 +586,11 @@ export class Encounter {
   // ---------------------------------------------------------------- 伏兵出現位置
   place(q) {
     const c = this.cur, V = this.E.pts[c.at];
+    if(q.where==='deck'){
+      // Each contact steps off a service float onto the same continuous platform as the pilot.
+      const x=clamp(V.x-24-q.k*37,34,151),z=369+(q.k%2?6:-5);
+      return {x,z,y:1,how:'deck',deck:true};
+    }
     const late = this.prog > c.s + 20;   // 已經衝過路口：一律從前方出現，不從背後
     let wh = q.where;
     if (late && (wh === 'side' || wh === 'far')) wh = 'out';
@@ -750,8 +807,10 @@ export class Encounter {
     const move = this.state === 'move' || this.state === 'idle';
     const priority=c?.strike && this.state==='fight' && this.bossE && !this.bossE.dead ? this.bossE : null;
     this.deviceHint=priority ? '摧毀'+priority.bossName : '';
-    if(priority)this.strikeMarker??=new THREE.Vector3();
-    const target=this.training?.marker || this.front?.marker || (priority && priority.chest(this.strikeMarker));
+    const lookout=c?.posts && this.mine.find(e=>e.frontActor?.station && !e.dead);
+    const ranged=priority || (this.bossE?.frontActor?.station && !this.bossE.dead ? this.bossE : lookout);
+    if(ranged){this.strikeMarker??=new THREE.Vector3();this.deviceHint='擊破'+ranged.label;}
+    const target=this.training?.marker || this.front?.marker || (ranged && ranged.chest(this.strikeMarker));
     this.wp = target || (move && wp && !this.front ? { x: wp.x, y: w.height(wp.x, wp.z) + 38, z: wp.z } : null);
     this.dist = target ? C.player.pos.distanceTo(target) : c ? Math.max(0, c.s - this.prog) : 0;
     const A = this.ahead; A.length = 0;
@@ -759,9 +818,10 @@ export class Encounter {
     else if (c && this.state !== 'done' && !this.training && !this.front) { const q = pointAt(E, this.prog); A.push(q.x, q.z); for (const P of E.pts) if (P.s > this.prog + 1) A.push(P.x, P.z); }
     if (this.R) { const on = Math.sin(this.t * 5) > 0; this.R.la.color.setRGB(on ? 6 : 0.3, on ? 0.45 : 0.02, on ? 0.2 : 0.01); this.R.lb.color.setRGB(on ? 0.3 : 6, on ? 0.02 : 0.45, on ? 0.01 : 0.2); }
     if (!B) return;
+    if(C.def.pilot==='斑鳩')B.root.visible=!C.scopeActive;
     B.a += ((this.wp ? 1 : 0) - B.a) * (1 - Math.exp(-dt * 3));
     const pillar = target || wp;
-    if (pillar) B.root.position.set(pillar.x, w.height(pillar.x, pillar.z), pillar.z);
+    if (pillar) B.root.position.set(pillar.x, ranged ? ranged.pos.y : w.height(pillar.x, pillar.z), pillar.z);
     const T = this.t;
     B.mat.uniforms.t.value = T; B.mat.uniforms.a.value = B.a;
     B.ring.material.opacity = 0.8 * B.a;

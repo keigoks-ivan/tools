@@ -1153,7 +1153,7 @@ export class Combat {
         e.walkVelocity.clampLength(0,Math.max(1,e.vel.length()));
       }
       if (e.rushT > 0) { e.rushT -= dt; this.fx.trackDust(e.pos, e.vel, 1); if (e.rushT <= 0) { e.vel.x *= 0.2; e.vel.z *= 0.2; } }   // 衝到牆前就收速
-      const thr = Math.max(e.rushT > 0 ? 1 : 0, e.airborne ? .7 : 0,e.boostT > 0 ? 1 : 0, e.qbT > 0 ? 1 : 0, e.hover > 0 ? 1 : 0, e.lunge > 0.45 ? 1 : 0);
+      const thr = e.components?.booster?.disabled ? 0 : Math.max(e.rushT > 0 ? 1 : 0, e.airborne ? .7 : 0,e.boostT > 0 ? 1 : 0, e.qbT > 0 ? 1 : 0, e.hover > 0 ? 1 : 0, e.lunge > 0.45 ? 1 : 0);
       e.thrust = damp(e.thrust, thr, 10, dt);
       this.audio.enemyBoost(e.id, e.pos, e.thrust);
 
@@ -1166,7 +1166,7 @@ export class Combat {
       } else if (e.stagT <= 0 && e.lunge <= 0) this.enemyFire(e, dt, dist, playerChest);
       m.animate(dt, {
         vel: e.walkVelocity, grounded: e.grounded, clearance: e.clearance, groundAt: e.groundAt,
-        boost: e.grounded && (e.boostT > 0 || e.qbT > 0) ? 1 : 0, flight: e.airborne ? 1 : 0,
+        boost: !e.components?.booster?.disabled && e.grounded && (e.boostT > 0 || e.qbT > 0) ? 1 : 0, flight: e.airborne ? 1 : 0,
         torsoYaw: e.face, pitch: 0, thrust: e.thrust, aim, low: braced ? .7 : 0,
         guard: !!e.cover && e.coverT > 0, stagger: e.stagT,
         brace: relay || e.burst > 0 || e.charge > 0 || e.volley > 0 ? 1 : 0,
@@ -1203,6 +1203,12 @@ export class Combat {
       else if(!e.airborne||dying||e.stagT>0)e.vel.y-=30*dt;
       if (!e.airborne && e.hover > 0 && !dying) { e.hover -= dt; e.vel.y = Math.min(12, e.vel.y + 36 * dt); }
     }
+    if (!dying && e.components?.booster?.disabled) {
+      const speed = Math.hypot(e.vel.x, e.vel.z), limit = e.K.walk * .52;
+      if (speed > limit) { e.vel.x *= limit / speed; e.vel.z *= limit / speed; }
+      e.vel.y = Math.min(e.vel.y, 9);
+      e.thrust = 0;
+    }
     e.pos.addScaledVector(e.vel, dt);
     const wasBlocked=e.bumped;
     e.bumped = e.rushT > 0 ? false : w.collide(e.pos, r, e.pos.y);
@@ -1223,7 +1229,7 @@ export class Combat {
     if (e.grounded && sp > 3) w.stomp(e.pos.x, e.pos.z, 4 * k, e.vel.x, e.vel.z, (o) => this.audio.trample(_c.set(o.x, 0, o.z), o.kind));
   }
   enemyQB(e, side) {
-    if (e.qbCd > 0) return;
+    if (e.components?.booster?.disabled || e.qbCd > 0) return;
     const toP = _c.subVectors(e.los || !e.lastSeen ? this.player.pos : e.lastSeen, e.pos).setY(0).normalize();
     let perp = V3(toP.z, 0, -toP.x).multiplyScalar(e.strafe * side);
     if (this.world) {
@@ -1259,11 +1265,12 @@ export class Combat {
   }
 
   enemyFire(e, dt, dist, pc) {
+    if (e.components?.cannon?.disabled) return;
     const K = e.K, T = this.tier;
     e.fireCd -= dt; e.altCd -= dt; e.warn = Math.max(0, e.warn - dt * 2);
     if (e.harborAir?.phase === 'missiles') { this.harborMissiles(e, dt, dist, pc); return; }
     const canSee = e.los && dist < K.range;
-    const muz = () => { e.m.muzzle.updateWorldMatrix(true, false); return e.m.muzzle.getWorldPosition(V3()); };
+    const muz = () => (e.components?.cannon?.muzzle || e.m.muzzle).getWorldPosition(V3());
     if (e.kind === 'grunt') {
       // 機槍連射
       if (!canSee) e.burst = 0;

@@ -2,8 +2,9 @@
 // 每幀讀 state，讀完呼叫 endFrame() 清掉「這一幀剛按下／放開」的旗標
 export class Input {
   // Fallback is opt-in: the existing Iron Dusk games keep pointer-lock-only aiming.
-  constructor(canvas, { mouseFallback = false } = {}) {
+  constructor(canvas, { mouseFallback = false, scopeDrag = false } = {}) {
     this.canvas = canvas;
+    this.scopeDrag = scopeDrag;
     this.keys = new Set();
     this.down = new Set();      // 這一幀剛按下
     this.up = new Set();        // 這一幀剛放開
@@ -181,6 +182,7 @@ export class Input {
     return {
       mx, my, lookX, lookY,
       fire: K.has('M0') || K.has('Tfire'),
+      lockPress: this.down.has('M2') || this.down.has('Tmsl'),
       lockHold: K.has('M2') || K.has('Tmsl'),
       lockRelease: this.up.has('M2') || this.up.has('Tmsl'),
       qb: shiftDown,                                // 點一下 Shift：快速閃避
@@ -234,15 +236,23 @@ export class Input {
     for (const type of releaseEvents) look.addEventListener(type, lend);
     const btn = (id, key) => {
       const b = el(id); if (!b) return;
+      const drag = this.scopeDrag && key === 'Tmsl';
+      let lastX, lastY;
+      if (drag) b.addEventListener('pointermove', (e) => {
+        if (!this.enabled || T.buttons.get(key) !== e.pointerId) return;
+        this.mdx += (e.clientX - lastX) * 2.2; this.mdy += (e.clientY - lastY) * 2.2;
+        lastX = e.clientX; lastY = e.clientY;
+      });
       b.addEventListener('pointerdown', (e) => {
         if (!this.enabled || T.buttons.has(key)) return;
         e.stopPropagation(); T.buttons.set(key, e.pointerId);
+        lastX = e.clientX; lastY = e.clientY;
         this.keys.add(key); this.down.add(key); b.setPointerCapture(e.pointerId);
       });
       const off = (e) => {
         if (T.buttons.get(key) !== e.pointerId) return;
         T.buttons.delete(key);
-        if (this.keys.delete(key)) this.up.add(key);
+        if (this.keys.delete(key) && (!drag || e.type === 'pointerup')) this.up.add(key);
       };
       for (const type of releaseEvents) b.addEventListener(type, off);
     };
