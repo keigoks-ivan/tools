@@ -11,6 +11,7 @@ import {TAIPEI_STAGES} from '../taipei/campaign.mjs';
 import {prepareStages} from '../combat.js';
 
 test('each Taipei chapter has seven reachable sectors, recovery checkpoints and its own ending',()=>{
+  assert.deepEqual(TAIPEI_STAGES.map(s=>s.route.district),['arcade','river','beitou','songyan','grassland','skyline']);
   for(const stage of prepareStages(TAIPEI_STAGES)){
     assert.equal(stage.enc.secs.length,7);
     assert.ok(stage.enc.len>=1000);
@@ -21,7 +22,13 @@ test('each Taipei chapter has seven reachable sectors, recovery checkpoints and 
   }
   assert.ok(TAIPEI_STAGES[0].route.secs.find(s=>s.pickup?.portable).breakContact);
   assert.equal(TAIPEI_STAGES[1].route.secs.filter(s=>s.pickup?.releaseFerry).length,1);
-  assert.ok(TAIPEI_STAGES[2].route.secs.filter(s=>s.pickup?.alt).every(s=>s.pickup.alt<100));
+  assert.ok(TAIPEI_STAGES[3].route.secs.some(s=>s.pickup?.travel>0&&s.breakContact));
+  const finale=TAIPEI_STAGES.at(-1).route.secs;
+  assert.ok(finale.some(s=>s.pickup?.pulse&&s.pickup.decoyX!==undefined));
+  assert.ok(finale.at(-1).pickup.afterBoss&&finale.at(-1).boss);
+  const aerial=finale.filter(s=>s.pickup?.alt);
+  assert.equal(aerial.length,2);
+  assert.ok(aerial.every(s=>s.pickup.alt<100));
 });
 test('surface water follows both upstream channels and leaves an exposed spit before the confluence',()=>{
   const [near,far]=channelsAt(-670);

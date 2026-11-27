@@ -381,11 +381,14 @@ export class Encounter {
     } else if (this.state === 'fight') {
       this.fightT += dt;
       const pickup = c.pickup;
-      if (pickup && !this.collected) {
-        const height = C.world.height(pickup.x,pickup.z) + (pickup.alt || 0);
-        if (Math.hypot(p.x-pickup.x,p.z-pickup.z)<13 && Math.abs(p.y-height)<(pickup.alt ? 9 : 17)) {
+      if (pickup && !this.collected && (!pickup.afterBoss || this.bossE?.dead)) {
+        const prop=C.world.pickupVisuals?.get(pickup.name);
+        prop?.advance?.(this.fightT);
+        const x=prop?.marker.x ?? pickup.x, z=prop?.marker.z ?? pickup.z;
+        const height = C.world.height(x,z) + (pickup.alt || 0);
+        if (Math.hypot(p.x-x,p.z-z)<13 && Math.abs(p.y-height)<(pickup.alt ? 9 : 17)) {
           this.collected = true;
-          C.world.pickupVisuals?.get(pickup.name)?.complete();
+          prop?.complete();
           C.audio.ui('confirm');
           C.note(pickup.name + (pickup.verb || (pickup.portable ? '已取回' : '已連線')), 'gr');
           if (c.breakContact) {
@@ -394,7 +397,7 @@ export class Encounter {
           }
         } else if (pickup.decoyX!==undefined && !this.wrongSignal && Math.hypot(p.x-pickup.decoyX,p.z-pickup.decoyZ)<13 && Math.abs(p.y-height)<17) {
           this.wrongSignal=true;
-          C.lines([['阿澄','這艘沒有引擎聲，別放行。去紅頂船旁的控制台！']],true);
+          C.lines([['阿澄',pickup.wrongLine || '這艘沒有引擎聲，別放行。去紅頂船旁的控制台！']],true);
           this.reinforce([{kind:'heli',where:'far'}]);
         }
       }
@@ -758,8 +761,8 @@ export class Encounter {
       wp = wp || E.pts[c.at];
     }
     const move = this.state === 'move' || this.state === 'idle';
-    const device=c?.pickup&&!this.collected&&this.state==='fight'?w.pickupVisuals?.get(c.pickup.name):null;
-    this.deviceHint = device ? (c.pickup.decoyX!==undefined ? '辨認紅頂船的放行台' : c.pickup.alt ? '升至天線高度' : '靠近'+c.pickup.name) : '';
+    const device=c?.pickup&&!this.collected&&(!c.pickup.afterBoss || this.bossE?.dead)&&this.state==='fight'?w.pickupVisuals?.get(c.pickup.name):null;
+    this.deviceHint = device ? (c.pickup.decoyX!==undefined ? (c.pickup.signalHint || '辨認紅頂船的放行台') : c.pickup.alt ? '升至天線高度' : '靠近'+c.pickup.name) : '';
     const target = this.training?.marker || this.front?.marker || (device?.searchArea ?? device?.marker);
     this.wp = target || (move && wp && !this.front ? { x: wp.x, y: w.height(wp.x, wp.z) + 38, z: wp.z } : null);
     this.dist = target ? C.player.pos.distanceTo(target) : c ? Math.max(0, c.s - this.prog) : 0;

@@ -206,8 +206,21 @@ async function game() {
 
   // ---------------------------------------------------------------- 設定
   // 視角：false＝駕駛艙（第一人稱）、true＝機體後方（看得到整台機體）；記住上次的選擇
-  const saveKey = k => (taipei && /^(cleared|best\d+|view)$/.test(k) ? 'mech.taipei.' : 'mech.') + k;
+  const saveKey = k => {
+    if(!taipei || !/^(cleared|best\d+|view)$/.test(k))return 'mech.'+k;
+    if(k==='cleared' || /^best[3-6]$/.test(k))return 'mech.taipei.six.'+k;
+    return 'mech.taipei.'+k;
+  };
   const store0 = (k, d) => { try { const v = localStorage.getItem(saveKey(k)); const n = v === null ? d : +v; return Number.isFinite(n) ? n : d; } catch (e) { return d; } };
+  // Chapters 1–2 are shared. Keep the original third chapter's rank with Xinyi.
+  if(taipei)try{
+    if(localStorage.getItem(saveKey('cleared'))===null){
+      const old=Number(localStorage.getItem('mech.taipei.cleared'))||0;
+      const rank=localStorage.getItem('mech.taipei.best3');
+      if(old>=3 && rank!==null)localStorage.setItem(saveKey('best6'),rank);
+      localStorage.setItem(saveKey('cleared'),Math.max(0,Math.min(2,old)));
+    }
+  }catch{}
   let tpView = store0('view', 0) === 1;
   let chaseD = store0('camd2', 9);
   chaseD = Number.isFinite(chaseD) ? clamp(chaseD, 6, 40) : 9;   // 近背視角距離（公尺），滑鼠滾輪調整；舊版遠鏡頭設定不套用
@@ -472,7 +485,7 @@ async function game() {
       if (RANKS.indexOf(rank) > store.get('best' + n, 0)) store.set('best' + n, RANKS.indexOf(rank));
     }
     audio.music(win ? (last ? 'allclear' : D.frontline==='landing' ? 'landingHome' : 'clear') : 'fail');
-    $('resTitle').textContent = win ? (last ? (taipei ? '台北雨線・任務完成' : '神戶市區停火') : `第 ${n} 關完成`) : `第 ${n} 關失敗`;
+    $('resTitle').textContent = win ? (last ? (taipei ? '台北雨線・七人全數接通' : '神戶市區停火') : `第 ${n} 關完成`) : `第 ${n} 關失敗`;
     $('resSub').textContent = win ? (last ? (taipei ? 'SIGNAL RESTORED' : 'CEASEFIRE') : 'STAGE CLEAR') : 'MISSION FAILED';
     $('resRank').textContent = rank;
     $('resRank').style.display = win ? '' : 'none';

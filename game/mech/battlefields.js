@@ -29,6 +29,10 @@ export function fieldHeight(x, z, profile, route, base = 0) {
   const F = BATTLEFIELDS[profile];
   if (!F || !F.mode) return base;
   if(profile==='taipei'){
+    if(route.district==='grassland'){
+      const edge=smooth(600,1500,Math.hypot(x,z));
+      return base*(.32+.68*edge);
+    }
     const relief=base*smooth(730,1220,Math.hypot(x,z));
     return relief-(route.riverBed?.(x,z) || 0);
   }

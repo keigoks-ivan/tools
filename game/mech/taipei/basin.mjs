@@ -3,6 +3,9 @@ import * as THREE from 'three';
 const frames={
   arcade:[[-4,0,-500],[0,4,-1200]],
   river:[[-1.68,-3.64,-4900],[3.64,-1.68,5600]],
+  beitou:[[-3,0,-705],[0,3,7450]],
+  songyan:[[-4,0,4630],[0,4,-2780]],
+  grassland:[[-2,0,5940],[0,2,10900]],
   skyline:[[4,0,5300],[0,-4,-1890]],
 };
 // Mapzen Terrarium z10, NASA SRTM. Signed little-endian metres, south-to-north rows.
@@ -38,15 +41,16 @@ export async function loadBasin(){
 
 export function basinSurface(A){
   const material=new THREE.MeshStandardMaterial({map:A.grassD,roughness:.97});
-  const imagery={value:null},east={value:new THREE.Vector3()},north={value:new THREE.Vector3()};
+  const pasture={value:0},imagery={value:null},east={value:new THREE.Vector3()},north={value:new THREE.Vector3()};
   material.userData.setBasinView=(district,texture)=>{
+    pasture.value=district==='grassland'?1:0;
     const frame=frames[district];
     east.value.fromArray(frame[0]);north.value.fromArray(frame[1]);imagery.value=texture;
   };
   material.onBeforeCompile=shader=>{
-    Object.assign(shader.uniforms,{crowns:A.forestCanopy,imagery,east,north});
+    Object.assign(shader.uniforms,{crowns:A.forestCanopy,imagery,east,north,pasture});
     shader.vertexShader='varying vec3 basinPos; varying vec3 basinNormal;\n'+shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nbasinPos=position;basinNormal=normal;');
-    shader.fragmentShader='uniform sampler2D crowns,imagery;uniform vec3 east,north;varying vec3 basinPos;varying vec3 basinNormal;\n'+shader.fragmentShader.replace('#include <map_fragment>',`
+    shader.fragmentShader='uniform float pasture;uniform sampler2D crowns,imagery;uniform vec3 east,north;varying vec3 basinPos;varying vec3 basinNormal;\n'+shader.fragmentShader.replace('#include <map_fragment>',`
       vec2 p=basinPos.xz;
       float grove=texture2D(crowns,p/549.0).g;
       vec2 crownUv=p/146.0 + normalize(basinNormal).xz*.21 + vec2(grove*.24);
@@ -57,6 +61,7 @@ export function basinSurface(A){
       vec3 field=texture2D(map,vMapUv*.39).rgb*.45+texture2D(map,mat2(.73,-.68,.68,.73)*vMapUv*.066).rgb*.55;
       field*=vec3(.57,.77,.59)*(.89+.24*grove);
       vec3 earth=mix(field,green,smoothstep(2.0,48.0,basinPos.y));
+      earth=mix(earth,field*vec3(1.65,1.37,.9),pasture*(1.0-smoothstep(480.0,940.0,length(p))));
       vec3 local=vec3(p,1.0);
       vec2 geoUv=.5+vec2(dot(east,local),dot(north,local))/40000.0;
       float border=max(abs(geoUv.x-.5),abs(geoUv.y-.5));

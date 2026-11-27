@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {marketCourt,cityPlaza,parkScooters} from './streets.mjs';
+import {buildInland} from './inland-art.mjs';
 import {buildXinyi} from './xinyi.mjs';
 import {channelsAt,buildGuandu} from './rivers.mjs';
 import {buildTaipei101,TAIPEI_101} from './landmark.mjs';
@@ -75,10 +76,25 @@ export async function prepareDistrict(A,heightSource) {
     });
     return xinyiMaterials;
   }
+  let heritage;
+  function heritageMaterials(){
+    if(!heritage){
+      const face=lit({map,metalness:.03});
+      heritage={...sharedMaterials,face,signs:lit({map:signs([
+        '北投溪','北投公園','溫泉博物館','上游步道','松山文創園區','一號倉庫','鍋爐房','生態景觀池',
+        '擎天崗','金包里大路','中央步道','草原步道'
+      ])})};
+      loader.load(new URL('./heritage.webp',import.meta.url).href,t=>{
+        t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;face.map=t;
+      });
+    }
+    return heritage;
+  }
   const carFinish=instancedCarMaterial(A.wearM);
   return (w,group,{bucket,box,put})=>{
     const district=w.fieldRoute.district, river=district==='river', city=district==='skyline';
-    const materials=city?commercialMaterials():sharedMaterials;
+    const inland=['beitou','songyan','grassland'].includes(district);
+    const materials=city?commercialMaterials():inland?heritageMaterials():sharedMaterials;
     w.terrainMesh.material.userData.setBasinView(district,basinColor);
     w.bearingOffset=city?180:0;
     w.scenicPoints=heightSource.peaks(district);
@@ -87,9 +103,11 @@ export async function prepareDistrict(A,heightSource) {
     if(city)landmark('台北 101',TAIPEI_101.x,TAIPEI_101.height,TAIPEI_101.z);
     const B=Object.fromEntries(Object.keys(materials).map(k=>[k,bucket()]));
     const records=[],count=b=>b.p.length/3;
-    const horizon=new THREE.Mesh(new THREE.CylinderGeometry(1610,1610,130,80,1,true),backdrop);
-    horizon.position.y=61;horizon.rotation.y=river?.38:city?2.16:.73;horizon.userData.fieldGeometry=true;
-    group.add(horizon);
+    if(!inland || district==='songyan'){
+      const horizon=new THREE.Mesh(new THREE.CylinderGeometry(1610,1610,130,80,1,true),backdrop);
+      horizon.position.y=61;horizon.rotation.y=river?.38:city?2.16:.73;horizon.userData.fieldGeometry=true;
+      group.add(horizon);
+    }
     let seed=river?175:city?839:47;
     const rand=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);
     const stone=paint(0xa79a86), light=paint(0xcbbca2), metal=paint(0x525951),dark=paint(0x323c3d), stripe=paint(0xdbba69);
@@ -139,7 +157,7 @@ export async function prepareDistrict(A,heightSource) {
       piece(x+side*1.68,6.59,z,.63,.17,.35,light);
     }
     const trees=[],scooters=[],cars=[[],[]];
-    const tree=(x,z)=>trees.push([x,z,.73+rand()*.28,rand()*6.28]);
+    const tree=(x,z)=>trees.push([x,z,(district==='beitou'?1.5:1)*(.73+rand()*.28),rand()*6.28]);
     function park(x,z,angle){
       const i=rand()<.61?0:1,c=[0xbac1bd,0x475b60,0x4e545e,0xdbb54e,0x8f4945][Math.floor(rand()*5)];
       cars[i].push([x,z,angle,c]);
@@ -155,7 +173,7 @@ export async function prepareDistrict(A,heightSource) {
       if(trees.length){
         w.prepareFoliage();
         const mesh=new THREE.InstancedMesh(w.fieldTrees[3],w.fieldTreeMaterial,trees.length);
-        trees.forEach(([x,z,scale,angle],i)=>{d.position.set(x,.11,z);d.rotation.y=angle;d.scale.setScalar(scale);d.updateMatrix();mesh.setMatrixAt(i,d.matrix);});
+        trees.forEach(([x,z,scale,angle],i)=>{d.position.set(x,(inland?w.height(x,z):0)+.11,z);d.rotation.y=angle;d.scale.setScalar(scale);d.updateMatrix();mesh.setMatrixAt(i,d.matrix);});
         mesh.customDepthMaterial=w.fieldTreeDepth;mesh.castShadow=mesh.receiveShadow=true;mesh.userData.fieldTree=true;group.add(mesh);
       }
       cars.forEach((list,i)=>{
@@ -261,7 +279,8 @@ export async function prepareDistrict(A,heightSource) {
       });
     }
     const wharf=river?paint(0x928575):stone;
-    if(!river){
+    if(inland)buildInland({w,B,quad,tile,uv,paint,piece,skin,course,tree,rand,landmark});
+    else if(!river){
       const offset=city?130:120, cross=city?[-65,110,278]:[-275,-55,90,278];
       pave(55,0,670,960,.012);
       for(const x of [-120,0,offset,offset+120])street(x,0,930);
@@ -383,14 +402,39 @@ export async function prepareDistrict(A,heightSource) {
       }
       const lamp=boxAt([1.08,.32,.28],0xffb85a,[0,1.56,1.13]);
       const set=done=>{prop.visible=!(pickup.portable&&done);lamp.material.emissive.set(done?0x17ba81:0xfb982c);};
+      const marker=prop.position.clone().add(new THREE.Vector3(0,3,0));
+      let advance;
+      if(pickup.travel){
+        boxAt([5.8,.7,4.6],0x515f56,[0,.35,0]);
+        for(const x of [-2,2])for(const z of [-1.85,1.85]){
+          const wheel=add(new THREE.CylinderGeometry(.58,.58,.35,10),0x343b39,x,.52,z);
+          wheel.rotation.x=Math.PI/2;
+        }
+        const beacon=boxAt([.48,.4,.48],0x7edbb4,[0,3.95,0]);
+        beacon.material.emissive.setHex(0x258958);
+        advance=t=>{prop.position.x=pickup.x+pickup.travel*Math.sin(t*.14);marker.x=prop.position.x;};
+      }
       let searchArea;
       if(pickup.decoyX!==undefined){
-        const other=prop.clone(true);other.position.set(pickup.decoyX,w.height(pickup.decoyX,pickup.decoyZ),pickup.decoyZ);
+        const other=prop.clone(true);other.position.set(pickup.decoyX,pickup.pulse?prop.position.y:w.height(pickup.decoyX,pickup.decoyZ),pickup.decoyZ);
         other.traverse(o=>{o.userData.fieldGeometry=o.userData.fieldMaterial=false;});
         const signal=other.children[prop.children.indexOf(lamp)];signal.material=lamp.material.clone();signal.material.emissive.set(0xd18546);signal.userData.fieldMaterial=true;
+        if(pickup.pulse){
+          const lamps=prop.children.filter(o=>o.position.y===3.1);
+          const copies=lamps.map(o=>other.children[prop.children.indexOf(o)]);
+          for(const o of copies){o.material=o.material.clone();o.userData.fieldMaterial=true;}
+          // The real lamp pauses before its third flash. Both lamps rest between groups.
+          advance=t=>{
+            const phase=t%3.2,lit=starts=>starts.some(start=>phase>=start&&phase<start+.22);
+            for(const o of lamps)o.material.emissiveIntensity=lit([0,.42,1.6])?4:.03;
+            for(const o of copies)o.material.emissiveIntensity=lit([0,.42,.84])?4:.03;
+          };
+          const postHeight=other.position.y-w.height(pickup.decoyX,pickup.decoyZ);
+          const mast=boxAt([1.1,postHeight,1.1],0x505e60,[0,0,0]);prop.remove(mast);other.add(mast);mast.position.y=-postHeight/2;
+        }
         group.add(other);searchArea=prop.position.clone().lerp(other.position,.5);searchArea.y+=3;
       }
-      set(false);w.pickupVisuals.set(pickup.name,{searchArea,marker:prop.position.clone().add(new THREE.Vector3(0,3,0)),complete:()=>set(true),reset:()=>set(false)});
+      set(false);w.pickupVisuals.set(pickup.name,{searchArea,marker,advance,complete:()=>set(true),reset:()=>{advance?.(0);set(false);}});
     }
     if(river)installFerries(group,w,materials);
     else w.taipeiRiver=null;
