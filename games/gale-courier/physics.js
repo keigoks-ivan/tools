@@ -5,7 +5,7 @@ function createRun(courseIndex = 0) {
   const course = COURSES[courseIndex];
   return {
     courseIndex, course,
-    player: { x: PLAYFIELD.spawn, y: PLAYFIELD.floor - 42, w: 26, h: 42, vx: 0, vy: 0, facing: 1,
+    player: { x: PLAYFIELD.spawn, y: PLAYFIELD.floor - 42, w: PLAYFIELD.courierWidth, h: 42, vx: 0, vy: 0, facing: 1,
       grounded: true, springing: false, grace: 0, bufferedJump: 0, invulnerable: 0 },
     seeds: course.seeds.map(([x, y]) => ({ x, y, taken: false })),
     enemies: course.enemies.map(([x, base, min, max], index) => ({
@@ -76,6 +76,7 @@ function advanceRun(run, input, dt = STEP) {
   p.vx += clamp(desired - p.vx, -acceleration, acceleration);
   if (direction) p.facing = direction;
   p.x = clamp(p.x + p.vx * dt, 8, run.course.end - p.w);
+  const cell = run.course.cells[Math.floor(p.x / COLLISION_CELL_WIDTH)];
 
   const previousBottom = p.y + p.h;
   const fallingGravity = !input.jumpHeld && !p.springing && p.vy < -210 ? 3000 : 1780;
@@ -84,7 +85,7 @@ function advanceRun(run, input, dt = STEP) {
   p.grounded = false;
   if (p.vy >= 0) {
     let landing;
-    for (const platform of run.course.platforms) {
+    for (const platform of cell.platforms) {
       if (p.x + p.w > platform.x && p.x < platform.x + platform.w &&
           previousBottom <= platform.y + .01 && p.y + p.h >= platform.y &&
           (!landing || platform.y < landing.y)) {
@@ -125,7 +126,7 @@ function advanceRun(run, input, dt = STEP) {
     }
   }
 
-  for (const [x, w] of run.course.spikes) {
+  for (const [x, w] of cell.spikes) {
     if (p.x + p.w > x + 4 && p.x < x + w - 4 &&
         p.y + p.h > PLAYFIELD.floor - 16 && p.y < PLAYFIELD.floor) {
       loseLife(run, false, p.x + p.w / 2 < x + w / 2 ? -1 : 1);
@@ -133,7 +134,8 @@ function advanceRun(run, input, dt = STEP) {
   }
   if (run.phase !== "playing") return;
 
-  for (const seed of run.seeds) {
+  for (const index of cell.seeds) {
+    const seed = run.seeds[index];
     if (!seed.taken && p.x + p.w > seed.x - 12 && p.x < seed.x + 12 &&
         p.y + p.h > seed.y - 13 && p.y < seed.y + 13) {
       seed.taken = true;

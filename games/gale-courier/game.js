@@ -200,6 +200,8 @@ function renderOverlay() {
   if (state === "playing") return;
   const finalCourse = run.courseIndex === COURSES.length - 1;
   const collected = tr(`已收集 ${run.count} / ${run.seeds.length} 顆風種。`, `Collected ${run.count} / ${run.seeds.length} wind seeds.`);
+  const seconds = Math.floor(gameTime);
+  const duration = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
   const current = run.course.name[locale];
   const titleStart = suggestedCourse() ? tr("繼續郵路", "Continue") : tr("開始遊戲", "Start game");
   const copy = {
@@ -207,7 +209,8 @@ function renderOverlay() {
     paused: [current, tr("遊戲暫停", "Game paused"), run.course.hint[locale], tr("繼續遊戲", "Resume")],
     lost: [current, tr("郵路中斷", "Delivery interrupted"), collected,
       canContinue ? tr("從郵站繼續", "Continue from checkpoint") : tr("再試一次", "Try again")],
-    won: [current, finalCourse ? tr("信已送達", "Letter delivered") : tr("順利抵達", "Course cleared"), collected,
+    won: [current, finalCourse ? tr("信已送達", "Letter delivered") : tr("順利抵達", "Course cleared"),
+      `${collected} ${tr(`用時 ${duration}`, `Time ${duration}`)}`,
       finalCourse ? tr("查看郵路", "Open route map") : tr("下一關", "Next course")],
   }[state];
   chapter.textContent = `✦  ${copy[0]}`;

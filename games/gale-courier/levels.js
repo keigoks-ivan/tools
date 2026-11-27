@@ -1,4 +1,5 @@
-const PLAYFIELD = {height: 620, floor: 545, spawn: 150};
+const PLAYFIELD = {height: 620, floor: 545, spawn: 150, courierWidth: 26};
+const COLLISION_CELL_WIDTH = 640;
 
 const firstCourse = {
   name: ["暮谷郵路", "Dusk Valley"],
@@ -184,6 +185,12 @@ const crossings = {
   highRidge: [[.17, 478, 82], [.47, 414, 82], [.77, 357, 76], [.93, 426, 76]],
   spring: [[.20, 480, 99, true], [.72, 333, 110]],
   relay: [[.15, 477, 86, true], [.55, 410, 87, true], [.90, 291, 94]],
+  lowSpan: [[.21, 490, 123], [.53, 498, 110], [.84, 473, 111]],
+  arch: [[.19, 482, 105], [.51, 415, 102], [.83, 468, 96]],
+  switchback: [[.16, 479, 96], [.43, 417, 92], [.69, 459, 94], [.90, 411, 92]],
+  steppedPier: [[.18, 499, 113], [.49, 445, 100], [.80, 489, 108]],
+  springStairs: [[.16, 482, 103, true], [.65, 373, 118], [.91, 436, 104]],
+  splitRelay: [[.16, 480, 96, true], [.59, 423, 106, true], [.90, 329, 106]],
 };
 
 // Each section starts at a postal station. Rows describe bank width, gap width,
@@ -241,6 +248,155 @@ const courseSections = [
   ],
 ];
 
+// The remaining postal sections vary the crossing order within each landscape.
+// The length range for a crossing keeps its landings within jump distance.
+const crossingLengths = {
+  open: [128, 191], brook: [178, 240], steppingStones: [226, 318],
+  stair: [272, 368], bridge: [283, 372], dock: [248, 344],
+  ridge: [332, 426], highRidge: [390, 470], spring: [315, 438], relay: [455, 510],
+  lowSpan: [208, 305], arch: [316, 425], switchback: [365, 455],
+  steppedPier: [314, 421], springStairs: [360, 442], splitRelay: [450, 523],
+};
+
+const extraCrossings = [
+  [ // Dusk Valley
+    "open brook open lowSpan brook open steppingStones",
+    "brook open steppingStones brook open brook lowSpan",
+    "open lowSpan brook steppingStones open lowSpan brook",
+    "steppingStones brook open lowSpan brook steppingStones open",
+    "brook steppingStones lowSpan open brook lowSpan steppingStones",
+    "open brook lowSpan steppingStones brook open lowSpan",
+    "lowSpan open brook lowSpan steppingStones brook open",
+    "brook steppingStones open lowSpan open brook steppingStones",
+  ],
+  [ // Cedar in the Mist
+    "brook lowSpan open steppingStones brook lowSpan steppingStones",
+    "steppingStones brook lowSpan open dock brook lowSpan",
+    "open steppingStones lowSpan dock brook steppingStones open",
+    "lowSpan dock brook steppingStones open lowSpan stair",
+    "steppingStones lowSpan open dock steppingStones stair brook",
+    "dock brook steppingStones lowSpan stair open dock",
+    "lowSpan steppingStones stair brook dock open steppingStones",
+    "stair lowSpan dock open steppingStones dock lowSpan",
+  ],
+  [ // Waterwheel Run
+    "dock lowSpan steppedPier stair dock arch lowSpan",
+    "stair dock steppingStones steppedPier arch lowSpan steppedPier",
+    "lowSpan arch steppedPier dock stair bridge dock",
+    "steppedPier stair dock arch lowSpan steppedPier ridge",
+    "arch steppedPier bridge lowSpan dock ridge stair",
+    "dock bridge steppedPier ridge stair lowSpan arch",
+    "ridge steppedPier lowSpan arch dock stair steppedPier",
+    "steppedPier arch dock bridge ridge steppedPier stair",
+  ],
+  [ // Copperleaf Crossing
+    "bridge arch dock stair switchback bridge arch",
+    "stair bridge switchback arch lowSpan ridge bridge",
+    "arch stair bridge ridge switchback dock arch",
+    "bridge switchback dock arch bridge ridge stair",
+    "dock arch switchback bridge stair arch switchback",
+    "switchback bridge arch ridge dock switchback bridge",
+    "arch ridge stair switchback arch bridge dock",
+  ],
+  [ // Clockwork Works
+    "spring bridge arch springStairs stair spring switchback",
+    "arch springStairs bridge spring dock springStairs stair",
+    "springStairs ridge spring arch switchback springStairs bridge",
+    "bridge spring arch springStairs switchback springStairs ridge",
+    "springStairs switchback bridge spring ridge springStairs arch",
+    "arch spring ridge springStairs stair switchback spring",
+    "switchback springStairs arch bridge springStairs ridge spring",
+  ],
+  [ // Gale Ridge
+    "ridge highRidge switchback springStairs arch ridge highRidge",
+    "switchback ridge spring highRidge ridge arch springStairs",
+    "springStairs highRidge arch ridge switchback spring highRidge",
+    "highRidge springStairs ridge switchback arch highRidge ridge",
+    "ridge switchback highRidge springStairs ridge highRidge spring",
+    "highRidge arch springStairs ridge switchback highRidge arch",
+    "springStairs ridge highRidge arch springStairs switchback ridge",
+  ],
+  [ // Moonwake Harbor
+    "steppedPier dock arch steppedPier lowSpan bridge steppedPier",
+    "arch steppedPier bridge dock steppedPier springStairs arch",
+    "dock steppedPier switchback arch bridge steppedPier ridge",
+    "steppedPier bridge steppedPier ridge dock springStairs steppedPier",
+    "arch steppedPier lowSpan dock switchback steppedPier arch",
+    "steppedPier ridge dock steppedPier springStairs arch steppedPier",
+    "switchback steppedPier arch bridge steppedPier ridge dock",
+  ],
+  [ // Starlit Switchbacks
+    "switchback springStairs highRidge splitRelay ridge switchback spring",
+    "springStairs switchback splitRelay ridge highRidge switchback arch",
+    "highRidge springStairs switchback arch splitRelay ridge highRidge",
+    "switchback splitRelay ridge springStairs switchback highRidge ridge",
+    "splitRelay switchback highRidge ridge switchback springStairs arch",
+    "highRidge arch springStairs switchback splitRelay ridge switchback",
+    "springStairs splitRelay highRidge switchback ridge springStairs highRidge",
+  ],
+  [ // Midnight Viaduct
+    "highRidge switchback relay ridge splitRelay highRidge arch",
+    "splitRelay highRidge switchback relay arch highRidge ridge",
+    "highRidge relay ridge switchback highRidge splitRelay relay",
+    "switchback splitRelay highRidge arch relay ridge highRidge",
+    "relay highRidge switchback splitRelay ridge highRidge relay",
+    "highRidge splitRelay arch relay highRidge switchback splitRelay",
+    "switchback relay highRidge splitRelay relay ridge highRidge",
+  ],
+  [ // Windspire Ascent
+    "splitRelay highRidge relay switchback splitRelay highRidge relay",
+    "highRidge splitRelay springStairs relay highRidge splitRelay switchback",
+    "relay switchback splitRelay highRidge relay ridge splitRelay",
+    "splitRelay relay highRidge springStairs splitRelay highRidge relay",
+    "highRidge splitRelay relay ridge splitRelay switchback highRidge",
+    "relay highRidge splitRelay relay switchback splitRelay highRidge",
+    "splitRelay relay highRidge splitRelay springStairs highRidge splitRelay",
+  ],
+];
+
+const shoreObstacles = [
+  ["terrace", "patrol", "brambles", "terrace", "patrol"],
+  ["brambles", "terrace", "patrol", "brambles", "terrace"],
+  ["patrol", "terrace", "splitPath", "brambles", "overpass"],
+  ["terrace", "splitPath", "overpass", "patrol", "lookout"],
+  ["lookout", "brambles", "overpass", "splitPath", "terrace"],
+  ["sentries", "terrace", "splitPath", "overpass", "lookout"],
+  ["lookout", "splitPath", "overpass", "sentries", "terrace"],
+  ["splitPath", "sentries", "lookout", "terrace", "overpass"],
+  ["sentries", "splitPath", "lookout", "overpass", "sentries"],
+  ["lookout", "sentries", "splitPath", "sentries", "lookout"],
+];
+
+function extraSections(courseIndex) {
+  return extraCrossings[courseIndex].map((crossings, sectionIndex) => {
+    const obstacles = shoreObstacles[courseIndex];
+    const spans = crossings.split(" ").map((crossing, index) => {
+      const [min, max] = crossingLengths[crossing];
+      const variation = courseIndex * 37 + sectionIndex * 53 + index * 71;
+      const width = index === 0 ? 580 + variation % 52 : 405 + variation % 153;
+      const gap = min + (variation * 7 % (max - min + 1));
+      const obstacle = index === 0 ? "terrace" : obstacles[(index + sectionIndex * 2) % obstacles.length];
+      return [width, gap, crossing, obstacle];
+    });
+    spans.push([460, 0, "open", obstacles[sectionIndex % obstacles.length]]);
+    return spans;
+  });
+}
+
+function collisionCells(end, platforms, seeds, spikes) {
+  const cells = Array.from({ length: Math.ceil(end / COLLISION_CELL_WIDTH) },
+    () => ({ platforms: [], seeds: [], spikes: [] }));
+  function add(kind, item, left, right) {
+    const first = Math.max(0, Math.floor((left - PLAYFIELD.courierWidth) / COLLISION_CELL_WIDTH));
+    const last = Math.min(cells.length - 1, Math.floor(right / COLLISION_CELL_WIDTH));
+    for (let i = first; i <= last; i += 1) cells[i][kind].push(item);
+  }
+  for (const platform of platforms) add("platforms", platform, platform.x, platform.x + platform.w);
+  seeds.forEach(([x], index) => add("seeds", index, x - 12, x + 12));
+  for (const spike of spikes) add("spikes", spike, spike[0], spike[0] + spike[1]);
+  return cells;
+}
+
 function extendRoute(opening, sections) {
   const { checkpoint, ...route } = opening;
   const platforms = route.platforms.map(platform => ({ ...platform }));
@@ -275,6 +431,21 @@ function extendRoute(opening, sections) {
       } else if (obstacle === "brambles") {
         spikes.push([center - 24, 57]);
         ledge(center - 91, 477, 131);
+      } else if (obstacle === "terrace") {
+        ledge(center - 141, 482, 106);
+        ledge(center - 6, 431, 92);
+        ledge(center + 98, 464, 88);
+      } else if (obstacle === "splitPath") {
+        spikes.push([center - 100, 65], [center + 35, 61]);
+        ledge(center - 145, 476, 110);
+        ledge(center - 14, 425, 111);
+        ledge(center + 111, 467, 85);
+      } else if (obstacle === "lookout") {
+        ledge(center - 175, 470, 118);
+        ledge(center - 24, 425, 128);
+        ledge(center + 117, 480, 82);
+        enemies.push([center + 16, 425, center - 22, center + 98]);
+        spikes.push([center - 56, 88]);
       } else if (obstacle === "overpass" || obstacle === "sentries") {
         const guarded = obstacle === "sentries";
         const upper = guarded ? 414 : 429;
@@ -296,7 +467,9 @@ function extendRoute(opening, sections) {
       end = edge + gap;
     }
   }
-  return { ...route, platforms, seeds, enemies, spikes, checkpoints, end, goal: end - 147 };
+  return { ...route, platforms, seeds, enemies, spikes, checkpoints, end, goal: end - 147,
+    cells: collisionCells(end, platforms, seeds, spikes) };
 }
 
-const COURSES = openingRoutes.map((opening, index) => extendRoute(opening, courseSections[index]));
+const COURSES = openingRoutes.map((opening, index) =>
+  extendRoute(opening, [...courseSections[index], ...extraSections(index)]));
