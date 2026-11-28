@@ -413,7 +413,7 @@ class Quarry extends Exercise{
   }
   radar(out){super.radar(out);for(const w of this.crew)out.push({kind:'ally',x:w.pos.x,z:w.pos.z});}
   spawnBoss(x,z,hp){
-    const e=this.unit('heavy','裂顎',x,this.site.heightAt(x,z),z);
+    const e=this.unit('heavy','噬嶽',x,this.site.heightAt(x,z),z);
     e.m.root.scale.setScalar(2.05);this.boss(e,4.8);e.ap=hp??e.apMax;
     e.frontActor.station.mobile=true;e.supportFloor=1;e.groundAt=this.site.heightAt;
     this.foe=e;return e;
@@ -435,23 +435,23 @@ class Quarry extends Exercise{
       this.text('坑口・熄火的礦車','注意前方車斗，兩名僚機已就位');
     }else if(this.sec===1){
       const e=this.spawnBoss(0,-264);this.setPosition(e,0,-264,-18);
-      e.retreatAP=Math.ceil(e.apMax*.68);this.text('坑口交鋒','打傷裂顎，逼它離開裝卸坪。紅圈鎖定後可以閃避或集中火力打斷');
-      this.C.say('裂顎','採掘重裝機　近距離接觸',2,'am');
+      e.retreatAP=Math.ceil(e.apMax*.68);this.text('坑口交鋒','打傷噬嶽，逼它離開裝卸坪。紅圈鎖定後可以閃避或集中火力打斷');
+      this.C.say('噬嶽','採掘重裝機　近距離接觸',2,'am');
     }else if(this.sec===2){
       const e=this.resumeBoss(0,-264,.68);
       this.checkpoint({bossHP:e.ap});this.way=1;
       e.retreatAP=Math.ceil(e.apMax*.48);
-      this.text('坡道追擊','裂顎正沿運礦路下切。擊破兩台掩護機，飛越採坑或沿坡道追擊');
-      this.guards=[['ace','東壁截擊機',94,-128],['grunt','碎石線守衛',-125,34]].map(([kind,name,x,z])=>this.unit(kind,name,x,this.site.heightAt(x,z),z));
+      this.text('坡道追擊','噬嶽正沿坡道撤退。擊破東壁的「斷風」與碎石線的「鐵砧」，再追入坑底');
+      this.guards=[['ace','斷風',94,-128],['grunt','鐵砧',-125,34]].map(([kind,name,x,z])=>this.unit(kind,name,x,this.site.heightAt(x,z),z));
     }else if(this.sec===3){
       const e=this.resumeBoss(22,136,.55);
       this.checkpoint({bossHP:e.ap});e.retreatAP=Math.ceil(e.apMax*.31);
-      this.text('坑底・碎石線','裂顎繞著積水區轉身，遠距會齊射，近距會躍擊。牆後可以斷開射線');
+      this.text('坑底・碎石線','噬嶽繞著積水區轉身，遠距會齊射，近距會躍擊。牆後可以斷開射線');
     }else{
       const e=this.resumeBoss(22,136,.31);
       this.checkpoint({bossHP:e.ap});e.retreatAP=0;
-      this.text('末段・裂顎過載','裂顎正在縮短蓄力時間。與隊友夾擊，親手完成最後一擊');
-      this.C.note('裂顎過載・攻勢加快','am');
+      this.text('末段・噬嶽過載','噬嶽正在縮短蓄力時間。與隊友夾擊，親手完成最後一擊');
+      this.C.note('噬嶽過載・攻勢加快','am');
     }
   }
   recordImpact(e,damage){
@@ -478,7 +478,7 @@ class Quarry extends Exercise{
       this.aim.y=this.leap?this.site.heightAt(p.x,p.z):p.y+9;
       this.origin.copy(e.pos);this.remaining=this.sec===4?1.8:2.6;
       this.interruptHP=this.sec===4?1500:1080;
-      this.site.markStrike(this.aim,this.leap?32:12);this.C.note(this.leap?'裂顎壓低雙肩・離開落點':'裂顎架炮・離開射線','am');
+      this.site.markStrike(this.aim,this.leap?32:12);this.C.note(this.leap?'噬嶽壓低雙肩・離開落點':'噬嶽架炮・離開射線','am');
     }
     e.fireCd=Math.max(e.fireCd,1);
     if(this.mode==='charge'){
@@ -501,7 +501,7 @@ class Quarry extends Exercise{
       this.setPosition(e,THREE.MathUtils.lerp(this.origin.x,this.aim.x,t),THREE.MathUtils.lerp(this.origin.z,this.aim.z,t),Math.sin(t*Math.PI)*24);
       if(t<1)return;
       this.C.fx.dust(e.pos,1.5);this.C.audio.explosion(e.pos,.8);
-      if(this.p.pos.distanceTo(this.aim)<32)this.C.hurt(770,this.aim,'裂顎落擊');
+      if(this.p.pos.distanceTo(this.aim)<32)this.C.hurt(770,this.aim,'噬嶽落擊');
     }
     this.site.markStrike(null);this.mode='ready';this.attackIn=this.sec===4?3.1:5;
   }

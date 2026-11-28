@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import {building,foldedSolids} from './fold-architecture.mjs';
-import {quarry} from './quarry.mjs?v=2';
+import {quarry} from './quarry.mjs';
 import {ridgeU} from './quarry-landscape.mjs';
 import {dock,summit} from './dock-summit.mjs';
 import {createExercise} from './missions.mjs';

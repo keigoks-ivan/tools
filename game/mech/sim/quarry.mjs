@@ -183,7 +183,7 @@ export function quarry(root,site,batch,A,bindTexture,sun=new THREE.Vector3(-.53,
   };
   site.moveTruck(0);
   // Excavator shoulder armour is built once per course. It detaches from the actor on retry.
-  const rig=new THREE.Group();root.add(rig);const armor=batch(rig,'裂顎・採掘外裝');
+  const rig=new THREE.Group();root.add(rig);const armor=batch(rig,'噬嶽・採掘外裝');
   for(const s of [-1,1]){
     armor.box(s*3.4,2.9,-.7,2.5,2.2,4,yellow,false,-.19);
     for(const dz of [-1.8,-.7,.4])armor.box(s*4.7,3.1,dz,.28,1.8,.62,steel);
