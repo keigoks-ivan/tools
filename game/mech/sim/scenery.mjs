@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import {building,foldedSolids} from './fold-architecture.mjs';
+import {quarry} from './quarry.mjs';
 import {dock,summit} from './dock-summit.mjs';
 import {createExercise} from './missions.mjs';
 
@@ -107,6 +108,7 @@ function batch(root,name,assets,castWalls=false){
   }};
 }
 const palette={
+  quarry:{zenith:0x80a8b8,horizon:0xdfdfd0,sun:0xffe4b2,env:.90,fill:1.65,fog:.00066},
   dock:{zenith:0x75afc3,horizon:0xffdfb8,sun:0xffedc7,env:.95,fill:1.85,fog:.00078},
   summit:{zenith:0x518ebc,horizon:0xe4e7e2,sun:0xffedcd,env:.98,fill:1.84,fog:.00092},
   fold:{zenith:0x89b7ce,horizon:0xf2dabb,sun:0xffefd0,env:1.05,fill:2.35,fog:.00072},
@@ -610,11 +612,12 @@ export function buildExercise(world,root){
   const site={boxes:[],create:(combat,enc)=>createExercise(id,site,combat,enc)};
   sky(root,world,id);
   if(id==='dock'){water(root,world);estuary(root);dock(root,site,batch);}
+  else if(id==='quarry')quarry(root,site,batch,world.A);
   else if(id==='summit')summit(root,site,batch,world.A);
   else ({fold,echo,rail})[id](root,site,world);
   if(id!=='rail'){
     for(const box of site.boxes)world.addCollider(box);
-    site.boxes=site.gates?.map(g=>g.box)||[];
+    site.boxes=site.mobile||site.gates?.map(g=>g.box)||[];
   }
   return site;
 }

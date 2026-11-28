@@ -1474,7 +1474,8 @@ export class World {
     }
   }
 
-  height(x, z) { return this.cityEnabled && (!this.battlefield || this.battlefield === 'city') && z > 820 ? -2 : this.terrain.height(x, z); }
+  height(x, z) { if(this.exerciseSite?.heightAt)return this.exerciseSite.heightAt(x,z);
+    return this.cityEnabled && (!this.battlefield || this.battlefield === 'city') && z > 820 ? -2 : this.terrain.height(x, z); }
 
   addCollider(b) {
     const i = this.boxes.length;

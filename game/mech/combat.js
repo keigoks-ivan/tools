@@ -768,7 +768,11 @@ export class Combat {
     if (e.vehicle) dmg = Math.min(dmg, Math.max(1, e.ap));   // 載具：不多算溢出的分數
     if (support && (!frontline || e === this.boss)) {
       // 掩護火力保留敵人的最後一段耐久，玩家收尾、照常結算成績。
-      dmg = Math.min(dmg, e.ap - Math.ceil(e.apMax * .25));
+      dmg = Math.min(dmg, e.ap - (e.supportFloor ?? Math.ceil(e.apMax * .25)));
+      if (dmg <= 0) return;
+    }
+    if (e.retreatAP) {
+      dmg = Math.min(dmg, e.ap - e.retreatAP);
       if (dmg <= 0) return;
     }
     if (!support) this.enc?.front?.recordImpact?.(e,dmg);
@@ -1471,10 +1475,11 @@ export class Combat {
     }
   }
   // 砲彈（直線飛、有提前量，看得到、閃得掉）
-  shell(e, from, pc, speed, dmg) {
+  shell(e, from, pc, speed, dmg, lead = true) {
     e.m.recoil = 1.2;
     const pl = this.player, dist = from.distanceTo(pc);
-    const to = V3().copy(pc).addScaledVector(pl.vel, dist / speed * rand(0.6, 1.0));
+    const to = V3().copy(pc);
+    if (lead) to.addScaledVector(pl.vel, dist / speed * rand(0.6, 1.0));
     const v = to.sub(from).normalize().multiplyScalar(speed);
     this.missiles.push({ own: 'enemy', pos: from.clone(), vel: v, target: null, t: 0, speed, vmax: speed, acc: 0, turn: 0, dmg, h: this.fx.missile('enemy'), life: 5, shell: true, from: e.pos.clone() });
     this.fx.muzzle(from, v, 'cannon');

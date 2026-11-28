@@ -7,8 +7,8 @@ import {World} from '../env.js';
 import {foldedSolids} from '../sim/fold-architecture.mjs';
 import {SIM_STAGES,HEIGHT,DECK} from '../sim/campaign.mjs';
 
-test('five independent courses build their own collision and moving geometry',()=>{
-  assert.deepEqual(SIM_STAGES.map(s=>s.route.district),['fold','echo','rail','dock','summit']);
+test('six independent courses build their own collision and moving geometry',()=>{
+  assert.deepEqual(SIM_STAGES.map(s=>s.route.district),['fold','echo','rail','dock','summit','quarry']);
   for(const stage of SIM_STAGES){
     const district=stage.route.district,root=new THREE.Group(),fixed=[];
     const site=buildExercise({fieldRoute:{district},addCollider:b=>fixed.push(b)},root);
@@ -36,10 +36,19 @@ test('five independent courses build their own collision and moving geometry',()
       assert.equal(site.gates[1].group.position.y,21);
       assert.deepEqual(site.boxes.map(b=>b.bottom),[0,21,0]);
       assert.ok(site.boxes.every(b=>!fixed.includes(b)));
-    }else{
+    }else if(district==='summit'){
       assert.equal(site.boxes.length,0);
       assert.ok(fixed.some(b=>b.top===35&&b.x0<90&&b.x1>90&&b.z0<156&&b.z1>156));
       assert.ok(fixed.some(b=>b.top>80&&b.x0<0&&b.x1>0&&b.z0<132&&b.z1>132));
+    }else{
+      assert.ok(site.heightAt(0,-369)-site.heightAt(22,136)>85);
+      const rock=root.children.find(o=>o.geometry?.attributes.quarryRoad),v=rock.geometry.attributes.position;
+      for(const k of [3302,13221,15176]){
+        const x=(v.getX(k)+v.getX(k+1)+v.getX(k+161))/3,z=(v.getZ(k)+v.getZ(k+1)+v.getZ(k+161))/3;
+        assert.ok(Math.abs(site.heightAt(x,z)-(v.getY(k)+v.getY(k+1)+v.getY(k+161))/3)<.001);
+      }
+      const truck=site.boxes[0],old=truck.x0;
+      site.moveTruck(1);assert.equal(truck.x0-old,45);site.moveTruck(0);assert.equal(truck.x0,old);
     }
     root.traverse(o=>{if(o.isMesh){o.geometry.dispose();o.material.dispose();}});
   }

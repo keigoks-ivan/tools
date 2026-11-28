@@ -527,7 +527,7 @@ export class Encounter {
       const t=state.age+=dt*(stopped?.21:1)*(e.stagT>0?.25:1);
       const speed=post.air?.18:.14;
       const x=post.x+(post.slide||0)*Math.sin(t*speed), y=post.air?post.y+2.8*Math.sin(t*.37):e.pos.y;
-      e.vel.set((x-e.pos.x)/Math.max(dt,.001),(y-e.pos.y)/Math.max(dt,.001),0);
+      e.vel.set((x-e.pos.x)/Math.max(dt,.001),(y-e.pos.y)/Math.max(dt,.001),post.mobile?(post.z-e.pos.z)/Math.max(dt,.001):0);
       e.pos.set(x,y,post.z);
       // The flying ace turns to present its flank between volleys, exposing its rear module.
       const bank=post.air&&!stopped ? Math.sin(t*speed)*1.6 : 0;

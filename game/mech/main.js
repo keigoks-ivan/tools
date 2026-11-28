@@ -423,8 +423,9 @@ async function game() {
   // 出擊前的簡報卡（stages.js 的 brief）：點一下或按任意鍵出擊；重來（同一關）不再顯示
   let landingHeroReady;
   function brief(n, start) {
-    // 蒼焰只在外傳終章登艇。簡報期間載入，前六章不用下載它的模型。
-    const needsAlly = ikaruga && STAGES[n-1].frontline === 'landing';
+    // 等到需要蒼焰當僚機的關卡，才在簡報期間載入模型。
+    const needsAlly = (ikaruga && STAGES[n-1].frontline === 'landing') ||
+      (simulation && unit!=='cangyan' && STAGES[n-1].route.district==='quarry');
     if (needsAlly) landingHeroReady ??= loadHeroMech().catch(() => { landingHeroReady = null; });
     const D = STAGES[n - 1];
     if (!D.brief || !D.brief.length || q.has('nobrief')) {
@@ -447,7 +448,7 @@ async function game() {
       if (performance.now() - t0 < 400) return;   // 剛出現時的那一下不算
       removeEventListener('keydown', done); el.removeEventListener('pointerdown', done);
       if (needsAlly) {
-        el.lastElementChild.textContent = '整備登陸小隊中…';
+        el.lastElementChild.textContent = '整備小隊中…';
         await landingHeroReady;
       }
       el.style.display = 'none'; start();
@@ -543,7 +544,7 @@ async function game() {
     const allDone=simulation ? !unplayedExercise() : last;
     audio.music(win ? (allDone ? 'allclear' : D.frontline==='landing' ? 'landingHome' : 'clear') : 'fail');
     $('resTitle').textContent = win ? simulation ? D.name+'・演習完成' : (last ? (kl ? '吉隆坡環線・全車到站' : ikaruga ? '東京左翼・三號艇靠岸' : taipei ? '台北雨線・七人全數接通' : '神戶市區停火') : `第 ${n} 關完成`) : `第 ${n} 關失敗`;
-    $('resSub').textContent = win ? simulation ? (allDone?'五場演習全數通過':'EXERCISE COMPLETE') : (last ? (kl ? 'FOUR BELLS' : ikaruga ? 'ALL HANDS ASHORE' : taipei ? 'SIGNAL RESTORED' : 'CEASEFIRE') : 'STAGE CLEAR') : 'MISSION FAILED';
+    $('resSub').textContent = win ? simulation ? (allDone?'六場演習全數通過':'EXERCISE COMPLETE') : (last ? (kl ? 'FOUR BELLS' : ikaruga ? 'ALL HANDS ASHORE' : taipei ? 'SIGNAL RESTORED' : 'CEASEFIRE') : 'STAGE CLEAR') : 'MISSION FAILED';
     $('resRank').textContent = rank;
     $('resRank').style.display = win ? '' : 'none';
     $('next').style.display = win && !allDone ? '' : 'none';

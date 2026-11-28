@@ -31,11 +31,12 @@ export function companionSpawn(world, player, preferred = 1, occupied = null) {
 }
 
 export class MechCompanion {
-  constructor(combat, order, spawn) {
+  constructor(combat, order, spawn, fit) {
     this.combat = combat;
     this.order = order;
     this.name = order.name || '斑鳩';
     this.mech = this.name === '蒼焰' ? new Mech('hero', 'hero') : new Mech('grunt', 'ally');
+    fit?.(this.mech);
     this.root = this.mech.root;
     this.root.name = '第三裝甲連・' + this.name;
     this.root.position.copy(spawn.position);
@@ -89,7 +90,7 @@ export class MechCompanion {
   }
 
   canSupport(enemy) {
-    return enemy && !enemy.dead && !enemy.gone && !enemy.dropping && enemy.ap > Math.ceil(enemy.apMax * .25)
+    return enemy && !enemy.dead && !enemy.gone && !enemy.dropping && enemy.ap > (enemy.supportFloor ?? Math.ceil(enemy.apMax * .25))
       && !enemy.fleeAt && (enemy === this.combat.boss ? this.order.supportBoss === true : !enemy.bossName);
   }
 

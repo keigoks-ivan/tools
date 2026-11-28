@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import {HEIGHT,DECK,DOCK_GATES,SUMMIT_TOWER,SUMMIT_APPROACHES} from './campaign.mjs';
+import {HAUL} from './quarry.mjs';
+import {muster} from './quarry-wing.mjs';
 import {EchoTape,echoFigure,replayShot} from './tape.mjs';
 
 const V=(x=0,y=0,z=0)=>new THREE.Vector3(x,y,z);
@@ -403,6 +405,142 @@ class Summit extends Exercise {
     return false;
   }
 }
+class Quarry extends Exercise{
+  prepare(){
+    this.crew=[];this.recruitAt=0;this.foe=null;this.mode='ready';this.aim=V();this.origin=V();this.way=1;
+    this.site.moveTruck(this.sec?1:0);this.site.parkRig();this.site.markStrike(null);
+    muster(this.C,this.crew);
+  }
+  radar(out){super.radar(out);for(const w of this.crew)out.push({kind:'ally',x:w.pos.x,z:w.pos.z});}
+  spawnBoss(x,z,hp){
+    const e=this.unit('heavy','裂顎',x,this.site.heightAt(x,z),z);
+    e.m.root.scale.setScalar(2.05);this.boss(e,4.8);e.ap=hp??e.apMax;
+    e.frontActor.station.mobile=true;e.supportFloor=1;e.groundAt=this.site.heightAt;
+    this.foe=e;return e;
+  }
+  setPosition(e,x,z,offset=0){
+    const s=e.frontActor.station;
+    s.x=x;s.z=z;e.pos.y=this.site.heightAt(x,z)+offset;e.grounded=offset<.1;
+  }
+  resumeBoss(x,z,hpFraction){
+    if(!this.foe){
+      const e=this.spawnBoss(x,z,this.C.cp?.bossHP);
+      if(this.C.cp?.bossHP==null)e.ap=Math.round(e.apMax*hpFraction);
+    }
+    return this.foe;
+  }
+  enter(){
+    this.clearPoint();this.mode='ready';this.site.markStrike(null);this.attackIn=3.8;
+    if(this.sec===0){
+      this.text('坑口・熄火的礦車','注意前方車斗，兩名僚機已就位');
+    }else if(this.sec===1){
+      const e=this.spawnBoss(0,-264);this.setPosition(e,0,-264,-18);
+      e.retreatAP=Math.ceil(e.apMax*.68);this.text('坑口交鋒','打傷裂顎，逼它離開裝卸坪。紅圈鎖定後可以閃避或集中火力打斷');
+      this.C.say('裂顎','採掘重裝機　近距離接觸',2,'am');
+    }else if(this.sec===2){
+      const e=this.resumeBoss(0,-264,.68);
+      this.checkpoint({bossHP:e.ap});this.way=1;
+      e.retreatAP=Math.ceil(e.apMax*.48);
+      this.text('坡道追擊','裂顎正沿運礦路下切。擊破兩台掩護機，飛越採坑或沿坡道追擊');
+      this.guards=[['ace','東壁截擊機',94,-128],['grunt','碎石線守衛',-125,34]].map(([kind,name,x,z])=>this.unit(kind,name,x,this.site.heightAt(x,z),z));
+    }else if(this.sec===3){
+      const e=this.resumeBoss(22,136,.55);
+      this.checkpoint({bossHP:e.ap});e.retreatAP=Math.ceil(e.apMax*.31);
+      this.text('坑底・碎石線','裂顎繞著積水區轉身，遠距會齊射，近距會躍擊。牆後可以斷開射線');
+    }else{
+      const e=this.resumeBoss(22,136,.31);
+      this.checkpoint({bossHP:e.ap});e.retreatAP=0;
+      this.text('末段・裂顎過載','裂顎正在縮短蓄力時間。與隊友夾擊，親手完成最後一擊');
+      this.C.note('裂顎過載・攻勢加快','am');
+    }
+  }
+  recordImpact(e,damage){
+    if(e!==this.foe||this.mode!=='charge')return;
+    this.interruptHP-=damage;
+    if(this.interruptHP<=0){
+      this.mode='stumble';this.remaining=2.7;this.site.markStrike(null);e.stagT=2.7;
+      const s=e.frontActor.station;this.setPosition(e,s.x,s.z);
+      this.C.note('已打斷・關節失衡','gr');this.C.fx.dust(e.pos,1);
+    }
+  }
+  attack(dt){
+    const e=this.foe,p=this.p.pos,s=e.frontActor.station;
+    if(this.mode==='stumble'){
+      if((this.remaining-=dt)<=0){this.mode='ready';this.attackIn=3.6;}
+      return;
+    }
+    if(this.mode==='ready'){
+      if((this.attackIn-=dt)>0)return;
+      this.attackIn=.55;
+      const chest=e.chest(this.origin);this.aim.copy(p);this.aim.y+=9;
+      if(this.C.world.raycast(chest,this.aim)>=0)return;
+      this.mode='charge';this.leap=Math.hypot(p.x-s.x,p.z-s.z)<123&&p.y-this.site.heightAt(p.x,p.z)<36;
+      this.aim.y=this.leap?this.site.heightAt(p.x,p.z):p.y+9;
+      this.origin.copy(e.pos);this.remaining=this.sec===4?1.8:2.6;
+      this.interruptHP=this.sec===4?1500:1080;
+      this.site.markStrike(this.aim,this.leap?32:12);this.C.note(this.leap?'裂顎壓低雙肩・離開落點':'裂顎架炮・離開射線','am');
+    }
+    e.fireCd=Math.max(e.fireCd,1);
+    if(this.mode==='charge'){
+      this.remaining-=dt;
+      this.setPosition(e,s.x,s.z,-2.3);
+      if(this.remaining>0)return;
+      if(!this.leap){
+        e.m.muzzle.getWorldPosition(this.origin);
+        this.salvo=0;this.mode='salvo';this.remaining=0;
+      }else{this.mode='jump';this.remaining=0;}
+    }
+    if(this.mode==='salvo'){
+      if((this.remaining-=dt)>0)return;
+      this.C.shell(e,this.origin,this.aim,227,480,false);this.salvo++;this.remaining=.24;
+      if(this.salvo<(this.sec===4?4:3))return;
+      this.setPosition(e,s.x,s.z);
+    }
+    if(this.mode==='jump'){
+      const t=Math.min(1,(this.remaining+=dt)/1.05);
+      this.setPosition(e,THREE.MathUtils.lerp(this.origin.x,this.aim.x,t),THREE.MathUtils.lerp(this.origin.z,this.aim.z,t),Math.sin(t*Math.PI)*24);
+      if(t<1)return;
+      this.C.fx.dust(e.pos,1.5);this.C.audio.explosion(e.pos,.8);
+      if(this.p.pos.distanceTo(this.aim)<32)this.C.hurt(770,this.aim,'裂顎落擊');
+    }
+    this.site.markStrike(null);this.mode='ready';this.attackIn=this.sec===4?3.1:5;
+  }
+  step(dt){
+    if(this.crew.length<2&&this.clock>=this.recruitAt){this.recruitAt=this.clock+.6;muster(this.C,this.crew);}
+    for(const w of this.crew)w.update(dt);
+    if(this.sec===0){
+      const t=clamp((this.age-.5)/2.2,0,1);
+      this.site.moveTruck(t*t*(3-2*t));
+      if(t===1){this.C.fx.dust(V(28,82,-287),.8);return this.next();}
+      return false;
+    }
+    const e=this.foe,s=e.frontActor.station;
+    if(e.dead){this.site.parkRig();this.site.markStrike(null);return this.next();}
+    this.site.poseRig(e);
+    if(this.sec===2){
+      const [gx,gz]=HAUL[this.way],dx=gx-s.x,dz=gz-s.z,len=Math.hypot(dx,dz);
+      const travel=Math.min(len,dt*21);
+      if(len>.01)this.setPosition(e,s.x+travel*dx/len,s.z+travel*dz/len);
+      if(len<=travel+.01){
+        if(this.way<HAUL.length-1)this.way++;
+        else if(this.guards.every(g=>g.dead))return this.next();
+      }
+      return false;
+    }
+    if(this.sec===1&&this.age<1.1){this.setPosition(e,0,-264,-18*(1-this.age/1.1));return false;}
+    if(this.mode==='ready'&&this.sec>=3){
+      const x=22+56*Math.sin(this.age*.17),z=136+23*Math.sin(this.age*.31);
+      const dx=x-s.x,dz=z-s.z,k=Math.min(1,dt*16/Math.max(.01,Math.hypot(dx,dz)));
+      this.setPosition(e,s.x+dx*k,s.z+dz*k);
+    }
+    if(e.retreatAP&&e.ap<=e.retreatAP)return this.next();
+    this.attack(dt);return false;
+  }
+  dispose(){
+    for(const w of this.crew||[])w.dispose();
+    this.site.parkRig();this.site.markStrike(null);
+  }
+}
 export function createExercise(id,site,C,E){
-  const Type={fold:Fold,echo:Echo,rail:Rail,dock:Dock,summit:Summit}[id];return new Type(site,C,E);
+  const Type={fold:Fold,echo:Echo,rail:Rail,dock:Dock,summit:Summit,quarry:Quarry}[id];return new Type(site,C,E);
 }
