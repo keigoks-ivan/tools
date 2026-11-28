@@ -13,7 +13,7 @@ import { pixelRatio, qualityLevel, FrameGate } from '../mech/runtime.js';
 import { buildBattlefield, addSigns } from './map.js?v=2';
 import { addBattlefieldArt } from './art.js';
 import { SCENARIOS, MODES, DIFFICULTIES, Mission, selection, missionPressurePreview } from './scenarios.mjs?v=3';
-import { InfantryHUD } from './hud.js?v=4';
+import { InfantryHUD } from './hud.js?v=5';
 import { Combat } from './combat.js?v=5';
 import { captureThreat, resupplyBlocked, resupplyVitals } from './battle-rules.mjs';
 import { operationFor } from './operations.mjs';
@@ -25,7 +25,7 @@ import { FIELD_OBJECTIVES, FieldTask, chooseFieldSite } from './field-objectives
 import { buildFieldObjective } from './field-objectives.js';
 import { SUPPORTS, supportChoice, TacticalSupport, fieldReward } from './support.mjs';
 import { SERVICE_CHALLENGES, evaluateService, recordService, serviceSummary, migrateLegacyService } from './service-record.mjs';
-import { CareerBook } from './career-ui.js';
+import { CareerBook } from './career-ui.js?v=2';
 
 const $=id=>document.getElementById(id),clamp=THREE.MathUtils.clamp;
 const mutedTest=new URLSearchParams(location.search).has('mute');

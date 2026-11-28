@@ -194,11 +194,11 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
     },
     draw(h) {
       if (breakout) { drawOperation(h); return; }
-      const X = h.x, w = h.w, s = h.s;
+      const X = h.x, w = h.w, s = Math.max(.85, h.s);
       X.save(); X.globalAlpha = 1; X.textAlign = 'left'; X.textBaseline = 'alphabetic';
       const x = 24 * s, y = 115 * s, width = 245 * s;
       X.fillStyle = 'rgba(5,13,18,.85)'; X.fillRect(x, y, width, (customsSupport ? 80 : 63) * s);
-      X.fillStyle = '#b6c9ca'; X.font = `${13 * s}px "Noto Sans TC",sans-serif`; X.fillText('撤離車隊  /  EVAC 02', x + 12 * s, y + 21 * s);
+      X.fillStyle = '#b6c9ca'; X.font = `${Math.max(15, 16 * s)}px "Sortie Round",sans-serif`; X.fillText('撤離車隊  /  EVAC 02', x + 12 * s, y + 21 * s);
       X.fillStyle = '#23373e'; X.fillRect(x + 12 * s, y + 34 * s, width - 24 * s, 5 * s);
       X.fillStyle = convoy.hp < 30 ? '#ff6659' : '#a5d9ad'; X.fillRect(x + 12 * s, y + 34 * s, (width - 24 * s) * convoy.hp / 100, 5 * s);
       X.fillText(`${Math.ceil(convoy.hp)}%　${pending ? '⚠ 敵機標定中' : this.blocked ? '等待指令' : Math.hypot(player.pos.x - convoy.pos[0], player.pos.z - convoy.pos[1]) > 110 ? '等待護衛靠近' : '清路後前進'}`, x + 12 * s, y + 56 * s);

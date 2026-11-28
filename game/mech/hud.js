@@ -3,6 +3,7 @@
 //   上：任務列、航向帶、主注意／主警告；左右：對地速度帶、離地高度帶；中：俯仰梯、飛行路徑標、準心、目標指示框（距離＋接近率）、鎖定符號；
 //   下：AP／EN、武器存量；另有飛彈鎖定圈、受擊方向、遭遇戰目標點、橫幅、警報
 import * as THREE from 'three';
+import { BODY as SANS, MONO, drawCaption, layoutText } from './typography.mjs';
 
 const clamp = THREE.MathUtils.clamp;
 const damp = (a, b, k, dt) => a + (b - a) * (1 - Math.exp(-k * dt));
@@ -10,20 +11,10 @@ const _v = new THREE.Vector3(), _w = new THREE.Vector3(), _o = new THREE.Vector3
 const COL = { cy: '127,243,255', am: '255,184,80', rd: '255,74,74', gr: '130,255,170', dim: '150,175,185', pk: '255,120,210', ink: '4,14,18', ink2: '238,246,248' };
 const rgba = (c, a) => `rgba(${COL[c] || c},${a})`;
 const HALO = (a) => `rgba(0,10,14,${a})`;
-const MONO = '"B612 Mono", "Roboto Mono", Menlo, Consolas, "Noto Sans TC", monospace';
-const SANS = 'Rajdhani, "Noto Sans TC", sans-serif';
 const D = Math.PI / 180;
 const pad = (n, k = 3) => String(Math.max(0, Math.round(n))).padStart(k, '0');
 const wrapD = (a) => ((a % 360) + 540) % 360 - 180;
 const PN = { head: 'HEAD', torso: 'TRSO', armL: 'ARM L', armR: 'ARM R', legL: 'LEG L', legR: 'LEG R' };
-
-// 航電等寬字（B612 Mono）：駕駛艙通常已經載了；沒有就自己載
-function loadMono() {
-  if (document.getElementById('b612')) return;
-  const l = document.createElement('link'); l.id = 'b612'; l.rel = 'stylesheet';
-  l.href = 'https://fonts.googleapis.com/css2?family=B612+Mono:wght@400;700&display=swap';
-  document.head.appendChild(l);
-}
 
 export class HUD {
   constructor(canvas, camera) {
@@ -33,7 +24,7 @@ export class HUD {
     this.fwd = new THREE.Vector3();
     this.vc = 0; this.vcT = null; this.vcR = 0;   // 鎖定目標的接近率（km/h）
     this._f = null;
-    loadMono();
+    this.layouts = {};
     this.resize();
     addEventListener('resize', () => this.resize());
   }
@@ -60,13 +51,17 @@ export class HUD {
     return out;
   }
 
+  fontSize(size) {
+    return Math.max(size < 13 ? 12 : size < 17 ? 15 : 18, Math.round(size * this.s * 1.18));
+  }
+
   // 字：先描一圈深色邊，再填色
-  text(str, x, y, size, color, a = 1, align = 'left', weight = 400, font = MONO) {
-    const X = this.x, fnt = `${weight} ${Math.round(size * this.s)}px ${font}`;
+  text(str, x, y, size, color, a = 1, align = 'left', weight = 400, font = MONO, maxWidth) {
+    const X = this.x, fnt = `${weight} ${this.fontSize(size)}px ${font}`;
     if (this._f !== fnt) { X.font = fnt; this._f = fnt; }
     X.textAlign = align; X.textBaseline = 'middle';
-    X.lineWidth = 3; X.strokeStyle = HALO(0.55 * a); X.strokeText(str, x, y);
-    X.fillStyle = rgba(color, a); X.fillText(str, x, y);
+    X.lineWidth = 3; X.strokeStyle = HALO(0.55 * a); X.strokeText(str, x, y, maxWidth);
+    X.fillStyle = rgba(color, a); X.fillText(str, x, y, maxWidth);
   }
   // 描線：先畫一道深色底，再畫彩色細線
   sk(col, a = 0.95, lw = 1.3) {
@@ -257,7 +252,7 @@ export class HUD {
       const alive = C.enemies.filter((e) => !e.dead).length + C.events.filter((ev) => ev.spawn).length + (EN && EN.queue ? EN.queue.length : 0);
       this.text(`HOSTILES ${alive}`, W / 2 + 12 * s, tY, 14, alive ? 'rd' : 'dim', 1, 'left', 700);
       const mm = Math.floor(C.stats.time / 60), ss = Math.floor(C.stats.time % 60);
-      this.text(`SCORE ${C.stats.score.toLocaleString()}   ${mm}:${String(ss).padStart(2, '0')}`, W / 2, tY + 17 * s, 11, 'cy', 0.75, 'center');
+      this.text(`SCORE ${C.stats.score.toLocaleString()}   ${mm}:${String(ss).padStart(2, '0')}`, W / 2, tY + Math.max(17, 17 * s), 11, 'cy', 0.75, 'center');
     }
 
     // ---- 航向帶：±30°、每 5° 一格、每 10° 標數字（N／E／S／W）；中央框＝目前航向，下方小三角＝機頭
@@ -272,7 +267,7 @@ export class HUD {
       if (Math.abs(x - hx) < 30 * s || Math.abs(x - hx) > hw - 12 * s) continue;
       this.text(v % 90 ? pad(v) : 'NESW'[v / 90], x, hy - 15 * s, 10, 'cy', 0.8, 'center', v % 90 ? 400 : 700);
     }
-    X.restore();
+    X.restore(); this._f = null;
     X.beginPath(); X.rect(hx - 22 * s, hy - 24 * s, 44 * s, 17 * s); X.fillStyle = HALO(0.55); X.fill(); this.sk('cy', 0.95, 1.2);
     this.text(pad(hdg % 360), hx, hy - 15.5 * s, 12, 'cy', 1, 'center', 700);
     X.beginPath(); X.moveTo(hx, hy + 2 * s); X.lineTo(hx - 4 * s, hy + 8 * s); X.lineTo(hx + 4 * s, hy + 8 * s); X.closePath(); this.sk('cy', 0.95, 1.2);
@@ -331,12 +326,12 @@ export class HUD {
     this.bar(x0, y0 + 10 * s, bw, 2 * s, P.en / 100, enC);
     if (P.overheat > 0) this.text('EN OVERHEAT', cx, y0 + 22 * s, 11, 'rd', 1, 'center', 700);
     else if(P.flying)this.text('空白 ↑　C／Ctrl ↓　Shift 推進　T 降落',cx,y0+22*s,11,'cy',.9,'center',600,SANS);
-    const M = C.msl, SH = C.shield, CN = C.cannon, OD = C.od, cb = 560 * s, cw = cb / 5, wy = y0 + 38 * s;
+    const M = C.msl, SH = C.shield, CN = C.cannon, OD = C.od, cb = Math.min(W - 16, Math.max(390, 560 * s)), cw = cb / 5, wy = y0 + 38 * s;
     const chip = (i, label, val, v, col, hot) => {   // 五格武器：比血條寬一點，字才不會擠在一起
       const x = cx - cb / 2 + i * cw + 4 * s, w = cw - 8 * s;
-      this.text(label, x, wy, 10, hot ? col : 'dim', 0.95);
-      this.text(val, x + w, wy, 11, col, hot ? 1 : 0.75, 'right', 700);
-      this.bar(x, wy + 8 * s, w, 2 * s, v, col);
+      this.text(label, x + w / 2, wy, 13, hot ? col : 'dim', 0.95, 'center');
+      this.text(val, x + w / 2, wy + this.fontSize(13) + 3, 13, col, hot ? 1 : 0.75, 'center', 700);
+      this.bar(x, wy + this.fontSize(13) * 1.6 + 5, w, 2 * s, v, col);
     };
     chip(0, C.def.pilot === '斑鳩' ? '平射炮' : C.weapons.rifle.mobile ? '掠翼' : 'RIFLE', R.reload >= 0 ? 'RELOAD' : `${R.ammo}/${R.mag}`, R.reload >= 0 ? R.reload : R.ammo / R.mag, R.reload >= 0 || R.ammo <= 3 ? 'am' : 'cy', true);
     if (C.def.pilot === '斑鳩') chip(1, '精準炮', M.cd >= 1 ? '就緒' : ((1-M.cd)*M.cooldownSeconds).toFixed(1)+'s', M.cd, M.cd >= 1 ? 'cy' : 'am', true);
@@ -358,11 +353,8 @@ export class HUD {
     if (C.sub) {
       const S = C.sub, a = clamp(Math.min(S.t, S.T - S.t) * 4, 0, 1), sy = H - 98 * s - 62 * s;
       X.globalAlpha = a * on;
-      X.font = `500 ${17 * s}px ${SANS}`;
-      const tw = X.measureText(S.text).width;
-      X.fillStyle = HALO(0.55); X.fillRect(W / 2 - tw / 2 - 16 * s, sy - 30 * s, tw + 32 * s, 48 * s);
-      this.text(S.who, W / 2, sy - 16 * s, 12, /獵犬|黑犬|灰狼/.test(S.who) ? 'rd' : S.who === '零號' ? 'cy' : 'am', 1, 'center', 700, SANS);
-      this.text(S.text, W / 2, sy + 4 * s, 17, 'ink2', 1, 'center', 500, SANS);
+      const color = /獵犬|黑犬|灰狼/.test(S.who) ? 'rd' : S.who === '零號' ? 'cy' : 'am';
+      drawCaption(X, this.layouts, W, sy + 10 * s, S.who, S.text, rgba(color, 1));
       X.globalAlpha = on;
     }
     // ---- 警報
@@ -384,8 +376,8 @@ export class HUD {
       const y = H * 0.38;
       X.fillStyle = rgba(B.color, 0.08 * a); X.fillRect(0, y - 34 * s, W, 68 * s);
       X.fillStyle = rgba(B.color, 0.6 * a); X.fillRect(W / 2 - 260 * s * a, y - 34 * s, 520 * s * a, 1.5); X.fillRect(W / 2 - 260 * s * a, y + 33 * s, 520 * s * a, 1.5);
-      this.text(B.text, W / 2, y - 6 * s, 40, B.color, a, 'center', 700, SANS);
-      if (B.sub) this.text(B.sub, W / 2, y + 22 * s, 15, B.color, 0.8 * a, 'center', 600, SANS);
+      this.text(B.text, W / 2, y - 6 * s, 40, B.color, a, 'center', 700, SANS, W - 32);
+      if (B.sub) this.text(B.sub, W / 2, y + 22 * s, 15, B.color, 0.8 * a, 'center', 600, SANS, W - 32);
     }
     X.globalAlpha = 1;
   }
@@ -420,7 +412,7 @@ export class HUD {
       if (e) for (const k of [-1, 1]) this.text(String(Math.abs(e)), p.x + ux * (g1 + 12 * s) * k, p.y + uy * (g1 + 12 * s) * k, 10, 'cy', 0.6, 'center');
     }
     X.setLineDash([]);
-    X.restore();
+    X.restore(); this._f = null;
   }
   // 飛行路徑標：小圓＋兩翼＋尾翼，靠近準心時變淡
   fpm(P, ax, ay) {
@@ -450,7 +442,7 @@ export class HUD {
       if (Math.abs(yy - y) < 13 * s) continue;
       this.text(String(t), x + dir * 12 * s, yy, 10, 'cy', 0.75, dir < 0 ? 'right' : 'left');
     }
-    X.restore();
+    X.restore(); this._f = null;
     const bw = 42 * s, bh = 17 * s, bx = x + dir * 6 * s;
     X.beginPath(); X.moveTo(x + dir * 1.5 * s, y); X.lineTo(bx, y - bh / 2); X.lineTo(bx + dir * bw, y - bh / 2); X.lineTo(bx + dir * bw, y + bh / 2); X.lineTo(bx, y + bh / 2); X.closePath();
     X.fillStyle = HALO(0.6); X.fill(); this.sk(col, 0.95, 1.2);
@@ -545,7 +537,7 @@ export class HUD {
     X.beginPath(); X.moveTo(12 * k2, 0); X.lineTo(-6 * k2, -7 * k2); X.lineTo(-3 * k2, 0); X.lineTo(-6 * k2, 7 * k2); X.closePath();
     X.fillStyle = rgba(locked ? 'am' : 'rd', warn ? 0.6 + 0.4 * Math.sin(this.t * 25) : 0.85); X.fill();
     X.strokeStyle = HALO(0.5); X.lineWidth = 1; X.stroke();
-    X.restore();
+    X.restore(); this._f = null;
     this.text(locked ? `LOCK ${Math.round(dist)}m` : `${Math.round(dist)}`, x - Math.cos(a) * 26 * s, y - Math.sin(a) * 26 * s, locked ? 11 : 10, locked ? 'am' : 'rd', 0.95, 'center', 700);
   }
 
@@ -554,8 +546,12 @@ export class HUD {
     const X = this.x, s = this.s;
     const front = EN.front?.objective;
     if (front) {
-      this.text(front.title, W / 2, y, 19, 'cy', 1, 'center', 700, SANS);
-      this.text(front.hint, W / 2, y + 20 * s, 14, 'ink2', .96, 'center', 700, SANS);
+      this.text(front.title, W / 2, y, 19, 'cy', 1, 'center', 700, SANS, W - 32);
+      const hintSize = this.fontSize(14);
+      X.font = `700 ${hintSize}px ${SANS}`;
+      this._f = X.font;
+      const hint = layoutText(X, this.layouts, 'frontHint', front.hint, Math.min(820, W - 32));
+      hint.lines.forEach((line, i) => this.text(line, W / 2, y + this.fontSize(19) + 4 + i * (hintSize + 4), 14, 'ink2', .96, 'center', 700, SANS));
       for (const { name, position } of scoped ? [] : EN.front.waypoints) {
         const p = this.proj(position, {});
         if (!p.front || p.x < 30 || p.x > W - 30 || p.y < 30 || p.y > H - 35) this.edgeMark(p, 'cy', name, W, H);
@@ -611,7 +607,7 @@ export class HUD {
     X.beginPath(); X.moveTo(15 * s, 0); X.lineTo(-7 * s, -10 * s); X.lineTo(-2 * s, 0); X.lineTo(-7 * s, 10 * s); X.closePath();
     X.fillStyle = rgba(col, al); X.fill();
     X.strokeStyle = HALO(0.5); X.lineWidth = 1; X.stroke();
-    X.restore();
+    X.restore(); this._f = null;
     this.text(label, x - Math.cos(a) * 28 * s, y - Math.sin(a) * 28 * s, 12, col, al, 'center', 700);
   }
 

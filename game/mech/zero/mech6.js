@@ -106,7 +106,7 @@ export async function startMech(X) {
   zhud.lift = 92;   // 字幕往上移，不壓在機體 HUD 的 AP／武器列上
   // 操作說明（開場 25 秒；手機把按鈕字換成機體版）
   const keys = document.createElement('div');
-  keys.style.cssText = 'position:fixed;right:24px;top:56%;z-index:7;pointer-events:none;font:500 13px/1.9 "Noto Sans TC",sans-serif;color:#cfe6ec;background:rgba(6,12,16,0.55);padding:10px 16px;border-right:2px solid #7ff3ff;transition:opacity 1.2s';
+  keys.style.cssText = 'position:fixed;right:24px;top:56%;z-index:7;pointer-events:none;font:500 16px/1.9 var(--type-body);color:#cfe6ec;background:rgba(6,12,16,0.55);padding:10px 16px;border-right:2px solid #7ff3ff;transition:opacity 1.2s';
   keys.innerHTML = M6.keys.map(([k, t]) => `<div><b style="color:#7ff3ff;display:inline-block;min-width:92px">${k}</b>${t}</div>`).join('');
   if (!input.touch.on) document.body.appendChild(keys);
   for (const [id, t] of M6.touch) { const b = $(id); if (b) { b.textContent = t; if(id==='tSupport') b.style.display='flex'; } }

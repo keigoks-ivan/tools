@@ -359,7 +359,7 @@ async function game() {
   world.cityObjects.push(...historyPlaques.meshes);
   try{history.restore(JSON.parse(localStorage.getItem('mech.history')));}catch{}
   window.__history=history;
-  const historyButton=document.createElement('button');historyButton.type='button';historyButton.className='btn';historyButton.textContent='神戶史實 · J';historyButton.style.cssText='position:fixed;right:150px;top:8px;z-index:20;padding:8px;font-size:13px';historyButton.hidden=true;document.body.append(historyButton);
+  const historyButton=document.createElement('button');historyButton.type='button';historyButton.className='btn';historyButton.textContent='神戶史實 · J';historyButton.style.cssText='position:fixed;right:150px;top:8px;z-index:20;padding:8px;font-size:16px';historyButton.hidden=true;document.body.append(historyButton);
   const historyAt=()=>historyPlaques.items.find(it=>it.p.distanceTo(player.pos)<12)?.id;
   historyButton.onclick=()=>{if(state==='play')history.open(historyAt());};
   const touchUI = $('touch');
@@ -435,13 +435,13 @@ async function game() {
     let el = $('brief');
     if (!el) {
       el = document.createElement('div'); el.id = 'brief';
-      el.style.cssText = 'position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(3,7,10,0.92);color:#dcecf0;font-family:Rajdhani,"Noto Sans TC",sans-serif;text-align:center;padding:24px;cursor:pointer';
+      el.style.cssText = 'position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:safe center;overflow-y:auto;background:rgba(3,7,10,0.92);color:#dcecf0;font-family:var(--type-body);text-align:center;padding:24px;cursor:pointer';
       document.body.appendChild(el);
     }
-    el.innerHTML = `<div style="font-size:13px;letter-spacing:0.4em;color:#7ff3ff">BRIEFING　STAGE ${n}</div>`
-      + `<div style="font-size:clamp(30px,5vw,52px);font-weight:700;margin:10px 0 2px">${D.name}</div><div style="font-size:14px;letter-spacing:0.3em;color:#ffb850;margin-bottom:28px">${D.en}</div>`
-      + D.brief.map((t) => `<p style="max-width:640px;margin:6px 0;font:500 17px/1.7 'Noto Sans TC',sans-serif">${t}</p>`).join('')
-      + '<div style="margin-top:34px;font-size:13px;letter-spacing:0.3em;color:#8aa3ab">點一下或按任意鍵出擊</div>';
+    el.innerHTML = `<div style="font-size:16px;letter-spacing:.16em;color:#7ff3ff">BRIEFING　STAGE ${n}</div>`
+      + `<div style="font-size:clamp(30px,5vw,52px);font-weight:700;margin:10px 0 2px">${D.name}</div><div style="font-size:18px;letter-spacing:.14em;color:#ffb850;margin-bottom:28px">${D.en}</div>`
+      + D.brief.map((t) => `<p style="max-width:640px;margin:6px 0;font:500 clamp(18px,2vw,22px)/1.6 var(--type-body)">${t}</p>`).join('')
+      + '<div style="margin-top:34px;font-size:16px;letter-spacing:.12em;color:#8aa3ab">點一下或按任意鍵出擊</div>';
     el.style.display = 'flex';
     const t0 = performance.now();
     const done = async () => {
@@ -951,7 +951,7 @@ async function game() {
     for (const el of kids) el.style.display = 'none';
     const msg = document.createElement('div');
     msg.innerHTML = '<div class="logo" style="font-size:clamp(28px,5vw,56px)">M-07<small>SYSTEM STANDBY</small></div><div class="zh">蒼焰　待命</div>'
-      + '<div style="margin-top:40px;font-size:13px;letter-spacing:0.3em;color:#8aa3ab">按任意鍵或點一下，啟動機體</div>';
+      + '<div style="margin-top:40px;font-size:16px;letter-spacing:.12em;color:#8aa3ab">按任意鍵或點一下，啟動機體</div>';
     tl.appendChild(msg);
     const go = () => {
       removeEventListener('keydown', go); removeEventListener('pointerdown', go);

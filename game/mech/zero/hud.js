@@ -1,5 +1,6 @@
 // 介面（2D canvas）：準心、命中標記、彈量、生命／護盾、受擊方向、目標標記、無線電字幕、狙擊鏡、互動提示
 import * as THREE from 'three';
+import { BODY, DISPLAY, drawCaption, layoutText } from '../typography.mjs';
 
 const clamp = THREE.MathUtils.clamp;
 const CY = '#7ff3ff', AM = '#ffb347', RD = '#ff4a4a';
@@ -11,6 +12,7 @@ export class HUD {
     this.dmg = [];          // 受擊方向 {a, t}
     this.sub = null;        // 字幕 {who, text, t, T}
     this.subQ = [];
+    this.layouts = {};
     this.banner = null;     // 章節標題
     this.prompt = null;
     this.obj = null;        // 目標 {p: Vector3, text}
@@ -19,7 +21,7 @@ export class HUD {
     this.notes = [];
     this.resize(); addEventListener('resize', () => this.resize());
   }
-  resize() { const d = Math.min(devicePixelRatio, 2); this.c.width = innerWidth * d; this.c.height = innerHeight * d; this.d = d; }
+  resize() { const d = Math.min(devicePixelRatio, 2); this.c.width = innerWidth * d; this.c.height = innerHeight * d; this.d = d; this.touchLayout = globalThis.matchMedia?.('(pointer: coarse)').matches && innerWidth >= 650 && innerWidth > innerHeight; }
   // now＝戰鬥喊話（發現敵人、狙擊手、重裝兵）：插隊馬上播，不排在一長串劇情對白後面；
   //   被打斷的劇情句還沒看完七成就放回隊伍最前面，喊話播完從頭再播一次
   say(who, text, t = 3.5, now = false) {
@@ -98,9 +100,67 @@ export class HUD {
     if (!vm.scoped) for (const f of this.pins) { const p = f.p.clone(); p.y += f.h; this._pin(W, H, p, P.pos.distanceTo(f.p), AM, 8, true); }
     // ---- 地上的手榴彈（敵人掉的）：15 m 內、還帶得下才標
     if (!vm.scoped && G.nadeN < 5) for (const L of G.loot) { const dd = P.pos.distanceTo(L.p); if (dd < 15) this._lootTag(W, H, L.p, dd, L.n); }
+    if (this.touchLayout) this._touchVitals(W, H, G);
+    else this._vitals(W, H, G);
+    // ---- 互動提示
+    if (this.prompt) {
+      x.textAlign = 'center'; x.font = `600 19px ${BODY}`;
+      const t = this.prompt; const tw = x.measureText(t).width + 36;
+      x.fillStyle = 'rgba(5,12,16,0.65)'; x.fillRect(cx - tw / 2, cy + 60, tw, 30);
+      x.strokeStyle = 'rgba(127,243,255,0.6)'; x.strokeRect(cx - tw / 2, cy + 60, tw, 30);
+      x.fillStyle = '#e8f3f6'; x.fillText(t, cx, cy + 80, W - 40); x.textAlign = 'left';
+    }
+    // ---- 提示訊息（右上）
+    let ny = 40;
+    for (let i = this.notes.length - 1; i >= 0; i--) {
+      const o = this.notes[i]; o.t -= dt; if (o.t <= 0) { this.notes.splice(i, 1); continue; }
+      x.globalAlpha = clamp(o.t * 2, 0, 1); x.textAlign = 'right'; x.font = `600 17px ${BODY}`; x.fillStyle = o.color;
+      x.fillText(o.text, W - 34, ny); ny += 20; x.globalAlpha = 1; x.textAlign = 'left';
+    }
+    // ---- 左上：章節與目標文字
+    x.textAlign = 'left'; x.textBaseline = 'alphabetic';
+    let fieldNoteY = 104;
+    if (G.objText) {
+      x.font = `600 15px ${DISPLAY}`; x.fillStyle = AM; x.fillText(G.chapterTag || '', 34, 40);
+      x.font = `500 18px ${BODY}`; x.fillStyle = '#e8f3f6'; const limit = Math.min(600, W - 68);
+      let y = 63;
+      for (const line of layoutText(x, this.layouts, 'objective', G.objText, limit).lines) { x.fillText(line, 34, y); y += 24; }
+      if (G.objSub) {
+        x.font = `500 16px ${BODY}`; x.fillStyle = '#ffad9e';
+        for (const line of layoutText(x, this.layouts, 'objectiveDetail', G.objSub, limit).lines) { x.fillText(line, 34, y); y += 21; }
+      }
+      fieldNoteY = y;
+    }
+    if (G.field) { x.font = `500 15px ${BODY}`; x.fillStyle = '#ceadff'; x.fillText('[M] 戰術地圖 · 自由攻略哨站', 34, fieldNoteY); }
+    this._radar(W, H, G);
+    G.ground?.draw(this,W,H);
+    this._subs(dt, W, H);
+    this._banner(dt, W, H);
+  }
+
+  _touchVitals(W, H, G) {
+    const x = this.x, vm = G.vm, P = G.player;
+    const left = 155, right = W - 215, mid = (left + right) / 2;
+    const bars = Math.min(110, (right - left) * .23);
+    x.save();
+    x.fillStyle = 'rgba(5,15,20,.85)'; x.fillRect(left, H - 58, right - left, 52);
+    x.textAlign = 'left'; x.textBaseline = 'middle'; x.font = `600 15px ${BODY}`;
+    x.fillStyle = '#d3e4e7'; x.fillText('護盾', left + 9, H - 43); x.fillText('生命', left + 9, H - 21);
+    this._bar(left + 48, H - 47, bars, 7, P.shield / 60, CY, '#33494f');
+    this._bar(left + 48, H - 25, bars, 7, P.hp / 100, P.hp < 35 ? RD : '#e8f3f6', '#33494f');
+    x.fillStyle = CY; x.fillText(vm.reloadT >= 0 ? '換彈中…' : vm.W.name, mid + 8, H - 43, right - mid - 20);
+    x.fillStyle = AM; x.fillText(`手榴彈 ×${G.nadeN}`, mid + 8, H - 20);
+    x.textAlign = 'right'; x.font = `700 23px ${DISPLAY}`; x.fillStyle = vm.ammo[vm.cur] ? '#eef6f8' : RD;
+    x.fillText(vm.ammo[vm.cur] + ' / ∞', right - 8, H - 20);
+    this._bar(mid + 8, H - 9, right - mid - 16, 2, vm.reloadT >= 0 ? vm.reloadT / vm.W.reload : vm.ammo[vm.cur] / vm.W.mag, vm.reloadT >= 0 ? AM : CY, '#33494f');
+    x.restore();
+  }
+
+  _vitals(W, H, G) {
+    const x = this.x, vm = G.vm, P = G.player;
     // ---- 左下：生命＋護盾
     const bx = 34, by = H - 60, bw = Math.min(260, W * 0.3);
-    x.font = '600 12px Rajdhani, sans-serif'; x.fillStyle = '#9fb4bb'; x.textBaseline = 'alphabetic';
+    x.font = `600 15px ${DISPLAY}`; x.fillStyle = '#9fb4bb'; x.textBaseline = 'alphabetic';
     x.fillText('SHIELD', bx, by - 26); x.fillText('VITAL', bx, by + 2);
     this._bar(bx + 52, by - 36, bw, 8, P.shield / 60, CY, 'rgba(127,243,255,0.15)');
     this._bar(bx + 52, by - 8, bw, 12, P.hp / 100, P.hp < 35 ? RD : '#e8f3f6', 'rgba(255,255,255,0.12)');
@@ -108,47 +168,21 @@ export class HUD {
     const n = vm.ammo[vm.cur], mag = vm.W.mag;
     const rx = W - 34;
     x.textAlign = 'right';
-    x.font = '700 46px Rajdhani, sans-serif'; x.fillStyle = n === 0 ? RD : n <= mag * 0.25 ? AM : '#eef6f8';
+    x.font = `700 46px ${DISPLAY}`; x.fillStyle = n === 0 ? RD : n <= mag * 0.25 ? AM : '#eef6f8';
     x.fillText(String(n), rx - 70, H - 38);
-    x.font = '600 20px Rajdhani, sans-serif'; x.fillStyle = '#8aa3ab'; x.fillText('/ ∞', rx, H - 40);
-    x.font = '600 13px Rajdhani, "Noto Sans TC", sans-serif'; x.fillStyle = CY;
+    x.font = `600 23px ${DISPLAY}`; x.fillStyle = '#8aa3ab'; x.fillText('/ ∞', rx, H - 40);
+    x.font = `600 16px ${BODY}`; x.fillStyle = CY;
     x.fillText(vm.reloadT >= 0 ? 'RELOADING…' : vm.W.name, rx, H - 88);
     // 彈匣格
     for (let i = 0; i < mag; i++) { x.fillStyle = i < n ? 'rgba(127,243,255,0.9)' : 'rgba(127,243,255,0.15)'; const w = Math.min(10, 180 / mag - 2); x.fillRect(rx - (mag - i) * (w + 2), H - 30, w, 5); }
     if (vm.reloadT >= 0) { const k = vm.reloadT / vm.W.reload; x.fillStyle = 'rgba(255,179,71,0.9)'; x.fillRect(rx - 180, H - 22, 180 * k, 2); }
     // 武器切換
-    x.font = '600 11px Rajdhani, "Noto Sans TC", sans-serif'; x.fillStyle = '#5d7178';
+    x.font = `600 14px ${BODY}`; x.fillStyle = '#5d7178';
     x.fillText('[1] 長槍  [2] 手槍  [3] 衝鋒槍 · Q', rx, H - 106);
     // 手榴彈
-    x.font = '600 13px Rajdhani, "Noto Sans TC", sans-serif'; x.fillStyle = G.nadeN ? '#b8e07a' : '#5d7178';
+    x.font = `600 16px ${BODY}`; x.fillStyle = G.nadeN ? '#b8e07a' : '#5d7178';
     x.fillText(`[G] 手榴彈 ×${G.nadeN}`, rx, H - 124);
     x.textAlign = 'left';
-    // ---- 互動提示
-    if (this.prompt) {
-      x.textAlign = 'center'; x.font = '600 16px Rajdhani, "Noto Sans TC", sans-serif';
-      const t = this.prompt; const tw = x.measureText(t).width + 36;
-      x.fillStyle = 'rgba(5,12,16,0.65)'; x.fillRect(cx - tw / 2, cy + 60, tw, 30);
-      x.strokeStyle = 'rgba(127,243,255,0.6)'; x.strokeRect(cx - tw / 2, cy + 60, tw, 30);
-      x.fillStyle = '#e8f3f6'; x.fillText(t, cx, cy + 80); x.textAlign = 'left';
-    }
-    // ---- 提示訊息（右上）
-    let ny = 40;
-    for (let i = this.notes.length - 1; i >= 0; i--) {
-      const o = this.notes[i]; o.t -= dt; if (o.t <= 0) { this.notes.splice(i, 1); continue; }
-      x.globalAlpha = clamp(o.t * 2, 0, 1); x.textAlign = 'right'; x.font = '600 14px Rajdhani, "Noto Sans TC", sans-serif'; x.fillStyle = o.color;
-      x.fillText(o.text, W - 34, ny); ny += 20; x.globalAlpha = 1; x.textAlign = 'left';
-    }
-    // ---- 左上：章節與目標文字
-    if (G.objText) {
-      x.font = '600 12px Rajdhani, sans-serif'; x.fillStyle = AM; x.fillText(G.chapterTag || '', 34, 40);
-      x.font = '500 15px "Noto Sans TC", sans-serif'; x.fillStyle = '#e8f3f6'; x.fillText(G.objText, 34, 62);
-      if (G.objSub) { x.font = '500 13px "Noto Sans TC", sans-serif'; x.fillStyle = '#ff9a8a'; x.fillText(G.objSub, 34, 82); }
-    }
-    if (G.field) { x.font = '500 12px "Noto Sans TC",sans-serif'; x.fillStyle = '#ceadff'; x.fillText('[M] 戰術地圖 · 自由攻略哨站', 34, 104); }
-    this._radar(W, H, G);
-    G.ground?.draw(this,W,H);
-    this._subs(dt, W, H);
-    this._banner(dt, W, H);
   }
 
   _radar(W, H, G) {
@@ -162,18 +196,18 @@ export class HUD {
     const exactIds=new Set((G.cleanupTargets||[]).map(c=>c.id).filter(id=>id!==undefined));
     for(const area of G.contacts.search||[]){x.globalAlpha=.55;plot(area.p,AM,true,Math.max(6,area.radius*r/90));}
     for(const [id,c] of G.contacts.items){if(exactIds.has(id))continue;x.globalAlpha=c.fresh?1:.8;plot(c.p,c.fresh?RD:AM,!c.fresh);}
-    for(const c of G.cleanupTargets||[]){x.globalAlpha=1;const {px,py}=plot(c.p,RD,false,4.5);if(Math.abs(c.altitude)>1.5){x.textAlign='center';x.font='600 10px Rajdhani,sans-serif';x.fillText(c.altitude>0?'▲':'▼',px,py-7);}}
+    for(const c of G.cleanupTargets||[]){x.globalAlpha=1;const {px,py}=plot(c.p,RD,false,4.5);if(Math.abs(c.altitude)>1.5){x.textAlign='center';x.font=`600 13px ${DISPLAY}`;x.fillText(c.altitude>0?'▲':'▼',px,py-7);}}
     x.globalAlpha=1;const w=G.field?.waypoint();if(w)plot(w.p,'#ceadff',true,5);if(G.scout.active)plot(G.player.pos,CY);x.restore();
     x.fillStyle=CY;x.beginPath();x.moveTo(0,-5);x.lineTo(4,4);x.lineTo(0,2);x.lineTo(-4,4);x.closePath();x.fill();
-    x.shadowColor='rgba(0,0,0,.9)';x.shadowBlur=4;x.textAlign='center';x.font='500 11px "Noto Sans TC",sans-serif';x.fillStyle=CY;x.fillText(G.cleanupTargets?.length?`殘敵定位 ${G.cleanupTargets.length} 名 · 90 m`:`已發現 ${G.contacts.items.size} 名 · 90 m`,0,-r-9);x.fillStyle='#c3b99f';x.fillText('黃點：最後目擊',0,r+15);x.fillText(G.cleanupTargets?.length?'紅點：即時位置 ▲高 ▼低':'黃圈：搜索區域',0,r+30);
+    x.shadowColor='rgba(0,0,0,.9)';x.shadowBlur=4;x.textAlign='center';x.font=`500 14px ${BODY}`;x.fillStyle=CY;x.fillText(G.cleanupTargets?.length?`殘敵定位 ${G.cleanupTargets.length} 名 · 90 m`:`已發現 ${G.contacts.items.size} 名 · 90 m`,0,-r-9);x.fillStyle='#c3b99f';x.fillText('黃點：最後目擊',0,r+15);x.fillText(G.cleanupTargets?.length?'紅點：即時位置 ▲高 ▼低':'黃圈：搜索區域',0,r+30);
     x.textAlign='left';x.fillText(G.scout.destroyed ? `無人機整備 ${Math.ceil(G.scout.cooldown)} 秒` : `[N] 偵察無人機 ${Math.ceil(G.scout.battery/45*100)}%`,-r,r+49);x.restore();
   }
   _scout(W, H, G) {
     const x=this.x,S=G.scout,cx=W/2,cy=H/2;
     x.save();x.shadowColor='rgba(0,0,0,.9)';x.shadowBlur=4;x.strokeStyle=S.hurtT>0?RD:'rgba(127,243,255,.8)';x.lineWidth=1.5;
     for(const [sx,sy] of [[-1,-1],[1,-1],[-1,1],[1,1]]){x.beginPath();x.moveTo(cx+sx*42,cy+sy*25);x.lineTo(cx+sx*42,cy+sy*38);x.lineTo(cx+sx*28,cy+sy*38);x.stroke();}
-    x.textAlign='center';x.font='600 16px "Noto Sans TC",sans-serif';x.fillStyle=CY;x.fillText('偵察戰鬥無人機',cx,38);
-    x.font='500 12px "Noto Sans TC",sans-serif';x.fillStyle='#edf6f8';x.fillText(`電量 ${Math.ceil(S.battery/45*100)}% · 航程 ${S.pos.distanceTo(G.player.pos).toFixed(0)} / 85 m`,cx,60);
+    x.textAlign='center';x.font=`600 19px ${BODY}`;x.fillStyle=CY;x.fillText('偵察戰鬥無人機',cx,38);
+    x.font=`500 15px ${BODY}`;x.fillStyle='#edf6f8';x.fillText(`電量 ${Math.ceil(S.battery/45*100)}% · 航程 ${S.pos.distanceTo(G.player.pos).toFixed(0)} / 85 m`,cx,60);
     x.fillText(`耐久 ${Math.ceil(S.hp)} / 45 · 彈藥 ${Math.floor(S.ammo)} / 30`,cx,80);
     x.fillStyle=S.spotted>0?RD:AM;
     if(S.spotted>0||S.exposed>0)x.fillText(S.spotted>0?'敵人已發現・正在反擊':'開火已暴露位置',cx,102);
@@ -218,7 +252,7 @@ export class HUD {
     x.save(); x.globalAlpha = clamp(1.4 - dist / 15, 0.35, 1); x.textAlign = 'center';
     x.shadowColor = 'rgba(0,0,0,0.7)'; x.shadowBlur = 4;
     x.fillStyle = '#b8e07a'; x.beginPath(); x.arc(sx, sy, 3.5, 0, Math.PI * 2); x.fill();
-    x.font = '600 12px Rajdhani, "Noto Sans TC", sans-serif'; x.fillText(`手榴彈 ×${n}`, sx, sy - 9);
+    x.font = `600 15px ${BODY}`; x.fillText(`手榴彈 ×${n}`, sx, sy - 9);
     x.restore();
   }
   _objective(W, H, G) { this._pin(W, H, this.obj.p, this.obj.left ?? G.player.pos.distanceTo(this.obj.p), AM, 12, true); }
@@ -251,9 +285,9 @@ export class HUD {
     x.globalAlpha = 0.86; x.fillStyle = col; x.strokeStyle = '#1b1206'; x.lineWidth = 2;
     x.beginPath(); x.moveTo(0, -r); x.lineTo(r, 0); x.lineTo(0, r); x.lineTo(-r, 0); x.closePath(); x.fill(); x.globalAlpha = 0.95; x.stroke();
     x.fillStyle = '#1b1206'; x.beginPath(); x.arc(0, 0, r0 * 0.27, 0, Math.PI * 2); x.fill();
-    x.shadowBlur = 4; x.font = `700 ${r0 > 10 ? 15 : 12}px Rajdhani, sans-serif`; x.fillStyle = col; x.textAlign = 'center';
+    x.shadowBlur = 4; x.font = `700 ${r0 > 10 ? 18 : 15}px ${DISPLAY}`; x.fillStyle = col; x.textAlign = 'center';
     x.fillText(`${dist.toFixed(0)} m`, 0, r + (r0 > 10 ? 18 : 14));
-    if (label) { x.font = '500 11px "Noto Sans TC",sans-serif'; x.fillText(label, 0, r + 29); }
+    if (label) { x.font = `500 14px ${BODY}`; x.fillText(label, 0, r + 29); }
     x.restore(); x.globalAlpha = 1;
   }
 
@@ -274,13 +308,13 @@ export class HUD {
     // 中心紅點
     x.fillStyle = 'rgba(255,60,40,0.95)'; x.beginPath(); x.arc(cx, cy, 2.2, 0, 7); x.fill();
     // 測距、屏息條
-    x.font = '600 13px Rajdhani, sans-serif'; x.fillStyle = 'rgba(255,179,71,0.9)'; x.textAlign = 'left';
+    x.font = `600 16px ${DISPLAY}`; x.fillStyle = 'rgba(255,179,71,0.9)'; x.textAlign = 'left';
     x.fillText(`RNG ${G.scopeRange ? G.scopeRange.toFixed(1) : '---'} m`, cx + R * 0.2, cy + R * 0.25);
     x.fillText(`x${(70 / G.vm.W.fov).toFixed(1)}`, cx + R * 0.2, cy + R * 0.25 + 18);
     const b = G.vm.breath;
     x.fillStyle = 'rgba(127,243,255,0.2)'; x.fillRect(cx - 60, cy + R * 0.72, 120, 4);
     x.fillStyle = G.vm.holding ? CY : 'rgba(127,243,255,0.6)'; x.fillRect(cx - 60, cy + R * 0.72, 120 * b, 4);
-    x.textAlign = 'center'; x.fillStyle = 'rgba(200,230,240,0.6)'; x.font = '500 11px "Noto Sans TC", sans-serif';
+    x.textAlign = 'center'; x.fillStyle = 'rgba(200,230,240,0.6)'; x.font = `500 14px ${BODY}`;
     x.fillText(G.vm.holding ? '屏息中' : 'SHIFT 屏息', cx, cy + R * 0.72 + 18);
     x.textAlign = 'left';
   }
@@ -291,15 +325,10 @@ export class HUD {
     const s = this.sub; if (!s) return;
     s.t -= dt; if (s.t <= 0) { this.sub = null; return; }
     const a = clamp(Math.min(s.t, s.T - s.t) * 4, 0, 1);
-    x.globalAlpha = a; x.textAlign = 'center';
-    x.font = '500 17px "Noto Sans TC", sans-serif';
-    const line = s.text, who = s.who;
-    const tw = x.measureText(line).width;
-    const L = this.lift || 0;   // 第 6 章（機體 HUD 在下面）往上移
-    x.fillStyle = 'rgba(0,0,0,0.45)'; x.fillRect(W / 2 - tw / 2 - 16, H - 150 - L, tw + 32, 50);
-    x.font = '600 12px Rajdhani, "Noto Sans TC", sans-serif'; x.fillStyle = who.startsWith('獵犬') || who.startsWith('黑犬') ? RD : AM; x.fillText(who, W / 2, H - 132 - L);
-    x.font = '500 17px "Noto Sans TC", sans-serif'; x.fillStyle = '#eef6f8'; x.fillText(line, W / 2, H - 110 - L);
-    x.globalAlpha = 1; x.textAlign = 'left';
+    x.globalAlpha = a;
+    const color = /^(獵犬|黑犬)/.test(s.who) ? RD : AM;
+    drawCaption(x, this.layouts, W, H - (W < 700 ? 143 : 102) - (this.lift || 0), s.who, s.text, color);
+    x.globalAlpha = 1;
   }
 
   _banner(dt, W, H) {
@@ -307,10 +336,10 @@ export class HUD {
     b.t -= dt; if (b.t <= 0) { this.banner = null; return; }
     const a = clamp(Math.min(b.t, b.T - b.t) * 2, 0, 1), x = this.x;
     x.globalAlpha = a; x.textAlign = 'center';
-    x.font = '700 38px Rajdhani, "Noto Sans TC", sans-serif'; x.fillStyle = '#eef6f8'; x.shadowColor = 'rgba(127,243,255,0.5)'; x.shadowBlur = 18;
-    x.fillText(b.big, W / 2, H * 0.3);
+    x.font = `700 38px ${BODY}`; x.fillStyle = '#eef6f8'; x.shadowColor = 'rgba(127,243,255,0.5)'; x.shadowBlur = 18;
+    x.fillText(b.big, W / 2, H * 0.3, W - 28);
     x.shadowBlur = 0;
-    x.font = '500 16px "Noto Sans TC", sans-serif'; x.fillStyle = AM; x.fillText(b.small, W / 2, H * 0.3 + 32);
+    x.font = `500 19px ${BODY}`; x.fillStyle = AM; x.fillText(b.small, W / 2, H * 0.3 + 32, W - 28);
     x.globalAlpha = 1; x.textAlign = 'left';
   }
 }

@@ -1,3 +1,4 @@
+import { MONO, DISPLAY } from './typography.mjs';
 // 駕駛艙：全景螢幕艙——玩家坐在機體胸口的一顆球裡，整面內壁都是螢幕，映出外面的景色。
 // 看得到：螢幕面板之間的細接縫與窄邊框、飄在周圍的全像多功能顯示頁（雷達、系統、武裝、電力、引擎…）、
 //   兩側扶手台（烤漆掉漆、面板線、螺絲、背光按鍵、護蓋開關、旋鈕、彈射拉環、主注意／主警告燈）、兩支操縱桿（扳機、帽型開關）和戴手套的雙手。
@@ -20,17 +21,8 @@ const _m = new THREE.Matrix4(), _m2 = new THREE.Matrix4(), _q = new THREE.Quater
 const _p = new THREE.Vector3(), _s = new THREE.Vector3(), _v = new THREE.Vector3(), _v2 = new THREE.Vector3(), _c = new THREE.Color();
 const pad = (n, k = 3) => String(Math.max(0, Math.round(n))).padStart(k, '0');
 
-// 航電等寬字（B612 Mono）：沒載到就用系統等寬字；載到之後重畫靜態圖層
-const MONO = '"B612 Mono", "Roboto Mono", Menlo, Consolas, monospace';
 function monoFont(cb) {
-  let l = document.getElementById('b612');
-  if (!l) {
-    l = document.createElement('link'); l.id = 'b612'; l.rel = 'stylesheet';
-    l.href = 'https://fonts.googleapis.com/css2?family=B612+Mono:wght@400;700&display=swap';
-    document.head.appendChild(l);
-  }
-  const go = () => Promise.all(['400', '700'].map((w) => document.fonts.load(`${w} 24px "B612 Mono"`))).then(cb, () => {});
-  if (l.sheet) go(); else l.addEventListener('load', go);
+  document.fonts.load('500 24px "Sortie Mono"').then(cb, () => {});
 }
 
 // 方位角 a（往右為正）、仰角 e（往上為正）、距離 d → 座標（眼睛在原點、面向 −Z）
@@ -173,7 +165,7 @@ const LABELS = ['RADAR', 'RNG 600', 'STATUS', 'ARMS', 'FCS', 'SPD', 'ALT', 'EN C
 function labelTex(unitName) {
   const W = 1024, H = 512, [c, x] = canvas(W, H), r = rng(3);
   const rect = {};
-  x.font = '700 30px Rajdhani, "Arial Narrow", sans-serif';
+  x.font = '700 32px ' + DISPLAY;
   x.textBaseline = 'middle';
   let px = 6, py = 4;
   for (const s of LABELS) {
@@ -948,15 +940,15 @@ export class Cockpit {
   }
   // 疊字（黑邊，壓在影像上也看得清楚）
   tq(x, s, px, py, col, sz, b = false, al = 'left') {
-    x.font = `${b ? 700 : 400} ${sz}px ${MONO}`; x.textAlign = al; x.textBaseline = 'middle';
+    x.font = `${b ? 700 : 400} ${Math.round(sz * 1.1)}px ${MONO}`; x.textAlign = al; x.textBaseline = 'middle';
     x.lineJoin = 'round'; x.lineWidth = 5; x.strokeStyle = 'rgba(0,10,14,0.7)'; x.strokeText(s, px, py);
     x.fillStyle = col; x.fillText(s, px, py);
   }
   // 疊字＋暗底小框（壓在很亮的影像上也看得清楚）
   tb(x, s, px, py, col, sz, b = false, al = 'left') {
-    x.font = `${b ? 700 : 400} ${sz}px ${MONO}`;
+    x.font = `${b ? 700 : 400} ${Math.round(sz * 1.1)}px ${MONO}`;
     const w = x.measureText(s).width, x0 = al === 'right' ? px - w : al === 'center' ? px - w / 2 : px;
-    x.fillStyle = 'rgba(2,14,20,0.78)'; x.fillRect(x0 - 5, py - sz * 0.62, w + 10, sz * 1.24);
+    x.fillStyle = 'rgba(2,14,20,0.78)'; x.fillRect(x0 - 5, py - sz * 0.68, w + 10, sz * 1.36);
     this.tq(x, s, px, py, col, sz, b, al);
   }
   // 符號層：中央十字線、目標框（跟著目標走；擷取時從外面收進來、咬住時縮一下再彈回）、種類與耐久、倍率、雷射測距、接近率、方位／仰角、追蹤狀態；
@@ -1226,7 +1218,7 @@ export class Cockpit {
     const row = (list, top) => list.forEach((s, i) => {
       const px = W * (i + 1) / (list.length + 1), py = top ? 24 : H - 22;
       x.fillStyle = COL.dim; x.fillRect(px - 1, top ? 5 : H - 12, 2, 7);
-      x.font = `700 ${sz}px ${MONO}`;
+      x.font = `700 ${Math.round(sz * 1.1)}px ${MONO}`;
       if (top && i === 0) {
         const tw = x.measureText(s).width + 12;
         x.fillStyle = 'rgba(111,240,255,0.85)'; x.fillRect(px - tw / 2, py - sz * 0.62, tw, sz * 1.24);
@@ -1245,7 +1237,7 @@ export class Cockpit {
   }
   // 螢幕文字（等寬航電字）
   tx(x, s, px, py, col, sz, b = false, al = 'left') {
-    x.font = `${b ? 700 : 400} ${sz}px ${MONO}`; x.textAlign = al; x.textBaseline = 'middle'; x.fillStyle = col; x.fillText(s, px, py);
+    x.font = `${b ? 700 : 400} ${Math.round(sz * 1.1)}px ${MONO}`; x.textAlign = al; x.textBaseline = 'middle'; x.fillStyle = col; x.fillText(s, px, py);
   }
   // 橫條：底色＋填色＋四分刻度
   hb(x, px, py, w, h, v, col) {
