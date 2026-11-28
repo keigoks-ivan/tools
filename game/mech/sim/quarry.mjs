@@ -1,68 +1,95 @@
 import * as THREE from 'three';
+import {quarryWater,quarryPines} from './quarry-landscape.mjs';
+import {haulTruck,crusherWorks,reclaimer,metalFinish} from './quarry-works.mjs';
 
 const {clamp,smoothstep}=THREE.MathUtils;
 const half=800,step=10,n=half*2/step;
 export const HAUL=[[0,-369,98],[-16,-287,82],[-112,-245,70],[-228,-146,52],[-201,-40,41],[-106,2,24],[-51,93,10],[22,136,7]];
+const haulLength=[0];
+for(let i=1;i<HAUL.length;i++)haulLength.push(haulLength[i-1]+Math.hypot(HAUL[i][0]-HAUL[i-1][0],HAUL[i][1]-HAUL[i-1][1]));
 const stockpiles=[[-101,204,35,19,15],[-55,203,26,21,10],[184,-66,26,33,14],[217,-60,20,27,11],[227,154,37,19,16]];
 function surface(x,z){
-  const a=Math.atan2(z,x),r=Math.hypot(x*.85,z)*(1+.052*Math.sin(3*a)+.029*Math.sin(7*a));
+  // Unequal benches follow several intersecting cut planes. A remnant spur splits the east face.
+  const a=Math.atan2(z,x),r=Math.max(Math.abs(x*.69+z*.17),Math.abs(z*.91-x*.12),Math.abs(x*.47-z*.70));
+  const strike=14*Math.sin(a*3+.5)+8*Math.sin(x*.023+z*.012)+4*Math.sin(x*.069-z*.051);
   let h=4;
-  for(const edge of [152,216,275,338,414]){
-    const cut=edge+10*Math.sin(4*a+edge*.034)+6*Math.cos(9*a-edge*.012);
-    h+=22*smoothstep(r,cut,cut+16);
+  for(const [edge,rise,width] of [[112,19,13],[170,28,9],[232,16,11],[283,32,10],[357,24,15]]){
+    const cut=edge+strike+16*Math.cos(a*3+edge*.019)+10*Math.sin(a*5+edge*.013);
+    h+=rise*smoothstep(r,cut,cut+width);
   }
-  h+=1.6*Math.sin(x*.025)*Math.cos(z*.033)+.55*Math.sin(z*.041+x*.05);
-  h+=smoothstep(r,435,620)*(29+24*Math.sin(a*7)+15*Math.cos(a*12));
+  const spur=Math.max(Math.abs((x-136)*.80+(z-254)*.24),Math.abs((z-254)*1.12-(x-136)*.18));
+  h+=37*(1-smoothstep(spur,96,120))+22*(1-smoothstep(spur,66,89));
+  h+=2.7*Math.sin(x*.034)*Math.cos(z*.052)+1.2*Math.sin(z*.074+x*.036);
+  h+=smoothstep(r,394,590)*(18+18*Math.sin(a*4+.2)+12*Math.cos(a*9));
   const pond=Math.hypot((x-108)/66,(z-48)/45)+.09*Math.sin(z*.068)+.10*Math.cos(x*.059+z*.028);
-  h=h*smoothstep(pond,.77,1.14)-2*(1-smoothstep(pond,.7,1.08));
+  h=h*smoothstep(pond,.77,1.14)-(3.4-2.8*smoothstep(pond,.18,1.03))*(1-smoothstep(pond,.7,1.08));
   for(const [px,pz,w,d,top] of stockpiles)h+=top*Math.max(0,1-Math.hypot((x-px)/w,(z-pz)/d));
-  let best=Infinity,roadY=0;
+  // Leave level working shelves at the two sentry stations as the neighbouring faces fall away.
+  h=THREE.MathUtils.lerp(h,17,1-smoothstep(Math.hypot(x+125,z-34),14,39));
+  h=THREE.MathUtils.lerp(h,22,1-smoothstep(Math.hypot(x-94,z+128),12,34));
+  let best=Infinity,roadY=0,lateral=0,chainage=0;
   for(let i=1;i<HAUL.length;i++){
     const [ax,az,ay]=HAUL[i-1],[bx,bz,by]=HAUL[i],dx=bx-ax,dz=bz-az;
     const t=clamp(((x-ax)*dx+(z-az)*dz)/(dx*dx+dz*dz),0,1);
     const dist=Math.hypot(x-ax-t*dx,z-az-t*dz);
-    if(dist<best){best=dist;roadY=ay+t*(by-ay);}
+    if(dist<best){
+      best=dist;roadY=ay+t*(by-ay);
+      const length=haulLength[i]-haulLength[i-1];
+      lateral=((x-ax)*dz-(z-az)*dx)/length;chainage=haulLength[i-1]+t*length;
+    }
   }
   const road=1-smoothstep(best,14,33);
   h=THREE.MathUtils.lerp(h,roadY,road);
   // The rim loading apron carries the truck sideways without lifting its wheels off the road.
-  const apron=1-smoothstep(Math.max(Math.abs(x-3)/60,Math.abs(z+287)/29),.81,1.33);
-  return {h:THREE.MathUtils.lerp(h,82,apron),road:Math.max(road,apron)};
+  const apron=1-smoothstep(Math.max(Math.abs(x-3)/76,Math.abs(z+287)/29),.81,1.33);
+  return {h:THREE.MathUtils.lerp(h,82,apron),road:Math.max(road,apron),lateral,chainage};
 }
-function bedrock(root,A){
-  const heights=new Float32Array((n+1)**2),positions=[],road=[],indices=[],exposure=[];
+function bedrock(root,A,bindTexture,sun){
+  const heights=new Float32Array((n+1)**2),positions=[],road=[],tracks=[],indices=[],exposure=[];
   for(let j=0;j<=n;j++)for(let i=0;i<=n;i++){
     const x=i*step-half,z=j*step-half,k=j*(n+1)+i,s=surface(x,z);
-    heights[k]=s.h;positions.push(x,s.h,z);road.push(s.road);
+    heights[k]=s.h;positions.push(x,s.h,z);road.push(s.road);tracks.push(s.lateral,s.chainage);
     if(i<n&&j<n)indices.push(k,k+n+1,k+1,k+1,k+n+1,k+n+2);
   }
   // Bake how much of the sky is hidden by the next quarry bench.
   for(let j=0;j<=n;j++)for(let i=0;i<=n;i++){
     const k=j*(n+1)+i;
     const bank=Math.max(heights[j*(n+1)+Math.max(0,i-3)],heights[j*(n+1)+Math.min(n,i+3)],heights[Math.max(0,j-3)*(n+1)+i],heights[Math.min(n,j+3)*(n+1)+i])-heights[k];
-    exposure.push(1-.31*smoothstep(bank,2,18));
+    let skyline=0;
+    for(const d of [2,5,10,18]){
+      const u=clamp(i+Math.round(sun.x*d),0,n),v=clamp(j+Math.round(sun.z*d),0,n);
+      skyline=Math.max(skyline,(heights[v*(n+1)+u]-heights[k])/(step*d)-sun.y);
+    }
+    exposure.push((1-.36*smoothstep(bank,2,18))*(1-.48*smoothstep(skyline,.01,.34)));
   }
   const g=new THREE.BufferGeometry();g.setAttribute('quarryLight',new THREE.Float32BufferAttribute(exposure,1));g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+  g.setAttribute('trackCoord',new THREE.Float32BufferAttribute(tracks,2));
   g.setAttribute('quarryRoad',new THREE.Float32BufferAttribute(road,1));g.setIndex(indices);g.computeVertexNormals();
   const mat=new THREE.MeshStandardMaterial({color:0xdfd6c2,roughness:.88});
+  const faceMap={value:A?.rockD||null};
+  bindTexture(mat,'./quarry-limestone.webp',true,t=>{faceMap.value=t;});
   mat.onBeforeCompile=s=>{
-    s.uniforms.grit={value:A?.rockD||null};s.uniforms.roadbed={value:A?.asphD||null};
-    s.vertexShader='attribute float quarryRoad,quarryLight;varying float vRoute,vLight;varying vec3 vRock,vFacet;\n'+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvRock=position;vRoute=quarryRoad;vLight=quarryLight;vFacet=normal;');
-    s.fragmentShader='uniform sampler2D grit,roadbed;varying vec3 vRock,vFacet;varying float vRoute,vLight;\n'+s.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
-      vec3 n=abs(normalize(vFacet));float cliff=1.-smoothstep(.42,.89,n.y);
-      vec2 wall=vec2(n.x>n.z?vRock.z:vRock.x,vRock.y);
-      vec3 grain=mix(texture2D(grit,vRock.xz/24.).rgb,texture2D(grit,wall/22.).rgb,cliff);
-      float seam=.5+.5*cos(vRock.y*1.28+.38*sin(wall.x*.07)+.013*wall.x);
-      float fluting=pow(.5+.5*cos(wall.x*2.2+.12*vRock.y),5.);
-      float veins=sin(vRock.x*.017+vRock.z*.013+.85*sin(vRock.z*.048));
-      float seep=smoothstep(.17,.78,sin(wall.x*.081+.12*sin(vRock.y*.3))+.42*cos(wall.x*.19));
-      vec3 stone=mix(vec3(.32,.29,.25),vec3(.52,.50,.44),smoothstep(-.7,.7,veins))*.63+grain*.77;
-      stone*=1.-cliff*(.18*seam+.10*fluting+.24*seep);
-      vec3 track=vec3(.16,.14,.115)+.58*texture2D(roadbed,vRock.xz/14.).rgb;
-      float rim=smoothstep(365.,510.,length(vRock.xz*vec2(.86,1.))+30.*veins);
-      stone=mix(stone,vec3(.10,.14,.086)+grain*.20,rim*(1.-cliff*.7));
-      float wet=1.-smoothstep(.5,5.5,vRock.y);
-      diffuseColor.rgb=mix(stone,track,vRoute*.92)*vLight*(1.-.32*wet);`);
+    Object.assign(s.uniforms,{grit:{value:A?.rubD||null},faceMap,roadbed:{value:A?.asphD||null},grass:{value:A?.grassD||null}});
+    const vary='varying vec2 vTrack; varying vec3 vRock,vFacet; varying float vRoute,vLight;\n';
+    s.vertexShader='attribute vec2 trackCoord; attribute float quarryRoad,quarryLight;'+vary+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvTrack=trackCoord;vRock=position;vRoute=quarryRoad;vLight=quarryLight;vFacet=normal;');
+    s.fragmentShader='uniform sampler2D grit,faceMap,roadbed,grass;'+vary+s.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
+      vec3 geom=abs(normalize(cross(dFdx(vRock),dFdy(vRock))));
+      float cliff=1.-smoothstep(.52,.94,min(geom.y,abs(normalize(vFacet).y)));
+      float aspect=smoothstep(.26,.76,geom.x);
+      float vein=.12*sin(vRock.x*.022+vRock.z*.032);
+      vec2 elev=vec2(vRock.y/26.+vein,0.);
+      vec3 face=mix(texture2D(faceMap,vec2(vRock.x/45.,elev.x)).rgb,texture2D(faceMap,vec2(vRock.z/45.+.32,elev.x)).rgb,aspect);
+      vec3 gravel=texture2D(grit,vRock.xz/15.).rgb;
+      vec3 macro=texture2D(faceMap,vRock.xz/115.+.37).rgb;
+      float fines=smoothstep(.08,.58,macro.r+vein);
+      vec3 dust=mix(vec3(.16,.145,.124),vec3(.29,.265,.22),fines)+gravel*(.23+.18*fines);
+      vec3 stone=mix(dust,face*1.04+.006,cliff);
+      float rim=smoothstep(340.,477.,max(abs(vRock.x*.73+vRock.z*.18),abs(vRock.z*.93-vRock.x*.09))+vein*80.);
+      stone=mix(stone,(texture2D(grass,vRock.xz/38.).rgb*vec3(.22,.35,.25)+vec3(.023,.044,.032)),rim*(1.-cliff));
+      vec3 gritRoad=texture2D(roadbed,vRock.xz/18.).rgb;
+      float ruts=1.-smoothstep(.7,2.2,abs(abs(vTrack.x+sin(vTrack.y*.033)*.65)-4.));
+      vec3 track=(vec3(.085,.060,.040)+gritRoad*.50+gravel*.19)*(1.-ruts*(.12+.19*smoothstep(.1,.54,gritRoad.r)));
+      diffuseColor.rgb=mix(stone,track,vRoute)*vLight*(.61+.39*smoothstep(.55,4.6,vRock.y));`);
   };
   const mesh=new THREE.Mesh(g,mat);
   mesh.receiveShadow=true;mesh.userData.fieldGeometry=mesh.userData.fieldMaterial=true;root.add(mesh);
@@ -79,13 +106,23 @@ const drum=new THREE.CylinderGeometry(.5,.5,1,16);
 const hopper=new THREE.CylinderGeometry(.5,.17,1,10);
 const chip=new THREE.CylinderGeometry(.31,.52,1,5);
 const yellow=0xc79449,steel=0x5a6769,red=0x966645;
-export function quarry(root,site,batch,A){
-  const floor=site.heightAt=bedrock(root,A),p=batch(root,'礦場破碎篩分線',A,true);
+export function quarry(root,site,batch,A,bindTexture,sun=new THREE.Vector3(-.53,.54,-.65)){
+  const floor=site.heightAt=bedrock(root,A,bindTexture,sun),p=batch(root,'礦場破碎篩分線',A,true);
   const solid=(x,y,z,w,h,d)=>({x0:x-w/2,x1:x+w/2,z0:z-d/2,z1:z+d/2,bottom:y,top:y+h});
-  const water=new THREE.Mesh(new THREE.CircleGeometry(1,56),new THREE.MeshStandardMaterial({color:0x397f7d,metalness:.29,roughness:.21}));
-  water.rotation.x=-Math.PI/2;water.scale.set(96,68,1);water.position.set(108,.55,48);
-  water.userData.fieldGeometry=water.userData.fieldMaterial=true;root.add(water);
-  for(const [x,z] of [[-99,154],[174,-120],[225,98]]){
+  quarryWater(root,site,bindTexture,sun);
+  quarryPines(root,floor,bindTexture);
+  // A floating intake and a segmented pipe give the shoreline a visible scale.
+  for(const x of [139,146])p.add(drum,x,1.1,64,2.6,12,2.6,0x435354,false,Math.PI/2);
+  p.box(142.5,2.05,64,9,.68,10,0x8c8776,'car-deck');
+  p.box(142.5,3.6,63,4.5,2.7,5,0x7c7d69);
+  for(const x of [138.5,146.5]){
+    for(const z of [59.6,64,68.4])p.box(x,3.1,z,.18,2,.18,yellow);
+    p.box(x,4.15,64,.18,.18,9.3,yellow);
+  }
+  p.strut([143,2,65],[177,floor(177,82)+.8,82],1.6,1.6,steel);
+  crusherWorks(p,floor,solid,site.boxes);
+  reclaimer(p,floor,solid,site.boxes);
+  for(const [x,z] of [[174,-120],[225,98]]){
     const y=floor(x,z);
     for(const sx of [-12,12])for(const sz of [-9,9]){
       p.box(x+sx,y+8,z+sz,2.4,16,2.4,steel);
@@ -138,29 +175,11 @@ export function quarry(root,site,batch,A){
     p.add(chip,x,y-.16,z,size*1.6,size*.45,size,0xa19888,false,sample()*.4,sample()*6,.13);
   }
   p.finish();
-  const truck=new THREE.Group();root.add(truck);const t=batch(truck,'百噸級運礦車');
-  t.box(0,6,0,24,5.8,12,steel);t.box(-3,12,0,20,6.6,13,yellow,'car-deck');
-  t.box(-3,15.5,0,20,.8,11.5,0x746c5c);
-  for(const s of [-1,1]){
-    t.box(-3,16,s*6.3,22,3,1.1,yellow,false,0,0,.08);
-    for(let x=-12;x<6;x+=3.5)t.box(x,12.7,s*6.7,.6,5.3,.55,0x7d674a);
-    for(const x of [-8.8,8.8]){
-      t.add(drum,x,4.6,s*6.5,9.2,3.3,9.2,0x353939,false,Math.PI/2);
-      t.add(drum,x,4.6,s*8.3,4.8,.65,4.8,yellow,false,Math.PI/2);
-    }
-  }
-  t.box(9,11,-1.5,8,6,8,yellow);t.box(9,14.7,-1.5,6.7,3.6,6.8,0x4e646b,'glazing');
-  t.box(9,16.8,-1.5,8.3,.7,8,0xe8d4a4);
-  t.box(11,9.2,-5.4,9,.7,4,steel);t.box(10.8,11,-7,9,.22,.22,yellow);
-  for(const x of [6.8,10,14.8])t.box(x,10,-7,.24,2,.24,yellow);
-  for(const x of [12.5,14.8])t.box(x,6.8,-7.1,.21,5.1,.24,steel);
-  for(let y=4.7;y<=9;y+=.9)t.box(13.65,y,-7.1,2.5,.22,.3,steel);
-  for(const z of [-3.4,3.4])t.box(13.25,11.2,z,.4,1.1,1.7,0xffe8bb,true);
-  t.finish();
-  const box=solid(0,82,-287,29,17.2,17);site.mobile=[box];
+  const truck=new THREE.Group();root.add(truck);haulTruck(truck,batch,A);
+  const box=solid(0,82,-287,29,18.7,17);site.mobile=[box];
   site.moveTruck=f=>{
     const x=4+45*f,y=floor(x,-287);
-    truck.position.set(x,y,-287);Object.assign(box,solid(x,y,-287,29,17.2,17));
+    truck.position.set(x,y,-287);Object.assign(box,solid(x,y,-287,29,18.7,17));
   };
   site.moveTruck(0);
   // Excavator shoulder armour is built once per course. It detaches from the actor on retry.
@@ -172,7 +191,17 @@ export function quarry(root,site,batch,A){
     armor.box(s*4.1,5,-2.8,1.7,2.6,2.2,yellow);
     armor.box(s*2.1,2.9,1,1.2,.62,.27,0xffdf93,true);
   }
-  armor.finish();rig.visible=false;
+  // Folded ripping boom over one shoulder, with exposed hydraulic rods and worn teeth.
+  for(const side of [-.65,.65]){
+    const x=3.8+side;
+    armor.strut([x,2.2,-2.6],[x,6.8,-1.6],.64,.7,0x8e673c);
+    armor.strut([x,6.8,-1.6],[x,5.4,1.7],.60,.65,yellow);
+    armor.strut([x,2.6,-1.4],[x,5.9,-1.15],.32,.36,0x9da59d);
+    armor.add(drum,x,6.7,-1.6,.82,.33,.82,steel,false,0,0,Math.PI/2);
+  }
+  armor.box(3.8,5.35,1.83,2.5,.57,1.1,0x665342,false,.23);
+  for(const x of [2.91,3.8,4.69])armor.strut([x,5.55,1.9],[x,4.8,2.45],.32,.36,0xc4b392);
+  armor.finish();metalFinish(rig,A);rig.visible=false;
   rig.matrixAutoUpdate=false;
   site.poseRig=e=>{const torso=e.m.bones.torso;torso.updateWorldMatrix(true,false);rig.matrix.copy(torso.matrixWorld);rig.matrixWorldNeedsUpdate=true;rig.visible=true;};
   site.parkRig=()=>{rig.visible=false;};

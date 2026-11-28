@@ -506,6 +506,7 @@ class Quarry extends Exercise{
     this.site.markStrike(null);this.mode='ready';this.attackIn=this.sec===4?3.1:5;
   }
   step(dt){
+    this.site.ripple(this.clock);
     if(this.crew.length<2&&this.clock>=this.recruitAt){this.recruitAt=this.clock+.6;muster(this.C,this.crew);}
     for(const w of this.crew)w.update(dt);
     if(this.sec===0){

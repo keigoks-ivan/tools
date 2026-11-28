@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import {building,foldedSolids} from './fold-architecture.mjs';
-import {quarry} from './quarry.mjs';
+import {quarry} from './quarry.mjs?v=2';
+import {ridgeU} from './quarry-landscape.mjs';
 import {dock,summit} from './dock-summit.mjs';
 import {createExercise} from './missions.mjs';
 
@@ -108,7 +109,7 @@ function batch(root,name,assets,castWalls=false){
   }};
 }
 const palette={
-  quarry:{zenith:0x80a8b8,horizon:0xdfdfd0,sun:0xffe4b2,env:.90,fill:1.65,fog:.00066},
+  quarry:{zenith:0x7292a9,horizon:0xb9cbd2,sun:0xffe1b9,env:.66,fill:.91,fog:.00046},
   dock:{zenith:0x75afc3,horizon:0xffdfb8,sun:0xffedc7,env:.95,fill:1.85,fog:.00078},
   summit:{zenith:0x518ebc,horizon:0xe4e7e2,sun:0xffedcd,env:.98,fill:1.84,fog:.00092},
   fold:{zenith:0x89b7ce,horizon:0xf2dabb,sun:0xffefd0,env:1.05,fill:2.35,fog:.00072},
@@ -120,10 +121,14 @@ function sky(root,world,district){
   if(world.hemi){
     world.hemi.intensity=colors.fill;world.scene.environmentIntensity=colors.env;
     world.scene.fog.density=colors.fog;
+    if(district==='quarry'){
+      world.sun.intensity=2.55;world.sun.color.setHex(0xffe8cc);world.lightDir.set(-.61,.58,-.54).normalize();
+    }
     if(district==='rail'){
       world.sun.intensity=2.25;world.sun.color.setHex(0xd9e5ed);
     }
   }
+  const mountain= district==='quarry';
   const material=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,uniforms:{
     vista:{value:null},withVista:{value:0},summit:{value:district==='summit'?1:0},sunDir:{value:world.lightDir||new THREE.Vector3(-.66,.19,.72).normalize()},
     squall:{value:district==='rail'?1:0},cloudMap:{value:world.A?.sky||null},topColor:{value:new THREE.Color(colors.zenith)},horizon:{value:new THREE.Color(colors.horizon)},sun:{value:new THREE.Color(colors.sun)}},
@@ -141,12 +146,12 @@ function sky(root,world,district){
       sky=mix(sky,mix(rainSky,vec3(.31,.38,.43),shaft*.47*(1.-smoothstep(.0,.47,n.y))),squall);
       // The seamless panorama closes the distant horizon at every bearing. Only a narrow
       // elevation band is painted; the original cloud dome remains above the ridges.
-      float v=(elevation+mix(.104,.115,summit))/mix(.305,.416,summit);
+      float v=${mountain?'(elevation+.095)/.52':'(elevation+mix(.104,.115,summit))/mix(.305,.416,summit)'};
       float band=withVista*(1.-smoothstep(.70,.99,v));
       if(band>.001){
-        float u=fract(uv.x*2.+.24);
+        float u=${mountain?ridgeU:'fract(uv.x*2.+.24)'};
         vec3 landscape=texture2D(vista,vec2(u,clamp(v,.012,.985))).rgb;
-        float haze=.24+.12*squall+.16*(1.-smoothstep(.12,.47,v));
+        float haze=${mountain?'.08':'.24'}+.12*squall+.16*(1.-smoothstep(.12,.47,v));
         sky=mix(sky,mix(landscape*(.98-.12*squall),sky,haze),band);
       }
       float key=max(dot(n,sunDir),0.);
@@ -154,7 +159,7 @@ function sky(root,world,district){
 #include <tonemapping_fragment>
 #include <colorspace_fragment>
 }`});
-  bindTexture(material,'./vista-'+district+'.webp',false,t=>{
+  bindTexture(material,mountain?'./quarry-ridge.webp':'./vista-'+district+'.webp',mountain,t=>{
     material.uniforms.vista.value=t;material.uniforms.withVista.value=1;
   });
   const m=new THREE.Mesh(new THREE.SphereGeometry(2200,24,12),material);m.renderOrder=-2;
@@ -612,7 +617,7 @@ export function buildExercise(world,root){
   const site={boxes:[],create:(combat,enc)=>createExercise(id,site,combat,enc)};
   sky(root,world,id);
   if(id==='dock'){water(root,world);estuary(root);dock(root,site,batch);}
-  else if(id==='quarry')quarry(root,site,batch,world.A);
+  else if(id==='quarry')quarry(root,site,batch,world.A,bindTexture,world.lightDir);
   else if(id==='summit')summit(root,site,batch,world.A);
   else ({fold,echo,rail})[id](root,site,world);
   if(id!=='rail'){
